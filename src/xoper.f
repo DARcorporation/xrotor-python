@@ -59,15 +59,11 @@ C
       IF(COMAND.EQ.'?   ') GO TO 900
       IF(COMAND.EQ.'FORM') GO TO 2
       IF(COMAND.EQ.'TERS') GO TO 4
-      IF(COMAND.EQ.'HARD') GO TO 6
-      IF(COMAND.EQ.'SIZE') GO TO 8
-      IF(COMAND.EQ.'ANNO') GO TO 9
       IF(COMAND.EQ.'DISP') GO TO 10
       IF(COMAND.EQ.'NAME') GO TO 15
       IF(COMAND.EQ.'WRIT') GO TO 20
       IF(COMAND.EQ.'DUCT') GO TO 22
       IF(COMAND.EQ.'VRAT') GO TO 24
-      IF(COMAND.EQ.'PLOT') GO TO 30
       IF(COMAND.EQ.'ATMO') GO TO 35
       IF(COMAND.EQ.'VELO') GO TO 38
       IF(COMAND.EQ.'ANGL') GO TO 40
@@ -169,35 +165,6 @@ C--- Output data on blade stations with each case (verbose)
       GO TO 900
 C
 C---------------------------------------------------------------------
-C--- Hardcopy current plot
-    6 IF(LPLOT) THEN
-       CALL PLEND
-       CALL REPLOT(IDEVRP)
-      ELSE
-       WRITE(*,*) 'No current plot'
-      ENDIF
-      GO TO 900
-C
-C---------------------------------------------------------------------
-C--- Change plot size
-    8 IF(NINPUT.GE.1) THEN
-       SIZE = RINPUT(1)
-      ELSE
-       WRITE(*,*) 'Current plot size =', SIZE
-       CALL ASKR('Enter new plot size^',SIZE)
-      ENDIF
-      GO TO 900
-C
-C---------------------------------------------------------------------
-C--- Annotate plot
-    9 IF(LPLOT) THEN
-       CALL ANNOT(1.2*CSIZE)
-      ELSE
-       WRITE(*,*) 'No current plot'
-      ENDIF
-      GO TO 900
-C
-C---------------------------------------------------------------------
 C--- Display current prop operating point data 
    10 CALL OUTPUT(LUWRIT)
 ccc      CALL CPROJ
@@ -242,80 +209,6 @@ C--------------------------------------------------------------
        ENDIF
       ELSE
        WRITE(*,*) '*** Select duct option first'
-      ENDIF
-      GO TO 900
-C
-C---------------------------------------------------------------------
-C--- Plot stuff
-   30 IF(NINPUT.GE.1) THEN
-       NPLOT = IINPUT(1)
-      ELSE
-       WRITE(*,2000)
-       NPLOT = 3
-       CALL ASKI('select plot number^',NPLOT)
-      ENDIF
-C
-      IF(NPLOT.EQ.0) THEN
-       GO TO 900
-C--- 3 view geometry plot of single blade
-      ELSE IF(NPLOT.EQ.1) THEN
-       CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC1*SIZE,LPLOT,LLAND)
-       CALL PLOT(XORG,YORG,-3)
-       CALL GEOPLT('ALUE')
-C--- Geometry of all blades, axial view
-      ELSE IF(NPLOT.EQ.2) THEN
-        CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFACD*SIZE,LPLOT,.NOT.LLAND)
-        CALL PLOT(0.175,0.175,-3)
-        CALL PRPPLT
-C--- Plot of operating point (Gam, CL, M, eff) + data
-      ELSE IF(NPLOT.EQ.3) THEN
-       CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-       CALL PLOT(XORG,YORG,-3)
-       CALL CLPLT
-C--- Combined geometry and operating point
-      ELSEIF(NPLOT.EQ.4) THEN
-       CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFACD*SIZE,LPLOT,.NOT.LLAND)
-       CALL PLOT(0.175,0.075,-3)
-       CALL GEOPLT('AL')
-       CALL PLOTABS(0.0,0.0,-3)
-       CALL PLOT(0.175,0.875,-3)
-       CALL CLPLT
-C--- Data for stored cases (vs r/R)
-      ELSE IF(NPLOT.EQ.5) THEN
-       CALL ACLPLT
-C--- Case sequence parameters
-      ELSE IF(NPLOT.EQ.6) THEN
-       CALL CASPLT
-C--- Induced velocities on blade
-      ELSE IF(NPLOT.EQ.7) THEN
-       CALL UVIPLT
-C--- Induced velocities immediately downstream of rotor
-      ELSE IF(NPLOT.EQ.8) THEN
-c       CALL UVIPLT2
-       CALL UVIPLT3
-C--- Velocity triangles
-      ELSE IF(NPLOT.EQ.9) THEN
-       CALL TRIPLT
-C--- Imposed external slipstream velocities
-      ELSE IF(NPLOT.EQ.10) THEN
-       IF(NADD.LT.2) THEN
-        WRITE(*,*) 'No slipstream profiles present'
-        GO TO 900
-       ENDIF
-       CALL VELPLT
-C--- Plot reference x,y data
-      ELSE IF(NPLOT.EQ.11) THEN
-       FNAME = ' '
-       CALL REFPLT(FNAME, XYOFF(1),XYOFF(2),XYFAC(1),XYFAC(2),
-     &             0.5*CSIZE, 1)
-C--- Plot blade parameters vs r/R
-      ELSE IF(NPLOT.EQ.12) THEN
-        CALL PLOT_DATA(NAME)
-C
-      ELSE
-       NINPUT = 0
-       GO TO 30
-C
       ENDIF
       GO TO 900
 C
@@ -373,9 +266,6 @@ C--- Specify advance ratio and solve
       CALL APER(4,2,LOPRINI)
 C
       IF(CONV) CALL OUTPUT(LUWRIT)
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -391,9 +281,6 @@ C--- Specify RPM and solve
       CALL APER(4,2,LOPRINI)
 C
       IF(CONV) CALL OUTPUT(LUWRIT)
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -420,9 +307,6 @@ C
       ENDIF
 C
       IF(CONV) CALL OUTPUT(LUWRIT)
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
 C---- Check for valid blade angle change 
       IF(ANS.NE.'P') THEN
        IF(CONV) THEN
@@ -461,9 +345,6 @@ C
       ENDIF
 C
       IF(CONV) CALL OUTPUT(LUWRIT)
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
 C---- Check for valid blade angle change 
       IF(ANS.NE.'P') THEN
        IF(CONV) THEN
@@ -502,9 +383,6 @@ C
       ENDIF
 C
       IF(CONV) CALL OUTPUT(LUWRIT)
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
 C---- Check for valid blade angle change 
       IF(ANS.NE.'P') THEN
        IF(CONV) THEN
@@ -634,9 +512,6 @@ C
        CALL APER(5,2,LOPRINI)
       ENDIF
 C
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
       IF(CONV) CALL OUTPUT(LUWRIT)
 C---- Was the pitch changed?
       IF(ANS.EQ.'R') THEN
@@ -664,7 +539,6 @@ C--- Do sequence of advance ratios
       WRITE(*,*) 'Sequence of advance ratios...'
       CALL SETCAS(1,NINPUT,RINPUT)
       CALL SHOCAS(LUWRIT,NPARX,NCASE,CASPAR,RAD,NAME)
-      CALL CASPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -673,7 +547,6 @@ C--- Do sequence of RPMs
       WRITE(*,*) 'Sequence of RPMs...'
       CALL SETCAS(2,NINPUT,RINPUT)
       CALL SHOCAS(LUWRIT,NPARX,NCASE,CASPAR,RAD,NAME)
-      CALL CASPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -682,7 +555,6 @@ C--- Do sequence of pitch angles
       WRITE(*,*) 'Sequence of blade angles...'
       CALL SETCAS(3,NINPUT,RINPUT)
       CALL SHOCAS(LUWRIT,NPARX,NCASE,CASPAR,RAD,NAME)
-      CALL CASPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -691,7 +563,6 @@ C--- Do sequence of velocities
       WRITE(*,*) 'Sequence of velocity with fixed pitch or RPM...'
       CALL SETCAS(4,NINPUT,RINPUT)
       CALL SHOCAS(LUWRIT,NPARX,NCASE,CASPAR,RAD,NAME)
-      CALL CASPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -812,9 +683,6 @@ C
       ENDIF
 C
       IF(CONV) CALL OUTPUT(LUWRIT)
-      CALL PLTINI(SCRNFR,IPSLU,IDEV,PLFAC2*SIZE,LPLOT,LLAND)
-      CALL PLOT(XORG,YORG,-3)
-      CALL CLPLT
       GO TO 900
 C
 C---------------------------------------------------------------------
@@ -858,27 +726,9 @@ C
      &  /'   REIN     Re-initialize prop to known operating state'
      &  /'   TERS     Toggle between terse and verbose output'
      &  /'   ITER i   Change max number of Newton iterations'
-     &  /'   N    i   Change number of radial points'
-     & //'   PLOT i   Plot various rotor parameters'
-     &  /'   ANNO     Annotate plot'
-     &  /'   HARD     Hardcopy current plot'
-     &  /'   SIZE r   Change plot-object size')
+     &  /'   N    i   Change number of radial points')
  1530 FORMAT(/' Current rpm:', F9.2)
  1550 FORMAT(' Blade angle changed',F7.3,' degrees')
-C
- 2000 FORMAT(/'  0   CANCEL'
-     &       /'  1   Geometry'
-     &       /'  2   Axial Geometry (all blades)'
-     &       /'  3   Radial distributions for current case'
-     &       /'  4   Radial distributions plus geometry'
-     &       /'  5   Radial distributions for all cases'
-     &       /'  6   Case sequence parameters'
-     &       /'  7   Induced velocities on blade vs r/R'
-     &       /'  8   Induced velocities in slipstream vs r/R'
-     &       /'  9   Velocity triangles'
-     &       /' 10   External slipstream velocity profiles'
-     &       /' 11   Reference x,y data'
-     &       /' 12   Plot blade data (Gam,CL,CD,etc) vs r/R')
 C
       END ! OPER
 
