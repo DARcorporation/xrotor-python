@@ -52,7 +52,6 @@ C
       CALL GETFLT(COMARG,RINPUT,NINPUT,ERROR)
 C
       IF(COMAND.EQ.'    ') THEN
-       CALL CLRZOOM
        RETURN
       ENDIF
       IF(COMAND.EQ.'?   ') WRITE(*,1100)
@@ -93,20 +92,6 @@ C--- Hack to check ADW equation sensitivity, get rid of this later... HHY
         WRITE(*,*) 'Current ADW factor =', ADWFCTR
         CALL ASKR('Enter new ADW factor^',ADWFCTR)
         GO TO 900
-      ENDIF
-C
-C--- Read or use engine rpm/power line file
-      IF(COMAND.EQ.'PVAR') GO TO 79
-C
-      IF(COMAND.EQ.'Z   ') THEN
-       CALL USETZOOM(.TRUE.,.TRUE.)
-       CALL REPLOT(IDEV)
-       GO TO 900
-      ENDIF
-      IF(COMAND.EQ.'U   ') THEN
-       CALL CLRZOOM
-       CALL REPLOT(IDEV)
-       GO TO 900
       ENDIF
 C
       WRITE(*,1050) COMAND

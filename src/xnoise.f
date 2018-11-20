@@ -37,6 +37,7 @@ C
       DIMENSION XDB(NXDIM,NYDIM)
       DIMENSION YDB(NXDIM,NYDIM)
       DIMENSION XLIM(2), YLIM(2)
+      DIMENSION NDBSIZ(2)
 C
       CHARACTER*80 PROMPT
       CHARACTER*4 COMAND, ANS
@@ -68,6 +69,10 @@ C
 C
       LDBCON = .FALSE.
       LPTRAC = .FALSE.
+C
+C---- i,j size of grid for dB footprint contour plot
+      NDBSIZ(1) = 21
+      NDBSIZ(2) = 11
 C
 C---- number of blade-passing harmonics to be calculated, and annotation delta
       NHARM = NT/2
@@ -119,17 +124,6 @@ C
       IF(COMAND.EQ.'UNIT') GO TO 30
       IF(COMAND.EQ.'AOC ') GO TO 40
       IF(COMAND.EQ.'AFIL') GO TO 45
-
-      IF(COMAND.EQ.'Z   ') then
-        call usetzoom(.false.,.true.)
-        call replot(idev)
-        go to 900
-      endif
-      IF(COMAND.EQ.'U   ') then
-        call clrzoom
-        call replot(idev)
-        go to 900
-      endif
 
       WRITE(*,8000) COMAND
       GO TO 900
@@ -664,105 +658,6 @@ C
 C
       RETURN
       END
-
-
-
-      SUBROUTINE PTITLE(XLAB,YLAB,SH,XYZOBS,ULNAM)
-      INCLUDE 'XROTOR.INC'
-      DIMENSION XYZOBS(3)
-      CHARACTER*(*) ULNAM
-      EXTERNAL PLCHAR, PLMATH
-C
-      MACH = VEL/VSO
-      MTIP = MACH * SQRT(1.0 + 1.0/ADV**2)
-      COEFP = PTOT * 0.25*(PI*ADV)**3
-C
-      CALL NEWPEN(3)
-      XL = XLAB
-      YL = YLAB
-C
-      CALL PLCHAR(XL,YL,SH,'Observer x,y,z =  ',0.0,18)
-      CALL PLNUMB(999.,YL,SH,XYZOBS(1),0.0,-1)
-      CALL PLCHAR(999.,YL,SH,' , ',0.0,3)
-      CALL PLNUMB(999.,YL,SH,XYZOBS(2),0.0,-1)
-      CALL PLCHAR(999.,YL,SH,' , ',0.0,3)
-      CALL PLNUMB(999.,YL,SH,XYZOBS(3),0.0,-1)
-      CALL PLCHAR(999.,YL,SH,'  (' ,0.0, 3)
-      CALL PLCHAR(999.,YL,SH,ULNAM ,0.0,-1)
-      CALL PLCHAR(999.,YL,SH,')'   ,0.0, 1)
-C
-      YL = YL + 2.2*SH
-      CALL PLCHAR(XL        ,YL,SH,'M   = '  ,0.0,6)
-      CALL PLSUBS(XL        ,YL,SH,'tip'     ,0.0,3,PLCHAR)
-      CALL PLNUMB(XL+ 6.0*SH,YL,SH,MTIP,0.0,3)
-C
-      CALL PLCHAR(XL+16.0*SH,YL,SH,'C    = ',0.0,7)
-      CALL PLSUBS(XL+16.0*SH,YL,SH,'p'      ,0.0,1,PLCHAR)
-      CALL PLNUMB(XL+23.0*SH,YL,    SH,COEFP,0.0,3)
-C
-      YL = YL + 2.2*SH
-      CALL PLCHAR(XL        ,YL,SH,'M   = ' ,0.0,6)
-      CALL PLMATH(XL        ,YL,SH,' &'     ,0.0,2)
-      CALL PLNUMB(XL+ 6.0*SH,YL,SH,MACH,0.0,3)
-C
-      CALL PLCHAR(XL+16.0*SH,YL,SH,'V/ R = ',0.0,7)
-      CALL PLMATH(XL+16.0*SH,YL,SH,'  W'    ,0.0,3)
-      CALL PLNUMB(XL+23.0*SH,YL,SH,ADV,0.0,3)
-C
-      YL = YL + 2.5*SH
-      CALL PLCHAR(XL,YL,1.2*SH,NAME,0.0,31)
-C
-      RETURN
-      END
-
-
-
-      SUBROUTINE CTITLE(XLAB,YLAB,SH,GALT,DCLIMB,ULNAM)
-      INCLUDE 'XROTOR.INC'
-      DIMENSION XYZOBS(3)
-      CHARACTER*(*) ULNAM
-      EXTERNAL PLCHAR, PLMATH
-C
-      MACH = VEL/VSO
-      MTIP = MACH * SQRT(1.0 + 1.0/ADV**2)
-      COEFP = PTOT * 0.25*(PI*ADV)**3
-C
-      CALL NEWPEN(3)
-      XL = XLAB
-      YL = YLAB
-C
-      CALL PLCHAR(XL,YL,SH,'Altitude =  ',0.0,12)
-      CALL PLNUMB(999.,YL,SH,GALT   ,0.0,-1)
-      CALL PLCHAR(999.,YL,0.5*SH,' ',0.0, 1)
-      CALL PLCHAR(999.,YL,SH,ULNAM  ,0.0,-1)
-      CALL PLCHAR(999.,YL,SH,'    Climb angle = ',0.0,18)
-      CALL PLNUMB(999.,YL,SH,DCLIMB,0.0,-1)
-      CALL PLMATH(999.,YL,SH,'"',0.0,1)
-C
-      YL = YL + 2.2*SH
-      CALL PLCHAR(XL        ,YL,SH,'M   = '  ,0.0,6)
-      CALL PLSUBS(XL        ,YL,SH,'tip'     ,0.0,3,PLCHAR)
-      CALL PLNUMB(XL+ 6.0*SH,YL,SH,MTIP,0.0,3)
-C
-      CALL PLCHAR(XL+16.0*SH,YL,SH,'C    = ',0.0,7)
-      CALL PLSUBS(XL+16.0*SH,YL,SH,'p'      ,0.0,1,PLCHAR)
-      CALL PLNUMB(XL+23.0*SH,YL,    SH,COEFP,0.0,3)
-C
-      YL = YL + 2.2*SH
-      CALL PLCHAR(XL        ,YL,SH,'M   = ' ,0.0,6)
-      CALL PLMATH(XL        ,YL,SH,' &'     ,0.0,2)
-      CALL PLNUMB(XL+ 6.0*SH,YL,SH,MACH,0.0,3)
-C
-      CALL PLCHAR(XL+16.0*SH,YL,SH,'V/ R = ',0.0,7)
-      CALL PLMATH(XL+16.0*SH,YL,SH,'  W'    ,0.0,3)
-      CALL PLNUMB(XL+23.0*SH,YL,SH,ADV,0.0,3)
-C
-      YL = YL + 2.5*SH
-      CALL PLCHAR(XL,YL,1.2*SH,NAME,0.0,31)
-C
-      RETURN
-      END
-
 
 
       SUBROUTINE SFT(Y,T,N, FAMPL, PHASE,NF)

@@ -98,7 +98,6 @@ C
       IF(COMAND.EQ.'?   ') WRITE(*,1100)
       IF(COMAND.EQ.'?   ') GO TO 900
       IF(COMAND.EQ.'QUIT') THEN
-        IF(LPLOT) CALL PLCLOSE
         STOP
       ENDIF
 C
