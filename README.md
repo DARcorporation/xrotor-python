@@ -1,74 +1,30 @@
 
 General
 -------
-XROTOR and its plot library should compile on any Unix system 
-with normal Fortran-77, C, and X-Windows support.  So far,
-XROTOR has been tested on the following systems:
+This is a containerized, stripped down version of XROTOR. All the modification, design, and graphical functionality has
+been removed. The only main menu options that are available in this stripped down version are:
+* OPER, which allows for the calculation of performance characteristics at given operating conditions;
+* BEND, which allows for the calculation of structural loads and deformations;
+* NOIS, which allows for the calculation of the acoustic signature;
+* LOAD, which loads a propeller definition file; and
+* DISP, which displays the current propeller characteristics data onscreen.
 
-  DEC-5000
-  Alpha
-  SGI
-* Sun
-* RS/6000
-* HP-9000
-* Pentium/Linux 
-
-The systems marked with "*" have peculiar features which require slight 
-modifications to the Makefiles in the plotlib/ and bin/ directories.  
-Examine these Makefiles before building the plot library and Xrotor.
-
-
-Build Sequence
---------------
-To install, first build the plot library in  ./plotlib  ...
-
- % cd plotlib
- % make libPlt.a
-
-Then build the programs in  ./bin  ...
-
- % make xrotor
- % make jplot
-
-
-Documentation
--------------
-User Guide is in the  xrotor.doc  file.  If impatient, you can just
-run XROTOR:
-
- % xrotor
-
-and size a new rotor from the DESI menu with the INPU command.
-The rotor can then be "operated" in the OPER menu.
-
-You can also analyze the sample water prop in the ./runs directory:
-
- % xrotor ex.prop ex.cases
-
-Various plots, parameter sweeps, etc., can be performed in the OPER menu:
-
- XROTOR   c>  oper
-
-.OPER   c>  plot 1
-
-.OPER   c>  plot 2
-
-.OPER   c>  plot 3
-
-
-The file EI.ex can be used for a structural analysis in the BEND menu:
-
- XROTOR   c>  bend
-
-.BEND   c>  read ex.EI
-
-.BEND   c>  eval
-
-.BEND   c>  plot 1
-
-.BEND   c>  plot 2
-
-If you really wanted a white background for graphics you can do this...
- % setenv XPLOT11_BACKGROUND white         (graphics default to rev. video)
-
-
+Installation
+------------
+The installation is straightforward thanks to the containerization. The only requirement is that [Docker]() is installed
+on the system and that the `docker` command is in the `PATH` of whichever console environment is used. 
+Then simply type:
+```bash
+docker build -t xrotor .
+docker run -it xrotor
+```
+The first of these two commands will build the Docker image, installing all dependencies and building and installing
+XROTOR. The `-t xrotor` option tags the container image with 'xrotor'. The second command starts the container and 
+presents the user with a interactive shell. Through this shell, XROTOR can be started simply by entering the command
+ `xrotor`.
+ 
+ The container can be stopped using `CTRL-C` on any UNIX system (e.g. Linux, Mac OSx). On Windows machines, however, 
+ this will only cause the terminal to exit the container's shell. To actually stop the container, Windows users should 
+ therefore also issue the command `docker stop xrotor` after they exit the container's shell.
+ 
+ 
