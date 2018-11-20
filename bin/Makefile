@@ -12,10 +12,8 @@ BINDIR = /home/codes/bin/
 
 ## Gfortran
 FC = gfortran
-FFLAGS = -O
-FFLOPT = -O
-#FFLAGS = -g -C -O0
-#FFLOPT = -g -C -O0
+FFLAGS = -Ofast
+FFLOPT = -Ofast
 LIBS =
 FTNLIB =
 INSTALLCMD = install -s
