@@ -61,39 +61,6 @@ C--- Find lower index of aero data sections XIAERO(N) bounding XI(IS)
       END
 
 
-
-      SUBROUTINE GETAERO(N,XISECT,A0,CLMAX,CLMIN,
-     &                   DCLDA,DCLDA_STALL,DCL_STALL,
-     &                   CDMIN,CLDMIN,DCDCL2,CMCON,MCRIT,REREF,REXP)
-C---------------------------------------------
-C     Gets aero data from stored section array
-C---------------------------------------------
-      INCLUDE 'XROTOR.INC'
-C
-      IF(N.LT.1 .OR. N.GT.NAERO) THEN
-        WRITE(*,*) 'Error: index of aero section out of bounds'
-        RETURN
-      ENDIF
-C
-      A0          = AERODATA( 1,N)
-      CLMAX       = AERODATA( 2,N)
-      CLMIN       = AERODATA( 3,N)
-      DCLDA       = AERODATA( 4,N)
-      DCLDA_STALL = AERODATA( 5,N)
-      DCL_STALL   = AERODATA( 6,N)
-      CDMIN       = AERODATA( 7,N)
-      CLDMIN      = AERODATA( 8,N)
-      DCDCL2      = AERODATA( 9,N)
-      CMCON       = AERODATA(10,N)
-      REREF       = AERODATA(11,N)
-      REXP        = AERODATA(12,N)
-      MCRIT       = AERODATA(13,N)
-      XISECT      = XIAERO(N)
-C
-      RETURN
-      END
-
-
       SUBROUTINE PUTAERO(N,XISECT,A0,CLMAX,CLMIN,
      &                   DCLDA,DCLDA_STALL,DCL_STALL,
      &                   CDMIN,CLDMIN,DCDCL2,CMCON,MCRIT,REREF,REXP)
@@ -124,39 +91,6 @@ C
 C
       RETURN
       END
-
-
-
-      SUBROUTINE SORTAR(NS,S,W,NDIM)
-C----------------------------------------------------
-C---- sort arrays by S values
-C     Orders data monotonically increasing in S(i)
-C----------------------------------------------------
-      DIMENSION S(NS), W(NDIM,NS)
-      LOGICAL DONE
-C
-      DO IPASS=1, 500
-        DONE = .TRUE.
-        DO N=1, NS-1
-          NP = N+1
-          IF(S(NP).LT.S(N)) THEN
-           TEMP  = S(NP)
-           S(NP) = S(N)
-           S(N)  = TEMP
-           DO L = 1, NDIM
-             TEMP    = W(L,NP)
-             W(L,NP) = W(L,N)
-             W(L,N)  = TEMP
-           END DO
-           DONE = .FALSE.
-          ENDIF
-        END DO
-        IF(DONE) GO TO 10
-      END DO
-      STOP 'SORTAR failed'
-C
- 10   RETURN
-      END ! SORTAR
 
 
 C*************************************************************************
@@ -495,26 +429,4 @@ C--- Total drag terms
 C
       RETURN
       END ! CLCDCM
-
-
-      SUBROUTINE CHKLIM(N,NSTRT,NEND,F,FMAX)
-C--- Get starting and end index for array values F(i) < FMAX
-      DIMENSION F(N)
-      NSTRT = 1
-      NEND  = N
-C--- Look for first point where F(i)<FMAX
-      DO I=1,N
-          IF(F(I).LT.FMAX) GO TO 10
-      END DO
- 10   NSTRT = MAX(I-1,1)
-C--- Look for last point where F(i)<FMAX
-      DO I=N,1,-1
-          IF(F(I).LT.FMAX) GO TO 20
-      END DO
- 20   NEND = MIN(I+1,N)
-C
-      RETURN
-      END
-
-
 

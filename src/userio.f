@@ -178,29 +178,6 @@ C
       END ! ASKC
 
 
-
-      SUBROUTINE ASKC1(PROMPT,CINPUT)
-C
-C---- 4-byte character string input
-C     converted to uppercase
-C
-      CHARACTER*(*) PROMPT
-      CHARACTER*4 CINPUT
-C
-      NP = INDEX(PROMPT,'^') - 1
-      IF(NP.EQ.0) NP = LEN(PROMPT)
-C
-      WRITE(*,1000) PROMPT(1:NP)
-      READ (*,1020) CINPUT
-      CALL LC2UC(CINPUT)
-C
-      RETURN
-C
- 1000 FORMAT(/A,'   c>  ',$)
- 1020 FORMAT(A4)
-      END ! ASKC1
-
-
       SUBROUTINE LC2UC(INPUT)
       CHARACTER*(*) INPUT
 C
