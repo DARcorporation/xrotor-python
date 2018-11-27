@@ -29,7 +29,7 @@ XROTOROBJS = xrotor.o xoper.o \
  			 xaero.o xio.o \
              xnoise.o xbend.o \
              xinte.o xutils.o \
-             srclin.o spline.o userio.o vortex.o
+             spline.o userio.o vortex.o
 
 
 all:	 $(PROGS)
@@ -64,8 +64,6 @@ xinte.o: $(SRC)/xinte.f $(SRC)/XROTOR.INC
 	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xinte.f
 xutils.o: $(SRC)/xutils.f
 	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xutils.f
-srclin.o: $(SRC)/srclin.f
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/srclin.f
 spline.o: $(SRC)/spline.f
 	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/spline.f
 userio.o: $(SRC)/userio.f
