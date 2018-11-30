@@ -142,7 +142,6 @@ C---- XROTOR defaults
       URDUCT = 1.0
 C
       CALL SETDEF
-      CALL GETDEF
 C
       IF(DUCT) THEN
         WRITE(*,*) 'Aprop/Aexit initialized to 1.0'
@@ -273,49 +272,6 @@ C
 C
       RETURN
       END ! SETDEF
-
-
-      SUBROUTINE GETDEF
-      INCLUDE 'XROTOR.INC'
-C
-C---- try to read start-up defaults from xrotor.def file if possible
-      LU = LUTEMP
-      OPEN(LU,FILE='xrotor.def',STATUS='OLD',ERR=50)
-C
-C--- This data in the defaults file is no longer consistent with XROTOR 7+
-C--- For now just use the non-aero data
-      READ(LU,*,ERR=10) RHO, VSO, RMU
-      READ(LU,*,ERR=10) DCLDA, A0
-      READ(LU,*,ERR=10) CDMIN, DCDCL2, CLDMIN
-      READ(LU,*,ERR=10) REREF, REXP
-      READ(LU,*,ERR=10) CLMAX, CLMIN, DCL_STALL
-      READ(LU,*,ERR=10) CMCON
-      READ(LU,*,ERR=10) XPITCH
-      READ(LU,*,ERR=10) II, INCR, IXSPAC
-      READ(LU,*,ERR=10) FAST, FREE, DUCT
-      READ(LU,*,ERR=10) TERSE, LLAND, LGRID
-      READ(LU,*,ERR=10) LVNORM
-      READ(LU,*,ERR=10) PAR, CSIZE
-      CLOSE(LU)
-C
-      WRITE(*,*) ' '
-      WRITE(*,*) 'Defaults read from file  xrotor.def'
-      RETURN
-C
- 10   WRITE(*,*) ' '
-      WRITE(*,*) 'READ error on file  xrotor.def'
-      WRITE(*,*) 'Hard-wired defaults used'
-      CLOSE(LU)
-      CALL SETDEF
-C
- 50   WRITE(*,*) ' '
-      WRITE(*,*) 'OPEN error on file  xrotor.def'
-      WRITE(*,*) 'Hard-wired defaults used'
-      CALL SETDEF
-C
-      RETURN
-      END ! GETDEF
-
 
 
       SUBROUTINE ATMO(ALSPEC,VSOALT,RHOALT,RMUALT)
