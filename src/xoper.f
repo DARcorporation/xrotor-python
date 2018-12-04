@@ -1857,29 +1857,6 @@ C
       END ! APITER
 
 
-      SUBROUTINE ADWCORR
-C---- Calculate OMEG*R-VT correction factor to wake advance ratio equation
-C
-      INCLUDE 'XROTOR.INC'
-      REAL ADVFACTOR(IX)
-C
-      DO I = 1, II
-        CALL CSCALC(I,UTOT,WA,WT,
-     &              VT,VT_ADW,
-     &              VA,VA_ADW,
-     &              VD,VD_ADW,
-     &              CI,CI_ADV,CI_VT,
-     &              SI,       SI_VA,
-     &              W,  W_ADV, W_VT, W_VA,
-     &              PHI,P_ADV, P_VT, P_VA)
-        ADVFACTOR(I) = XI(I)/ADV / (XI(I)/ADV - VT)
-ccc        WRITE(18,*) XI(I), ADVFACTOR(I), XI(I)/ADV,VT
-      END DO
-C    
-      RETURN
-      END
-
-
       SUBROUTINE CSCALC(I,UTOT,WA,WT,
      &                  VT,VT_ADW,
      &                  VA,VA_ADW,
