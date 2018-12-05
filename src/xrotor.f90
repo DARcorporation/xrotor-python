@@ -60,17 +60,17 @@ PROGRAM XROTOR
     !--- Get command line args (if present)
     NARG = IARGC()
     !
-    IF(NARG.GT.0) CALL GETARG(1, FNAME)
-    IF(FNAME(1:1) .NE. ' ') CALL LOAD(FNAME)
+    IF(NARG > 0) CALL GETARG(1, FNAME)
+    IF(FNAME(1:1) /= ' ') CALL LOAD(FNAME)
     !
     FNAME = ' '
-    IF(NARG.GT.1) CALL GETARG(2, FNAME)
-    IF(FNAME(1:1) .NE. ' ') THEN
+    IF(NARG > 1) CALL GETARG(2, FNAME)
+    IF(FNAME(1:1) /= ' ') THEN
         NCASE = 0
         OPEN(LUTEMP, FILE = FNAME, STATUS = 'OLD', ERR = 2)
         CALL GETCAS(LUTEMP, NPARX, NCASE, CASPAR)
         CLOSE(LUTEMP)
-        IF(NCASE.GT.0) THEN
+        IF(NCASE > 0) THEN
             KF = INDEX(FNAME, ' ') - 1
             WRITE(*, *) 'Operating cases read from file  ', &
                     FNAME(1:KF), ' ...'
@@ -94,18 +94,18 @@ PROGRAM XROTOR
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
     GREEK = .TRUE.
-    IF(COMAND.EQ.'    ') GO TO 900
-    IF(COMAND.EQ.'?   ') WRITE(*, 1100)
-    IF(COMAND.EQ.'?   ') GO TO 900
-    IF(COMAND.EQ.'QUIT') THEN
+    IF(COMAND == '    ') GO TO 900
+    IF(COMAND == '?   ') WRITE(*, 1100)
+    IF(COMAND == '?   ') GO TO 900
+    IF(COMAND == 'QUIT') THEN
         STOP
     ENDIF
     !
-    IF(COMAND.EQ.'OPER') CALL OPER
-    IF(COMAND.EQ.'BEND') CALL BEND
-    IF(COMAND.EQ.'LOAD') CALL LOAD(COMARG)
-    IF(COMAND.EQ.'NOIS') CALL NOISE
-    IF(COMAND.EQ.'DISP') GO TO 100
+    IF(COMAND == 'OPER') CALL OPER
+    IF(COMAND == 'BEND') CALL BEND
+    IF(COMAND == 'LOAD') CALL LOAD(COMARG)
+    IF(COMAND == 'NOIS') CALL NOISE
+    IF(COMAND == 'DISP') GO TO 100
     IF(GREEK) WRITE(*, 1050) COMAND
     GO TO 900
     !
@@ -164,8 +164,8 @@ SUBROUTINE INIT
     !---- ADW factor (multiplies TINV/PINV in ADW calculation)
     ADWFCTR = 1.0
     !
-    IF(II  .GT.IX) STOP 'Array overflow.  IX too small'
-    IF(IINF.GT.JX) STOP 'Array overflow.  JX too small'
+    IF(II > IX) STOP 'Array overflow.  IX too small'
+    IF(IINF > JX) STOP 'Array overflow.  JX too small'
     !
     !---- actual-rotor radius is always 1 (non-dimensionalized with itself)
     XITIP = 1.0
@@ -319,7 +319,7 @@ SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
             1.700, 1.912, 2.047, 1.667 /
     !
     !---- special case: Water at STP
-    IF(ALSPEC.EQ.-1.0) THEN
+    IF(ALSPEC == -1.0) THEN
         VSOALT = 1500.
         RHOALT = 1000.
         RMUALT = 1.15E-3
@@ -330,7 +330,7 @@ SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
     !
     !---- linearly interpolate quantities from tabulated values
     do I = 2, N
-        IF(ALSPEC.GT.ALT(I)) GO TO 10
+        IF(ALSPEC > ALT(I)) GO TO 10
         !
         DALT = ALT(I) - ALT(I - 1)
         DVSO = VSO(I) - VSO(I - 1)
@@ -348,7 +348,7 @@ SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
     10 end do
     !
     !
-    IF(ALSPEC.GT.ALT(N)) THEN
+    IF(ALSPEC > ALT(N)) THEN
         WRITE(*, *) ' '
         WRITE(*, *) 'ATMO: You''re in low earth orbit.  Good luck.'
         VSOALT = VSO(N)
@@ -450,7 +450,7 @@ SUBROUTINE SETX
         T(I) = DT * (FLOAT(I) - 0.5)
         TP = DT * FLOAT(I)
         !
-        IF(IXSPAC.EQ.2) THEN
+        IF(IXSPAC == 2) THEN
             !------- Usual sine stretching, adjusted for nonzero root radius
             XI(I) = SQRT(XITIP * SIN(T(I))**2 + (XI0 * COS(T(I)))**2)
             XP = SQRT(XITIP * SIN(TP)**2 + (XI0 * COS(TP))**2)
@@ -482,7 +482,7 @@ SUBROUTINE OPFILE(LU, FNAME)
     CHARACTER*1 ANS, DUMMY
     !
     !---- get filename if it hasn't been already specified
-    IF(FNAME(1:1).EQ.' ') CALL ASKS('Enter output filename^', FNAME)
+    IF(FNAME(1:1) == ' ') CALL ASKS('Enter output filename^', FNAME)
     !
     !---- try to open file
     OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 50)
@@ -495,11 +495,11 @@ SUBROUTINE OPFILE(LU, FNAME)
     ANS = COMAND(1:1)
     !
     !---- ask again if reply is invalid
-    IF(INDEX('OoAaNn', ANS).EQ.0) THEN
+    IF(INDEX('OoAaNn', ANS) == 0) THEN
         CALL ASKC(' O / A / N  ?^', COMAND, COMARG)
         ANS = COMAND(1:1)
         !
-        IF(INDEX('OoAaNn', ANS).EQ.0) THEN
+        IF(INDEX('OoAaNn', ANS) == 0) THEN
             !------- Still bad reply. Give up asking and just return
             WRITE(*, *) 'No action taken'
             RETURN
@@ -507,11 +507,11 @@ SUBROUTINE OPFILE(LU, FNAME)
     ENDIF
     !
     !---- at this point, file is open and reply is valid
-    IF    (INDEX('Oo', ANS) .NE. 0) THEN
+    IF    (INDEX('Oo', ANS) /= 0) THEN
         !------ go to beginning of file to overwrite
         REWIND(LU)
         GO TO 60
-    ELSEIF(INDEX('Aa', ANS) .NE. 0) THEN
+    ELSEIF(INDEX('Aa', ANS) /= 0) THEN
         !------ go to end of file to append
         DO K = 1, 12345678
             READ(LU, 1000, END = 60) DUMMY
@@ -520,7 +520,7 @@ SUBROUTINE OPFILE(LU, FNAME)
     ELSE
         !------ new file... get filename from command argument, or ask if not supplied
         FNAME = COMARG
-        IF(FNAME(1:1).EQ.' ') CALL ASKS('Enter output filename^', FNAME)
+        IF(FNAME(1:1) == ' ') CALL ASKS('Enter output filename^', FNAME)
     ENDIF
     !
     !---- at this point, file FNAME is new or is to be overwritten
@@ -544,7 +544,7 @@ SUBROUTINE OUTPUT(LU)
     !---------------------------------------------
     !
     IADD = 1
-    IF(LU.EQ.LUWRIT) IADD = INCR
+    IF(LU == LUWRIT) IADD = INCR
     !
     WRITE (LU, 1000)
     IF(.NOT.CONV) WRITE(LU, 2000)
@@ -589,7 +589,7 @@ SUBROUTINE OUTPUT(LU)
     EIDEAL = 2.0 / (1.0 + SQRT(TCLIM + 1.0))
     !
     !---- define low advance ratio (helicopter?) related data
-    IF(ADV.LT.0.1) THEN
+    IF(ADV < 0.1) THEN
         CALL SPLINE(CH, W1, XI, II)
         CTH = CT / 7.7516
         CPH = CP / 24.352
@@ -600,22 +600,22 @@ SUBROUTINE OUTPUT(LU)
     !
     !
     IF(DUCT) THEN
-        IF(IWTYP.EQ.1) WRITE(LU, 1001) NAME
-        IF(IWTYP.EQ.2) WRITE(LU, 1002) NAME
-        IF(IWTYP.EQ.3) WRITE(LU, 1001) NAME
+        IF(IWTYP == 1) WRITE(LU, 1001) NAME
+        IF(IWTYP == 2) WRITE(LU, 1002) NAME
+        IF(IWTYP == 3) WRITE(LU, 1001) NAME
     ELSE
-        IF(IWTYP.EQ.1) WRITE(LU, 1011) NAME
-        IF(IWTYP.EQ.2) WRITE(LU, 1012) NAME
-        IF(IWTYP.EQ.3) WRITE(LU, 1013) NAME
+        IF(IWTYP == 1) WRITE(LU, 1011) NAME
+        IF(IWTYP == 2) WRITE(LU, 1012) NAME
+        IF(IWTYP == 3) WRITE(LU, 1013) NAME
     ENDIF
-    IF(NADD.GT.1) THEN
+    IF(NADD > 1) THEN
         WRITE(LU, 1021) ADW
     ELSE IF(DUCT) THEN
         WRITE(LU, 1022) URDUCT, ADW
     ELSE
         WRITE(LU, 1023) ADW
     ENDIF
-    IF(ADW.LT.0.5 * ADV) WRITE(LU, 1024)
+    IF(ADW < 0.5 * ADV) WRITE(LU, 1024)
     WRITE(LU, 1010) NBLDS, RAD, ADV, &
             TDIM, PDIM, QDIM, &
             EFFTOT, VEL, RPM, &
@@ -648,13 +648,13 @@ SUBROUTINE OUTPUT(LU)
         REMAX = MAX(RE(I), REMAX)
     END DO
     REEXP = 1.0
-    IF(REMAX.GE.1.0E6) THEN
+    IF(REMAX >= 1.0E6) THEN
         REEXP = 6.0
-    ELSEIF(REMAX.GE.1.0E3) THEN
+    ELSEIF(REMAX >= 1.0E3) THEN
         REEXP = 3.0
     ENDIF
     !
-    IF(REEXP.EQ.1.0) THEN
+    IF(REEXP == 1.0) THEN
         WRITE(LU, 1020)
     ELSE
         WRITE(LU, 1120) IFIX(REEXP)
@@ -751,10 +751,10 @@ SUBROUTINE UVADD(XIW, WA, WT)
     WA = 0.0
     WT = 0.0
     !
-    IF(NADD.LE.1) RETURN
+    IF(NADD <= 1) RETURN
     !
     RDIM = XIW * RAD
-    IF(RDIM.GE.RADD(1) .AND. RDIM.LE.RADD(NADD)) THEN
+    IF(RDIM >= RADD(1) .AND. RDIM <= RADD(NADD)) THEN
         WA = SEVAL(RDIM, UADD, UADDR, RADD, NADD) / VEL
         WT = SEVAL(RDIM, VADD, VADDR, RADD, NADD) / VEL
     ENDIF

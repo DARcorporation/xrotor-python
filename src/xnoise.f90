@@ -78,14 +78,14 @@ SUBROUTINE NOISE
     NHARM = NT / 2
     DHARM = 5.0
     !
-    IF(AOC0 .NE. 0.0) THEN
-        IF(AOC0 .LT. 0.0) AOC0 = 0.0
+    IF(AOC0 /= 0.0) THEN
+        IF(AOC0 < 0.0) AOC0 = 0.0
         DO I = 1, II
             AOCI(I) = AOC0
         ENDDO
     ENDIF
     !
-    IF(ULNAM.EQ.'(m) ') THEN
+    IF(ULNAM == '(m) ') THEN
         WRITE(*, *) 'Coordinates currently specified in meters'
     ELSE
         WRITE(*, *) 'Coordinates currently specified in feet'
@@ -115,22 +115,22 @@ SUBROUTINE NOISE
     NINPUT = 0
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
-    IF(COMAND.EQ.'    ') RETURN
-    IF(COMAND.EQ.'?   ') WRITE(*, 8100)
-    IF(COMAND.EQ.'?   ') GO TO 900
-    IF(COMAND.EQ.'P   ') GO TO 10
-    IF(COMAND.EQ.'FOOT') GO TO 20
-    IF(COMAND.EQ.'NTIM') GO TO 25
-    IF(COMAND.EQ.'UNIT') GO TO 30
-    IF(COMAND.EQ.'AOC ') GO TO 40
-    IF(COMAND.EQ.'AFIL') GO TO 45
+    IF(COMAND == '    ') RETURN
+    IF(COMAND == '?   ') WRITE(*, 8100)
+    IF(COMAND == '?   ') GO TO 900
+    IF(COMAND == 'P   ') GO TO 10
+    IF(COMAND == 'FOOT') GO TO 20
+    IF(COMAND == 'NTIM') GO TO 25
+    IF(COMAND == 'UNIT') GO TO 30
+    IF(COMAND == 'AOC ') GO TO 40
+    IF(COMAND == 'AFIL') GO TO 45
 
     WRITE(*, 8000) COMAND
     GO TO 900
     !
     !===========================================================================
     10   CONTINUE
-    IF(NINPUT.GE.3) THEN
+    IF(NINPUT >= 3) THEN
         XYZOBS(1) = RINPUT(1)
         XYZOBS(2) = RINPUT(2)
         XYZOBS(3) = RINPUT(3)
@@ -164,13 +164,13 @@ SUBROUTINE NOISE
     !
     !======================================================================
     20   CONTINUE
-    IF(NINPUT.GE.1) THEN
+    IF(NINPUT >= 1) THEN
         GALT = RINPUT(1)
     ELSE
         PROMPT = 'Enter flight altitude above ground (' // ULNAM // ')^'
         CALL ASKR(PROMPT, GALT)
     ENDIF
-    IF(NINPUT.GE.2) THEN
+    IF(NINPUT >= 2) THEN
         DCLIMB = RINPUT(2)
     ELSE
         CALL ASKR('Enter climb angle (deg)^', DCLIMB)
@@ -199,7 +199,7 @@ SUBROUTINE NOISE
     1250 FORMAT(1X, A, 2I6)
     CALL READI(2, NDBSIZ, ERROR)
     IF(ERROR) GO TO 204
-    IF(NDBSIZ(1).GT.NXDIM .OR. NDBSIZ(2).GT.NYDIM) THEN
+    IF(NDBSIZ(1) > NXDIM .OR. NDBSIZ(2) > NYDIM) THEN
         WRITE(*, *) 'Array dimension limits are:', NXDIM, NYDIM
         NDBSIZ(1) = MIN(NDBSIZ(1), NXDIM)
         NDBSIZ(2) = MIN(NDBSIZ(2), NYDIM)
@@ -231,7 +231,7 @@ SUBROUTINE NOISE
     !
     !===========================================================================
     25   CONTINUE
-    IF(NINPUT.GE.1) THEN
+    IF(NINPUT >= 1) THEN
         NT = IINPUT(1)
     ELSE
         251    WRITE(*, 1251) NT
@@ -240,7 +240,7 @@ SUBROUTINE NOISE
         IF(ERROR) GO TO 251
     ENDIF
     !
-    IF(NT.GT.NTX) THEN
+    IF(NT > NTX) THEN
         NT = NTX
         WRITE(*, *) 'Number of samples limited to array limit:', NTX
     ENDIF
@@ -249,7 +249,7 @@ SUBROUTINE NOISE
     GO TO 900
     !
     !======================================================================
-    30   IF(ULNAM.EQ.'ft') THEN
+    30   IF(ULNAM == 'ft') THEN
         ULNAM = 'm '
         UNITL = 1.0
         WRITE(*, *) 'Coordinates now specified in meters'
@@ -265,7 +265,7 @@ SUBROUTINE NOISE
     !                                      2
     !---- set local blade airfoil  area / c
     !     (this version assumes that it's constant)
-    IF(NINPUT.GE.1) THEN
+    IF(NINPUT >= 1) THEN
         AOC0 = RINPUT(1)
     ELSE
         CALL ASKR&
@@ -292,7 +292,7 @@ SUBROUTINE NOISE
     !     These are splined to the computational radial stations.
     !
     FNAME = COMARG
-    IF(FNAME(1:1) .EQ. ' ') THEN
+    IF(FNAME(1:1) == ' ') THEN
         CALL ASKS&
                 ('Enter blade airfoil area/c**2 distribution filename^', FNAME)
     ENDIF
@@ -422,8 +422,8 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
     !
     PI = 4.0 * ATAN(1.0)
     !
-    IF(II .GT.IX) STOP 'PTRACE: Array overflow. IX too small.'
-    IF(NT.GT.NTX) STOP 'PTRACE: Array overflow. NTX too small.'
+    IF(II > IX) STOP 'PTRACE: Array overflow. IX too small.'
+    IF(NT > NTX) STOP 'PTRACE: Array overflow. NTX too small.'
     !
     !---- prop rotational speed
     OMEGA = VEL / (ADV * RAD)
@@ -511,7 +511,7 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
             !-------- Mach number component along blade element --> observer direction
             MR = (X * MAX + Y * MAY + Z * MAZ) / R
             !
-            IF(MR.GE.1.0) THEN
+            IF(MR >= 1.0) THEN
                 WRITE(*, 5500) MR, XI(I), (TH * 180.0 / PI)
                 5500      FORMAT(/' WARNING.  Relative approach Mach number =', F6.3, &
                         '  at r/R =', F6.3, '    theta =', F6.1, ' deg.')
@@ -616,9 +616,9 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
                     !
                     !------------ remove whole multiples of blade period to get into spline range
                     TOFF = TEL0 + AMOD((TELB - TEL0), (TELN - TEL0))
-                    IF(TOFF.LT.TEL0) TOFF = TOFF + (TELN - TEL0)
+                    IF(TOFF < TEL0) TOFF = TOFF + (TELN - TEL0)
                     !
-                    IF(TOFF.LT.TEL0 .OR. TOFF.GT.TELN) THEN
+                    IF(TOFF < TEL0 .OR. TOFF > TELN) THEN
                         WRITE(*, *) '? PTRACE: Time out of spline range.'
                         WRITE(*, *) 't   t0   tN', TOFF, TEL0, TELN
                     ENDIF
@@ -672,7 +672,7 @@ SUBROUTINE SFT(Y, T, N, FAMPL, PHASE, NF)
     !---------------------------------------------------
     DIMENSION SINT(361), COST(361)
     !
-    IF(N + 1.GT.361) STOP 'SFT: Array overflow'
+    IF(N + 1 > 361) STOP 'SFT: Array overflow'
     !
     PI = 4.0 * ATAN(1.0)
     !
@@ -712,13 +712,13 @@ SUBROUTINE PSPLIN(X, XP, S, II)
     DIMENSION X(II), XP(II), S(II)
     DIMENSION A(480), B(480), C(480)
     !
-    IF(II.GT.480)     STOP 'PSPLIN: Array overflow'
-    IF(X(II).NE.X(1)) STOP 'PSPLIN: Data not periodic'
+    IF(II > 480)     STOP 'PSPLIN: Array overflow'
+    IF(X(II) /= X(1)) STOP 'PSPLIN: Data not periodic'
     !
     do I = 1, II - 1
         !
         !------ Periodic point
-        IF(I.EQ.1) THEN
+        IF(I == 1) THEN
             DSMI = 1.0 / (S(II) - S(II - 1))
             DXM = X(II) - X(II - 1)
             DSPI = 1.0 / (S(I + 1) - S(I))
@@ -759,7 +759,7 @@ SUBROUTINE PTRISO(A, B, C, D, KK)
         B(KM) = B(KM) * AINV
         A(K) = A(K) - B(K) * C(KM)
         D(K) = D(K) - B(K) * D(KM)
-        IF(K.LT.KK) THEN
+        IF(K < KK) THEN
             B(K) = - B(K) * B(KM)
         ELSE
             A(K) = A(K) - B(K) * B(KM)
@@ -837,7 +837,7 @@ SUBROUTINE DBFOOT(NBLDS, II, XI, DXI, AOC, CH, GAM, &
     !---- find j index of y=0 line
     DELY = ABS(Y(1, NY) - Y(1, 1))
     DO J0 = 1, NY
-        IF(Y(1, J0) .GT. -0.0001 * DELY) GO TO 5
+        IF(Y(1, J0) > -0.0001 * DELY) GO TO 5
     ENDDO
     J0 = 1
     5    CONTINUE

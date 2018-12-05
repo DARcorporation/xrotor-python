@@ -30,12 +30,12 @@ SUBROUTINE ASKI(PROMPT, IINPUT)
     INTEGER IINPUT
     !
     NP = INDEX(PROMPT, '^') - 1
-    IF(NP.EQ.0) NP = LEN(PROMPT)
+    IF(NP == 0) NP = LEN(PROMPT)
     !
-    IF(IINPUT.NE.999)  WRITE(*, 1001) IINPUT
+    IF(IINPUT /= 999)  WRITE(*, 1001) IINPUT
     10   WRITE(*, 1000) PROMPT(1:NP)
     READ (*, 1002, ERR = 10) LINE
-    IF(LINE.NE.' ') READ (LINE, *, ERR = 10) IINPUT
+    IF(LINE /= ' ') READ (LINE, *, ERR = 10) IINPUT
     RETURN
     !
     1000 FORMAT(A, '   i>  ', $)
@@ -53,12 +53,12 @@ SUBROUTINE ASKR(PROMPT, RINPUT)
     REAL RINPUT
     !
     NP = INDEX(PROMPT, '^') - 1
-    IF(NP.EQ.0) NP = LEN(PROMPT)
+    IF(NP == 0) NP = LEN(PROMPT)
     !
-    IF(RINPUT.NE.999.)  WRITE(*, 1001) RINPUT
+    IF(RINPUT /= 999.)  WRITE(*, 1001) RINPUT
     10   WRITE(*, 1000) PROMPT(1:NP)
     READ (*, 1002, ERR = 10) LINE
-    IF(LINE.NE.' ') READ (LINE, *, ERR = 10) RINPUT
+    IF(LINE /= ' ') READ (LINE, *, ERR = 10) RINPUT
     RETURN
     !
     1000 FORMAT(A, '   r>  ', $)
@@ -77,15 +77,15 @@ SUBROUTINE ASKL(PROMPT, LINPUT)
     CHARACTER*1 CHAR
     !
     NP = INDEX(PROMPT, '^') - 1
-    IF(NP.EQ.0) NP = LEN(PROMPT)
+    IF(NP == 0) NP = LEN(PROMPT)
     !
     10   WRITE(*, 1000) PROMPT(1:NP)
     READ (*, 1010) CHAR
-    IF(CHAR.EQ.'y') CHAR = 'Y'
-    IF(CHAR.EQ.'n') CHAR = 'N'
-    IF(CHAR.NE.'Y' .AND. CHAR.NE.'N') GO TO 10
+    IF(CHAR == 'y') CHAR = 'Y'
+    IF(CHAR == 'n') CHAR = 'N'
+    IF(CHAR /= 'Y' .AND. CHAR /= 'N') GO TO 10
     !
-    LINPUT = CHAR .EQ. 'Y'
+    LINPUT = CHAR == 'Y'
     RETURN
     !
     1000 FORMAT(/A, ' y/n>  ', $)
@@ -102,7 +102,7 @@ SUBROUTINE ASKS(PROMPT, INPUT)
     CHARACTER*(*) INPUT
     !
     NP = INDEX(PROMPT, '^') - 1
-    IF(NP.EQ.0) NP = LEN(PROMPT)
+    IF(NP == 0) NP = LEN(PROMPT)
     !
     WRITE(*, 1000) PROMPT(1:NP)
     READ (*, 1010) INPUT
@@ -130,14 +130,14 @@ SUBROUTINE ASKC(PROMPT, COMAND, CARGS)
     IZERO = ICHAR('0')
     !
     NP = INDEX(PROMPT, '^') - 1
-    IF(NP.EQ.0) NP = LEN(PROMPT)
+    IF(NP == 0) NP = LEN(PROMPT)
     !
     WRITE(*, 1000) PROMPT(1:NP)
     READ (*, 1020) LINE
     !
     !---- strip off leading blanks
     DO K = 1, 128
-        IF(LINE(1:1) .EQ. ' ') THEN
+        IF(LINE(1:1) == ' ') THEN
             LINE = LINE(2:128)
         ELSE
             GO TO 5
@@ -148,19 +148,19 @@ SUBROUTINE ASKC(PROMPT, COMAND, CARGS)
     !---- find position of first blank, "+", "-", ".", ",", or numeral
     K = INDEX(LINE, ' ')
     KI = INDEX(LINE, '-')
-    IF(KI.NE.0) K = MIN(K, KI)
+    IF(KI /= 0) K = MIN(K, KI)
     KI = INDEX(LINE, '+')
-    IF(KI.NE.0) K = MIN(K, KI)
+    IF(KI /= 0) K = MIN(K, KI)
     KI = INDEX(LINE, '.')
-    IF(KI.NE.0) K = MIN(K, KI)
+    IF(KI /= 0) K = MIN(K, KI)
     KI = INDEX(LINE, ',')
-    IF(KI.NE.0) K = MIN(K, KI)
+    IF(KI /= 0) K = MIN(K, KI)
     DO I = 0, 9
         KI = INDEX(LINE, CHAR(IZERO + I))
-        IF(KI.NE.0) K = MIN(K, KI)
+        IF(KI /= 0) K = MIN(K, KI)
     ENDDO
     !
-    !      IF(K.EQ.1) THEN
+    !      IF(K == 1) THEN
     !C------ the "command" is a number... set entire COMAND string with it
     !        COMAND = LINE
     !      ELSE
@@ -168,7 +168,7 @@ SUBROUTINE ASKC(PROMPT, COMAND, CARGS)
     !        COMAND = LINE(1:K-1)
     !      ENDIF
     !
-    IF(K.LE.1) K = 5
+    IF(K <= 1) K = 5
     !---- set 4-byte alphabetic command string and convert it to uppercase
     COMAND = LINE(1:K - 1)
     CALL LC2UC(COMAND)
@@ -194,7 +194,7 @@ SUBROUTINE LC2UC(INPUT)
     !
     do I = 1, N
         K = INDEX(LCASE, INPUT(I:I))
-        IF(K.GT.0) INPUT(I:I) = UCASE(K:K)
+        IF(K > 0) INPUT(I:I) = UCASE(K:K)
     end do
     !
     RETURN
@@ -291,7 +291,7 @@ SUBROUTINE GETINT(INPUT, A, N, ERROR)
     !
     !---- ignore everything after a "!" character
     K = INDEX(REC, '!')
-    IF(K.GT.0) REC(1:ILEN) = REC(1:K - 1)
+    IF(K > 0) REC(1:ILEN) = REC(1:K - 1)
     !
     NINP = N
     !
@@ -303,13 +303,13 @@ SUBROUTINE GETINT(INPUT, A, N, ERROR)
         KSPACE = INDEX(REC(K:ILENP), ' ') + K - 1
         KCOMMA = INDEX(REC(K:ILENP), ',') + K - 1
         !
-        IF(K.EQ.KSPACE) THEN
+        IF(K == KSPACE) THEN
             !------- just skip this space
             K = K + 1
             GO TO 9
         ENDIF
         !
-        IF(K.EQ.KCOMMA) THEN
+        IF(K == KCOMMA) THEN
             !------- comma found.. increment number count and keep looking
             N = N + 1
             K = K + 1
@@ -321,11 +321,11 @@ SUBROUTINE GETINT(INPUT, A, N, ERROR)
         N = N + 1
         K = MIN(KSPACE, KCOMMA) + 1
         !
-        9     IF(K.GE.ILEN) GO TO 11
+        9     IF(K >= ILEN) GO TO 11
     end do
     !
     !---- decide on how many numbers to read, and go ahead and read them
-    11   IF(NINP.GT.0) N = MIN(N, NINP)
+    11   IF(NINP > 0) N = MIN(N, NINP)
     READ(REC(1:ILEN), *, ERR = 20) (A(I), I = 1, N)
     ERROR = .FALSE.
     RETURN
@@ -364,7 +364,7 @@ SUBROUTINE GETFLT(INPUT, A, N, ERROR)
     !
     !---- ignore everything after a "!" character
     K = INDEX(REC, '!')
-    IF(K.GT.0) REC(1:ILEN) = REC(1:K - 1)
+    IF(K > 0) REC(1:ILEN) = REC(1:K - 1)
     !
     NINP = N
     !
@@ -376,13 +376,13 @@ SUBROUTINE GETFLT(INPUT, A, N, ERROR)
         KSPACE = INDEX(REC(K:ILENP), ' ') + K - 1
         KCOMMA = INDEX(REC(K:ILENP), ',') + K - 1
         !
-        IF(K.EQ.KSPACE) THEN
+        IF(K == KSPACE) THEN
             !------- just skip this space
             K = K + 1
             GO TO 9
         ENDIF
         !
-        IF(K.EQ.KCOMMA) THEN
+        IF(K == KCOMMA) THEN
             !------- comma found.. increment number count and keep looking
             N = N + 1
             K = K + 1
@@ -394,11 +394,11 @@ SUBROUTINE GETFLT(INPUT, A, N, ERROR)
         N = N + 1
         K = MIN(KSPACE, KCOMMA) + 1
         !
-        9     IF(K.GE.ILEN) GO TO 11
+        9     IF(K >= ILEN) GO TO 11
     end do
     !
     !---- decide on how many numbers to read, and go ahead and read them
-    11   IF(NINP.GT.0) N = MIN(N, NINP)
+    11   IF(NINP > 0) N = MIN(N, NINP)
     READ(REC(1:ILEN), *, ERR = 20) (A(I), I = 1, N)
     ERROR = .FALSE.
     RETURN
@@ -422,20 +422,20 @@ SUBROUTINE STRIP(STRING, NS)
     !
     !---- find last non-blank character
     do K2 = N, 1, -1
-        IF(STRING(K2:K2).NE.' ') GO TO 11
+        IF(STRING(K2:K2) /= ' ') GO TO 11
     end do
     K2 = 0
     11 CONTINUE
     !
     !---- find first non-blank character
     do K1 = 1, K2
-        IF(STRING(K1:K1).NE.' ') GO TO 21
+        IF(STRING(K1:K1) /= ' ') GO TO 21
     end do
     21 CONTINUE
     !
     !---- number of non-blank characters
     NS = K2 - K1 + 1
-    IF(NS.EQ.0) RETURN
+    IF(NS == 0) RETURN
     !
     !---- shift STRING so first character is non-blank
     STRING(1:NS) = STRING(K1:K2)

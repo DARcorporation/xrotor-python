@@ -52,18 +52,18 @@ SUBROUTINE BEND
     NINPUT = 0
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
-    IF(COMAND.EQ.'    ') RETURN
-    IF(COMAND.EQ.'?   ') WRITE(*, 1100)
-    IF(COMAND.EQ.'?   ') GO TO 900
-    IF(COMAND.EQ.'READ') GO TO 10
-    IF(COMAND.EQ.'CLR ') GO TO 20
-    IF(COMAND.EQ.'EVAL') GO TO 30
-    IF(COMAND.EQ.'DEFL') GO TO 40
-    IF(COMAND.EQ.'REST') GO TO 50
-    IF(COMAND.EQ.'WRIT') GO TO 70
-    IF(COMAND.EQ.'SETS') GO TO 80
-    IF(COMAND.EQ.'MCLR') GO TO 85
-    IF(COMAND.EQ.'HELP') GO TO 100
+    IF(COMAND == '    ') RETURN
+    IF(COMAND == '?   ') WRITE(*, 1100)
+    IF(COMAND == '?   ') GO TO 900
+    IF(COMAND == 'READ') GO TO 10
+    IF(COMAND == 'CLR ') GO TO 20
+    IF(COMAND == 'EVAL') GO TO 30
+    IF(COMAND == 'DEFL') GO TO 40
+    IF(COMAND == 'REST') GO TO 50
+    IF(COMAND == 'WRIT') GO TO 70
+    IF(COMAND == 'SETS') GO TO 80
+    IF(COMAND == 'MCLR') GO TO 85
+    IF(COMAND == 'HELP') GO TO 100
     !
     !-------------------------------------------------------------
     WRITE(*, 1000) COMAND
@@ -99,7 +99,7 @@ SUBROUTINE BEND
     GO TO 900
     !
     !-------------------------------------------------------------
-    70   IF(COMARG(1:1).NE.' ') SAVFIL = COMARG
+    70   IF(COMARG(1:1) /= ' ') SAVFIL = COMARG
     CALL OPFILE(LUSAVE, SAVFIL)
     CALL STWRIT(LUSAVE)
     CLOSE(LUSAVE)
@@ -190,7 +190,7 @@ SUBROUTINE EILOAD(FNAME1)
     LU = 14
     !
     FNAME = FNAME1
-    IF(FNAME(1:1).EQ.' ') CALL ASKS('Enter input filename^', FNAME)
+    IF(FNAME(1:1) == ' ') CALL ASKS('Enter input filename^', FNAME)
     !
     OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 200)
     READ(LU, 1000) DUMMY
@@ -790,8 +790,8 @@ SUBROUTINE STCALC
         !
         do I = 1, II + 1
             do K = 1, 12
-                IF(RLXR(K) * RR(K, I) .GT.  RRLIM(K)) RLXR(K) = RRLIM(K) / RR(K, I)
-                IF(RLXR(K) * RR(K, I) .LT. -RRLIM(K)) RLXR(K) = -RRLIM(K) / RR(K, I)
+                IF(RLXR(K) * RR(K, I) > RRLIM(K)) RLXR(K) = RRLIM(K) / RR(K, I)
+                IF(RLXR(K) * RR(K, I) < -RRLIM(K)) RLXR(K) = -RRLIM(K) / RR(K, I)
                 !
                 RMAX = MAX(RMAX, ABS(RR(K, I) / RRLIM(K)))
                 RMS = RMS + (RR(K, I) / RRLIM(K))**2
@@ -833,7 +833,7 @@ SUBROUTINE STCALC
         WRITE(*, 1800) ITER, RMAX, RMS, RLX
         1800 FORMAT(1X, I3, '   max:', E9.3, '   rms:', E9.3, '   RLX =', F7.4)
         !
-        IF(RMAX .LE. EPS) GO TO 101
+        IF(RMAX <= EPS) GO TO 101
         !
     end do
     WRITE(*, *) 'STCALC: Convergence failed.  Continuing ...'
@@ -905,7 +905,7 @@ SUBROUTINE STWRIT(LU)
     RTD = 180.0 / PI
     !
     IADD = 1
-    IF(LU.EQ.LUWRIT) IADD = INCR
+    IF(LU == LUWRIT) IADD = INCR
     !
     WRITE(LU, 1020)
     !
@@ -1014,7 +1014,7 @@ SUBROUTINE B12SOL(A, B, C, R, II)
         IM = I - 1
         !
         !------ don't eliminate first B block because it doesn't exist
-        IF(I.EQ.1) GO TO 12
+        IF(I == 1) GO TO 12
         !
         !------ eliminate Bi block, thus modifying Ai and Ci blocks
         do K = 1, 12
@@ -1066,7 +1066,7 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                 1311        KX = K
             131 end do
             !
-            IF(A(KX, KPIV, I).EQ.0.0) THEN
+            IF(A(KX, KPIV, I) == 0.0) THEN
                 WRITE(*, *) 'Singular A block, i = ', I
                 STOP
             ENDIF
@@ -1098,7 +1098,7 @@ SUBROUTINE B12SOL(A, B, C, R, II)
             !-------- forward eliminate everything
             do K = KP1, 12
                 ATMP = -A(K, KPIV, I)
-                IF(ATMP.EQ.0.0) GO TO 135
+                IF(ATMP == 0.0) GO TO 135
                 do L = KP1, 12
                     A(K, L, I) = A(K, L, I) + ATMP * A(KPIV, L, I)
                 end do
@@ -1117,12 +1117,12 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                 do L = 1, NRHS
                     R(K, L, I) = R(K, L, I) + ATMP * R(KPIV, L, I)
                 end do
-        135 end do
+            135 end do
             !
         end do
         !
         !------ solve for last row
-        IF(A(12, 12, I).EQ.0.0) THEN
+        IF(A(12, 12, I) == 0.0) THEN
             WRITE(*, *) 'Singular A block, i = ', I
             STOP
         ENDIF

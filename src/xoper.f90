@@ -51,44 +51,44 @@ SUBROUTINE OPER
     NINPUT = 0
     CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
     !
-    IF(COMAND.EQ.'    ') THEN
+    IF(COMAND == '    ') THEN
         RETURN
     ENDIF
-    IF(COMAND.EQ.'?   ') WRITE(*, 1100)
-    IF(COMAND.EQ.'?   ') GO TO 900
-    IF(COMAND.EQ.'FORM') GO TO 2
-    IF(COMAND.EQ.'TERS') GO TO 4
-    IF(COMAND.EQ.'DISP') GO TO 10
-    IF(COMAND.EQ.'NAME') GO TO 15
-    IF(COMAND.EQ.'WRIT') GO TO 20
-    IF(COMAND.EQ.'DUCT') GO TO 22
-    IF(COMAND.EQ.'VRAT') GO TO 24
-    IF(COMAND.EQ.'ATMO') GO TO 35
-    IF(COMAND.EQ.'VELO') GO TO 38
-    IF(COMAND.EQ.'ANGL') GO TO 40
-    IF(COMAND.EQ.'ADVA') GO TO 42
-    IF(COMAND.EQ.'RPM ') GO TO 45
-    IF(COMAND.EQ.'THRU') GO TO 50
-    IF(COMAND.EQ.'TORQ') GO TO 60
-    IF(COMAND.EQ.'POWE') GO TO 70
-    IF(COMAND.EQ.'ASEQ') GO TO 81
-    IF(COMAND.EQ.'RSEQ') GO TO 82
-    IF(COMAND.EQ.'BSEQ') GO TO 83
-    IF(COMAND.EQ.'VSEQ') GO TO 84
-    IF(COMAND.EQ.'CLRC') GO TO 90
-    IF(COMAND.EQ.'ADDC') GO TO 92
-    IF(COMAND.EQ.'CPUT') GO TO 94
-    IF(COMAND.EQ.'CGET') GO TO 96
-    IF(COMAND.EQ.'CASE') GO TO 97
-    IF(COMAND.EQ.'LIST') GO TO 98
+    IF(COMAND == '?   ') WRITE(*, 1100)
+    IF(COMAND == '?   ') GO TO 900
+    IF(COMAND == 'FORM') GO TO 2
+    IF(COMAND == 'TERS') GO TO 4
+    IF(COMAND == 'DISP') GO TO 10
+    IF(COMAND == 'NAME') GO TO 15
+    IF(COMAND == 'WRIT') GO TO 20
+    IF(COMAND == 'DUCT') GO TO 22
+    IF(COMAND == 'VRAT') GO TO 24
+    IF(COMAND == 'ATMO') GO TO 35
+    IF(COMAND == 'VELO') GO TO 38
+    IF(COMAND == 'ANGL') GO TO 40
+    IF(COMAND == 'ADVA') GO TO 42
+    IF(COMAND == 'RPM ') GO TO 45
+    IF(COMAND == 'THRU') GO TO 50
+    IF(COMAND == 'TORQ') GO TO 60
+    IF(COMAND == 'POWE') GO TO 70
+    IF(COMAND == 'ASEQ') GO TO 81
+    IF(COMAND == 'RSEQ') GO TO 82
+    IF(COMAND == 'BSEQ') GO TO 83
+    IF(COMAND == 'VSEQ') GO TO 84
+    IF(COMAND == 'CLRC') GO TO 90
+    IF(COMAND == 'ADDC') GO TO 92
+    IF(COMAND == 'CPUT') GO TO 94
+    IF(COMAND == 'CGET') GO TO 96
+    IF(COMAND == 'CASE') GO TO 97
+    IF(COMAND == 'LIST') GO TO 98
     !
-    IF(COMAND.EQ.'N')    GO TO 72
-    IF(COMAND.EQ.'ITER') GO TO 75
-    IF(COMAND.EQ.'INIT') GO TO 76
-    IF(COMAND.EQ.'REIN') GO TO 78
+    IF(COMAND == 'N')    GO TO 72
+    IF(COMAND == 'ITER') GO TO 75
+    IF(COMAND == 'INIT') GO TO 76
+    IF(COMAND == 'REIN') GO TO 78
     !
     !--- Hack to check ADW equation sensitivity, get rid of this later... HHY
-    IF(COMAND.EQ.'ADW') THEN
+    IF(COMAND == 'ADW') THEN
         WRITE(*, *) 'Current ADW factor =', ADWFCTR
         CALL ASKR('Enter new ADW factor^', ADWFCTR)
         GO TO 900
@@ -103,17 +103,17 @@ SUBROUTINE OPER
     WRITE(*, 3)
     CALL ASKC('.FORM^', COMAND, COMARG)
     !
-    IF(COMAND.EQ.'GRAD') THEN
+    IF(COMAND == 'GRAD') THEN
         VRTX = .FALSE.
         FAST = .TRUE.
-    ELSEIF(COMAND.EQ.'POT') THEN
+    ELSEIF(COMAND == 'POT') THEN
         VRTX = .FALSE.
         FAST = .FALSE.
-    ELSEIF(COMAND.EQ.'VRTX') THEN
+    ELSEIF(COMAND == 'VRTX') THEN
         VRTX = .TRUE.
-    ELSEIF(COMAND.EQ.'WAKE') THEN
+    ELSEIF(COMAND == 'WAKE') THEN
         FREE = .NOT.FREE
-    ELSEIF(COMAND.EQ.' ') THEN
+    ELSEIF(COMAND == ' ') THEN
         GO TO 900
     ENDIF
     !
@@ -158,13 +158,13 @@ SUBROUTINE OPER
     !---------------------------------------------------------------------
     !--- Change case name
     15 NAME = COMARG
-    IF(NAME(1:1).EQ.' ')&
+    IF(NAME(1:1) == ' ')&
             CALL ASKS('Enter case name (32 characters max)^', NAME)
     GO TO 900
     !
     !---------------------------------------------------------------------
     !--- Write current prop operating point data to file
-    20 IF(COMARG(1:1).NE.' ') SAVFIL = COMARG
+    20 IF(COMARG(1:1) /= ' ') SAVFIL = COMARG
     CALL OPFILE(LUSAVE, SAVFIL)
     CALL OUTPUT(LUSAVE)
     CLOSE(LUSAVE)
@@ -174,7 +174,7 @@ SUBROUTINE OPER
     22   DUCT = .NOT.DUCT
     IF(DUCT) THEN
         WRITE(*, *) 'Duct option selected'
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             URDUCT = RINPUT(1)
         ELSE
             CALL ASKR('Enter Aexit/Aprop for duct^', URDUCT)
@@ -187,7 +187,7 @@ SUBROUTINE OPER
     !
     !--------------------------------------------------------------
     24   IF(DUCT) THEN
-        IF(NINPUT.GE.1) THEN
+        IF(NINPUT >= 1) THEN
             URDUCT = RINPUT(1)
         ELSE
             CALL ASKR('Enter Aexit/Aprop for duct^', URDUCT)
@@ -199,7 +199,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Change altitude
-    35 IF(NINPUT.GE.1) THEN
+    35 IF(NINPUT >= 1) THEN
         ALT = RINPUT(1)
     ELSE
         CALL ASKR('flight altitude (km)^', ALT)
@@ -211,7 +211,7 @@ SUBROUTINE OPER
     !---------------------------------------------------------------------
     !--- Change flight velocity
     38 VELOLD = VEL
-    IF(NINPUT.GE.1) THEN
+    IF(NINPUT >= 1) THEN
         VEL = RINPUT(1)
     ELSE
         CALL ASKR('flight speed (m/s)^', VEL)
@@ -228,7 +228,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Change blade pitch
-    40 IF(NINPUT.GE.1) THEN
+    40 IF(NINPUT >= 1) THEN
         DELB = RINPUT(1)
     ELSE
         CALL ASKR('angle change (deg)^', DELB)
@@ -242,7 +242,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Specify advance ratio and solve
-    42 IF(NINPUT.GE.1) THEN
+    42 IF(NINPUT >= 1) THEN
         ADV = RINPUT(1)
     ELSE
         CALL ASKR('advance ratio     ^', ADV)
@@ -255,7 +255,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Specify RPM and solve
-    45 IF(NINPUT.GE.1) THEN
+    45 IF(NINPUT >= 1) THEN
         RPM = RINPUT(1)
     ELSE
         RPM = VEL / (RAD * ADV * PI / 30.)
@@ -270,7 +270,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Specify thrust and solve
-    50 IF(NINPUT.GE.1) THEN
+    50 IF(NINPUT >= 1) THEN
         TSPEC = RINPUT(1)
     ELSE
         TSPEC = TTOT * (RHO * VEL**2 * RAD**2)
@@ -280,12 +280,12 @@ SUBROUTINE OPER
     WRITE(*, 1530) RPM
     51 CALL ASKC('fix Pitch / fix Rpm ( P/R )?^', &
             ANS, ANSARG)
-    IF(ANS.NE.'R' .AND. ANS.NE.'P') GO TO 51
+    IF(ANS /= 'R' .AND. ANS /= 'P') GO TO 51
     !
     CONV = .FALSE.
     BSAV = BETA(II)
-    IF(ANS.EQ.'P') CALL APER(1, 2, LOPRINI)
-    IF(ANS.EQ.'R') THEN
+    IF(ANS == 'P') CALL APER(1, 2, LOPRINI)
+    IF(ANS == 'R') THEN
         CALL ASKR('rpm:^', RPM)
         ADV = VEL / (RAD * RPM * PI / 30.0)
         CALL APER(1, 1, LOPRINI)
@@ -293,7 +293,7 @@ SUBROUTINE OPER
     !
     IF(CONV) CALL OUTPUT(LUWRIT)
     !---- Check for valid blade angle change
-    IF(ANS.NE.'P') THEN
+    IF(ANS /= 'P') THEN
         IF(CONV) THEN
             !----- convergence was achieved: show blade angle change incurred
             WRITE(*, 1550) DBETA * 180.0 / PI
@@ -309,7 +309,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Specify torque and solve
-    60 IF(NINPUT.GE.1) THEN
+    60 IF(NINPUT >= 1) THEN
         QSPEC = RINPUT(1)
     ELSE
         QSPEC = QTOT * (RHO * VEL**2 * RAD**3)
@@ -319,11 +319,11 @@ SUBROUTINE OPER
     WRITE(*, 1530) RPM
     61 CALL ASKC('fix Pitch / fix Rpm ( P/R )?^', &
             ANS, ANSARG)
-    IF(ANS.NE.'R' .AND. ANS.NE.'P') GO TO 61
+    IF(ANS /= 'R' .AND. ANS /= 'P') GO TO 61
     !
     CONV = .FALSE.
-    IF(ANS.EQ.'P') CALL APER(2, 2, LOPRINI)
-    IF(ANS.EQ.'R') THEN
+    IF(ANS == 'P') CALL APER(2, 2, LOPRINI)
+    IF(ANS == 'R') THEN
         CALL ASKR('rpm:^', RPM)
         ADV = VEL / (RAD * RPM * PI / 30.0)
         CALL APER(2, 1, LOPRINI)
@@ -331,7 +331,7 @@ SUBROUTINE OPER
     !
     IF(CONV) CALL OUTPUT(LUWRIT)
     !---- Check for valid blade angle change
-    IF(ANS.NE.'P') THEN
+    IF(ANS /= 'P') THEN
         IF(CONV) THEN
             !----- convergence was achieved: show blade angle change incurred
             WRITE(*, 1550) DBETA * 180.0 / PI
@@ -347,7 +347,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Specify power and solve
-    70 IF(NINPUT.GE.1) THEN
+    70 IF(NINPUT >= 1) THEN
         PSPEC = RINPUT(1)
     ELSE
         PSPEC = PTOT * (RHO * VEL**3 * RAD**2)
@@ -357,11 +357,11 @@ SUBROUTINE OPER
     WRITE(*, 1530) RPM
     71 CALL ASKC('fix pitch / fix rpm ( P/R )?^', &
             ANS, ANSARG)
-    IF(ANS.NE.'R' .AND. ANS.NE.'P') GO TO 71
+    IF(ANS /= 'R' .AND. ANS /= 'P') GO TO 71
     !
     CONV = .FALSE.
-    IF(ANS.EQ.'P') CALL APER(3, 2, LOPRINI)
-    IF(ANS.EQ.'R') THEN
+    IF(ANS == 'P') CALL APER(3, 2, LOPRINI)
+    IF(ANS == 'R') THEN
         CALL ASKR('rpm:^', RPM)
         ADV = VEL / (RAD * RPM * PI / 30.0)
         CALL APER(3, 1, LOPRINI)
@@ -369,7 +369,7 @@ SUBROUTINE OPER
     !
     IF(CONV) CALL OUTPUT(LUWRIT)
     !---- Check for valid blade angle change
-    IF(ANS.NE.'P') THEN
+    IF(ANS /= 'P') THEN
         IF(CONV) THEN
             !----- convergence was achieved: show blade angle change incurred
             WRITE(*, 1550) DBETA * 180.0 / PI
@@ -402,7 +402,7 @@ SUBROUTINE OPER
     ENDIF
     !
     73   CALL ASKI('Enter new number of radial points^', II)
-    IF(II.GT.IX) THEN
+    IF(II > IX) THEN
         WRITE(*, *)
         WRITE(*, *) 'Maximum number is', IX
         GO TO 73
@@ -423,7 +423,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Set max number or iterations for nonlinear solution
-    75   IF(NINPUT.GE.1) THEN
+    75   IF(NINPUT >= 1) THEN
         NITERA = IINPUT(1)
     ELSE
         CALL ASKI('Max number of iterations^', NITERA)
@@ -447,7 +447,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Read or use engine rpm/power line file
-    79   IF(LPWRVAR .AND. NPWRVAR.GT.0) THEN
+    79   IF(LPWRVAR .AND. NPWRVAR > 0) THEN
         WRITE(*, *) ' '
         WRITE(*, *) 'Current RPM/Power Engine Line'
         DO L = 1, NPWRVAR
@@ -458,10 +458,10 @@ SUBROUTINE OPER
     !
     LU = 12
     FNAME = COMARG
-    IF(FNAME(1:1).EQ.' ') THEN
+    IF(FNAME(1:1) == ' ') THEN
         CALL ASKS('Enter power/rpm filename^', FNAME)
     ENDIF
-    IF(FNAME(1:1).NE.' ') THEN
+    IF(FNAME(1:1) /= ' ') THEN
         OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 795)
         CALL GETPVAR(LU, IX, NPWRVAR, RPMVAR, PWRVAR)
         WRITE(*, *) ' '
@@ -481,17 +481,17 @@ SUBROUTINE OPER
     IF(LPWRVAR) THEN
         791  CALL ASKC('fix Pitch / fix Rpm / fix Velocity ( P/R/V )?^', &
                 ANS, ANSARG)
-        IF(ANS.EQ.' ') GO TO 900
-        IF(ANS.NE.'R' .AND. ANS.NE.'P' .AND. ANS.NE.'V') GO TO 791
+        IF(ANS == ' ') GO TO 900
+        IF(ANS /= 'R' .AND. ANS /= 'P' .AND. ANS /= 'V') GO TO 791
         !
         CONV = .FALSE.
-        IF(ANS.EQ.'P') CALL APER(5, 2, LOPRINI)
-        IF(ANS.EQ.'R') THEN
+        IF(ANS == 'P') CALL APER(5, 2, LOPRINI)
+        IF(ANS == 'R') THEN
             CALL ASKR('rpm:^', RPM)
             ADV = VEL / (RAD * RPM * PI / 30.0)
             CALL APER(5, 1, LOPRINI)
         ENDIF
-        IF(ANS.EQ.'V') THEN
+        IF(ANS == 'V') THEN
             CALL ASKR('vel:^', VEL)
             ADV = VEL / (RAD * RPM * PI / 30.0)
             CALL APER(5, 2, LOPRINI)
@@ -499,7 +499,7 @@ SUBROUTINE OPER
         !
         IF(CONV) CALL OUTPUT(LUWRIT)
         !---- Was the pitch changed?
-        IF(ANS.EQ.'R') THEN
+        IF(ANS == 'R') THEN
             IF(CONV) THEN
                 !----- convergence was achieved: show blade angle change incurred
                 WRITE(*, 1550) DBETA * 180.0 / PI
@@ -556,7 +556,7 @@ SUBROUTINE OPER
     KCASE = 0
     GO TO 900
     !
-    92   IF(NCASE.GE.ICASX) THEN
+    92   IF(NCASE >= ICASX) THEN
         WRITE(*, *) 'Case arrays too small.  Increase ICASX.'
         GO TO 900
     ENDIF
@@ -577,7 +577,7 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Write case accumulation arrays to file
-    94   IF(NCASE.LE.0) THEN
+    94   IF(NCASE <= 0) THEN
         WRITE(*, *)
         WRITE(*, *) 'No cases saved'
         GO TO 900
@@ -585,11 +585,11 @@ SUBROUTINE OPER
     !
     LU = 12
     FNAME = COMARG
-    IF(FNAME(1:1).EQ.' ') CALL ASKS('Enter case save filename^', FNAME)
+    IF(FNAME(1:1) == ' ') CALL ASKS('Enter case save filename^', FNAME)
     OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 945)
     WRITE(*, *) 'File exists.  Overwrite?  Y'
     READ (*, 1000) CHKEY
-    IF(INDEX('Nn', CHKEY) .NE. 0) THEN
+    IF(INDEX('Nn', CHKEY) /= 0) THEN
         CLOSE(LU)
         GO TO 900
     ELSE
@@ -607,7 +607,7 @@ SUBROUTINE OPER
     96   CONTINUE
     LU = 12
     FNAME = COMARG
-    IF(FNAME(1:1).EQ.' ') CALL ASKS('Enter case save filename^', FNAME)
+    IF(FNAME(1:1) == ' ') CALL ASKS('Enter case save filename^', FNAME)
     OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 965)
     CALL GETCAS(LU, NPARX, NCASE, CASPAR)
     CLOSE(LU)
@@ -620,21 +620,21 @@ SUBROUTINE OPER
     !
     !---------------------------------------------------------------------
     !--- Rerun case operating point
-    97   IF(NCASE.LE.0) THEN
+    97   IF(NCASE <= 0) THEN
         WRITE(*, *)
         WRITE(*, *) 'No cases saved'
         GO TO 900
     ENDIF
     !
-    IF(NINPUT.GE.1) THEN
+    IF(NINPUT >= 1) THEN
         ICASE = IINPUT(1)
     ELSE
         CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
         ICASE = 0
         CALL ASKI('Select case number (0 to cancel)^', ICASE)
     ENDIF
-    IF(ICASE.LE.0) GO TO 900
-    IF(ICASE.GT.NCASE) THEN
+    IF(ICASE <= 0) GO TO 900
+    IF(ICASE > NCASE) THEN
         NINPUT = 0
         GO TO 97
     ENDIF
@@ -746,7 +746,7 @@ SUBROUTINE SHOCAS(LU, NDIM, N, PAR, RAD, NAME)
     DIMENSION PAR(0:NDIM, *)
     CHARACTER NAME*(*)
     !
-    IF(NDIM.LT.11) THEN
+    IF(NDIM < 11) THEN
         WRITE(*, *) 'Error in SHOCAS: NDIM too small for PAR array'
         RETURN
     ENDIF
@@ -769,7 +769,7 @@ SUBROUTINE SHOCAS(LU, NDIM, N, PAR, RAD, NAME)
         TRQ = PAR(10, I)
         EFF = PAR(11, I)
         RPM = VEL / (RAD * ADV) * 30.0 / PI
-        IF(CONVFLG.EQ.999.0) THEN
+        IF(CONVFLG == 999.0) THEN
             WRITE(LU, 1200) I, ADV, BET, VEL, RPM, RHO, RMU, VSO, ALT
         ELSE
             WRITE(LU, 1200) I, ADV, BET, VEL, RPM, RHO, RMU, VSO, ALT, &
@@ -856,7 +856,7 @@ SUBROUTINE GETCAS(LU, NDIM, NCAS, PAR)
     CHARACTER DUMMY*1, LINE*128, CNAME*32
     LOGICAL ERROR
     !
-    IF(NDIM.LT.11) THEN
+    IF(NDIM < 11) THEN
         WRITE(*, *) 'Error in GETCAS: NDIM too small for PAR array'
         RETURN
     ENDIF
@@ -887,7 +887,7 @@ SUBROUTINE GETCAS(LU, NDIM, NCAS, PAR)
         THR = 999.0
         TRQ = 999.0
         EFF = 999.0
-        IF(N.EQ.13) THEN
+        IF(N == 13) THEN
             POW = A(10) * 1000.0
             THR = A(11)
             TRQ = A(12)
@@ -936,10 +936,10 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
     !      WRITE(*,*) 'Overwrite or Append  to case accumulator?  O'
     !      READ (*,1000) ANS
     ! 1000 FORMAT(A)
-    !      IF(INDEX('Aa',ANS) .EQ. 0) NCASE = 0
+    !      IF(INDEX('Aa',ANS) == 0) NCASE = 0
     !
     !
-    IF(NCASE.GT.0) THEN
+    IF(NCASE > 0) THEN
         WRITE(*, *)
         WRITE(*, *) 'Appending to current case accumulator...'
     ENDIF
@@ -948,19 +948,19 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
     !
     !---------------------------------------------------------------------
     !--- Sequence of advance ratio
-    IF(ITYPE.EQ.1) THEN
+    IF(ITYPE == 1) THEN
         KCASE = 1
         !
-        IF    (NINPUT.GE.3) THEN
+        IF    (NINPUT >= 3) THEN
             ADV1 = RINPUT(1)
             ADV2 = RINPUT(2)
             DADV = RINPUT(3)
-        ELSEIF(NINPUT.GE.2) THEN
+        ELSEIF(NINPUT >= 2) THEN
             ADV1 = RINPUT(1)
             ADV2 = RINPUT(2)
             DADV = 999.
             CALL ASKR('Enter advance ratio increment  ^', DADV)
-        ELSEIF(NINPUT.GE.1) THEN
+        ELSEIF(NINPUT >= 1) THEN
             ADV1 = RINPUT(1)
             ADV2 = 999.
             CALL ASKR('Enter last  advance ratio value^', ADV2)
@@ -974,11 +974,11 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
             DADV = 999.
             CALL ASKR('Enter advance ratio increment  ^', DADV)
         ENDIF
-        IF(ADV1.EQ.ADV2) RETURN
+        IF(ADV1 == ADV2) RETURN
         DADV = SIGN(DADV, ADV2 - ADV1)
         NP = 1
-        IF(DADV .NE. 0.0) NP = INT((ADV2 - ADV1) / DADV + 0.5) + 1
-        IF(NP.LE.0) RETURN
+        IF(DADV /= 0.0) NP = INT((ADV2 - ADV1) / DADV + 0.5) + 1
+        IF(NP <= 0) RETURN
         !
         !--- Check for use of rpm/power relationship to set power
         YES = .FALSE.
@@ -986,7 +986,7 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         IF(LPWRVAR) CALL ASKL('Use engine rpm/power line ?^', YES)
         IF(YES) XANS = 100.0
         !
-        IF(NCASE + NP .GT. ICASX) THEN
+        IF(NCASE + NP > ICASX) THEN
             WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
             NP = ICASX - NCASE
         ENDIF
@@ -1009,19 +1009,19 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         !
         !---------------------------------------------------------------------
         !--- Sequence of RPM
-    ELSEIF(ITYPE.EQ.2) THEN
+    ELSEIF(ITYPE == 2) THEN
         KCASE = 2
         !
-        IF    (NINPUT.GE.3) THEN
+        IF    (NINPUT >= 3) THEN
             RPM1 = RINPUT(1)
             RPM2 = RINPUT(2)
             DRPM = RINPUT(3)
-        ELSEIF(NINPUT.GE.2) THEN
+        ELSEIF(NINPUT >= 2) THEN
             RPM1 = RINPUT(1)
             RPM2 = RINPUT(2)
             DRPM = 999.
             CALL ASKR('Enter rpm increment  ^', DRPM)
-        ELSEIF(NINPUT.GE.1) THEN
+        ELSEIF(NINPUT >= 1) THEN
             RPM1 = RINPUT(1)
             RPM2 = 999.
             CALL ASKR('Enter last  rpm value^', RPM2)
@@ -1035,11 +1035,11 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
             DRPM = 999.
             CALL ASKR('Enter rpm increment  ^', DRPM)
         ENDIF
-        IF(RPM1.EQ.RPM2) RETURN
+        IF(RPM1 == RPM2) RETURN
         DRPM = SIGN(DRPM, RPM2 - RPM1)
         NP = 1
-        IF(DRPM .NE. 0.0) NP = INT((RPM2 - RPM1) / DRPM + 0.5) + 1
-        IF(NP.LE.0) RETURN
+        IF(DRPM /= 0.0) NP = INT((RPM2 - RPM1) / DRPM + 0.5) + 1
+        IF(NP <= 0) RETURN
         !
         !--- Check for use of rpm/power relationship to set power
         YES = .FALSE.
@@ -1050,11 +1050,11 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         ANS = ' '
         CALL ASKS('Fix power P or thrust T or blade pitch A ?^', ANS)
         CALL LC2UC(ANS)
-        IF(ANS.EQ.'T') XANS = XANS + 1000.0
-        IF(ANS.EQ.'Q') XANS = XANS + 2000.0
-        IF(ANS.EQ.'P') XANS = XANS + 3000.0
+        IF(ANS == 'T') XANS = XANS + 1000.0
+        IF(ANS == 'Q') XANS = XANS + 2000.0
+        IF(ANS == 'P') XANS = XANS + 3000.0
         !
-        IF(NCASE + NP .GT. ICASX) THEN
+        IF(NCASE + NP > ICASX) THEN
             WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
             NP = ICASX - NCASE
         ENDIF
@@ -1078,19 +1078,19 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         !
         !---------------------------------------------------------------------
         !--- Sequence of blade angle
-    ELSEIF(ITYPE.EQ.3) THEN
+    ELSEIF(ITYPE == 3) THEN
         KCASE = 3
         !
-        IF    (NINPUT.GE.3) THEN
+        IF    (NINPUT >= 3) THEN
             BET1 = RINPUT(1)
             BET2 = RINPUT(2)
             DBET = RINPUT(3)
-        ELSEIF(NINPUT.GE.2) THEN
+        ELSEIF(NINPUT >= 2) THEN
             BET1 = RINPUT(1)
             BET2 = RINPUT(2)
             DBET = 999.
             CALL ASKR('Enter tip angle increment   (deg) ^', DBET)
-        ELSEIF(NINPUT.GE.1) THEN
+        ELSEIF(NINPUT >= 1) THEN
             BET1 = RINPUT(1)
             BET2 = 999.
             CALL ASKR('Enter last  tip angle value (deg) ^', BET2)
@@ -1104,11 +1104,11 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
             DBET = 999.
             CALL ASKR('Enter tip angle increment   (deg) ^', DBET)
         ENDIF
-        IF(BET1.EQ.BET2) RETURN
+        IF(BET1 == BET2) RETURN
         DBET = SIGN(DBET, BET2 - BET1)
         NP = 1
-        IF(DBET .NE. 0.0) NP = INT((BET2 - BET1) / DBET + 0.5) + 1
-        IF(NP.LE.0) RETURN
+        IF(DBET /= 0.0) NP = INT((BET2 - BET1) / DBET + 0.5) + 1
+        IF(NP <= 0) RETURN
         !
         !--- Check for use of rpm/power relationship to set power
         YES = .FALSE.
@@ -1116,7 +1116,7 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         IF(LPWRVAR) CALL ASKL('Use engine rpm/power line ?^', YES)
         IF(YES) XANS = 100.0
         !
-        IF(NCASE + NP .GT. ICASX) THEN
+        IF(NCASE + NP > ICASX) THEN
             WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
             NP = ICASX - NCASE
         ENDIF
@@ -1140,19 +1140,19 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         !
         !---------------------------------------------------------------------
         !--- Sequence of velocities
-    ELSEIF(ITYPE.EQ.4) THEN
+    ELSEIF(ITYPE == 4) THEN
         KCASE = 4
         !
-        IF    (NINPUT.GE.3) THEN
+        IF    (NINPUT >= 3) THEN
             VEL1 = RINPUT(1)
             VEL2 = RINPUT(2)
             DVEL = RINPUT(3)
-        ELSEIF(NINPUT.GE.2) THEN
+        ELSEIF(NINPUT >= 2) THEN
             VEL1 = RINPUT(1)
             VEL2 = RINPUT(2)
             DVEL = 999.
             CALL ASKR('Enter speed increment   (m/s) ^', DVEL)
-        ELSEIF(NINPUT.GE.1) THEN
+        ELSEIF(NINPUT >= 1) THEN
             VEL1 = RINPUT(1)
             VEL2 = 999.
             CALL ASKR('Enter last  speed value (m/s) ^', VEL2)
@@ -1166,11 +1166,11 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
             DVEL = 999.
             CALL ASKR('Enter speed increment   (m/s) ^', DVEL)
         ENDIF
-        IF(VEL1.EQ.VEL2) RETURN
+        IF(VEL1 == VEL2) RETURN
         DVEL = SIGN(DVEL, VEL2 - VEL1)
         NP = 1
-        IF(DVEL .NE. 0.0) NP = INT((VEL2 - VEL1) / DVEL + 0.5) + 1
-        IF(NP.LE.0) RETURN
+        IF(DVEL /= 0.0) NP = INT((VEL2 - VEL1) / DVEL + 0.5) + 1
+        IF(NP <= 0) RETURN
         !
         !--- Check for use of rpm/power relationship to set power
         YES = .FALSE.
@@ -1182,20 +1182,20 @@ SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
         20     ANS4 = 'CS'
         CALL ASKS('FP fixed-pitch or CS constant-speed^', ANS4)
         CALL LC2UC(ANS4)
-        IF(ANS4.NE.'CS' .AND. ANS4.NE.'FP') GO TO 20
-        IF(ANS4.EQ.'CS') THEN
+        IF(ANS4 /= 'CS' .AND. ANS4 /= 'FP') GO TO 20
+        IF(ANS4 == 'CS') THEN
             RPM = VEL / (RAD * ADV * PI / 30.)
             CALL ASKR('Enter constant rpm value^', RPM)
             ADV = VEL / (RAD * RPM * PI / 30.)
             KCASE = 5
-            IF(XANS.NE.100.0) THEN
-                IF(PSPEC.LE.0.0 .AND. PTOT.GT.0.0)&
+            IF(XANS /= 100.0) THEN
+                IF(PSPEC <= 0.0 .AND. PTOT > 0.0)&
                         PSPEC = PTOT * (RHO * VEL**3 * RAD**2)
                 CALL ASKR('Enter constant power value^', PSPEC)
             ENDIF
         ENDIF
         !
-        IF(NCASE + NP .GT. ICASX) THEN
+        IF(NCASE + NP > ICASX) THEN
             WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
             NP = ICASX - NCASE
         ENDIF
@@ -1421,8 +1421,8 @@ SUBROUTINE APINIT
             !
             !---- Apply limiter to GAM update based on CL change
             RLX = 1.0
-            IF(RLX * ABS(DCL) .GT. 0.2) THEN
-                IF(DCL.NE.0.0) THEN
+            IF(RLX * ABS(DCL) > 0.2) THEN
+                IF(DCL /= 0.0) THEN
                     RLX = MIN(RLX, 0.2 / ABS(DCL))
                     !cc        write(*,998) 'APER CL limiter i,rlx,dcl,cl',i,rlx,dcl,cl(i)
                 ENDIF
@@ -1430,8 +1430,8 @@ SUBROUTINE APINIT
             ENDIF
             998    format(a, 2x, i5, 3(2x, F12.5))
             !
-            IF(ABS(DCL) .GT. ABS(DCLMAX)) DCLMAX = DCL
-            IF(ABS(RLX) .LT. RLXMIN)      RLXMIN = RLX
+            IF(ABS(DCL) > ABS(DCLMAX)) DCLMAX = DCL
+            IF(ABS(RLX) < RLXMIN)      RLXMIN = RLX
             !
             GAM(I) = GAM(I) + RLX * DELG
             !-------- dREZ = Z_G*dG + Z_ADW*dADW = 0
@@ -1456,21 +1456,21 @@ SUBROUTINE APINIT
         REZ = ADW - ADV * 0.5 * (1.0 + SQRT(1.0 + 4.0 * VHSQ))
         Z_ADW = 1.0 - ADV / SQRT(1.0 + 4.0 * VHSQ) * VHSQ_T * T_ADW
         !c      Z_ADW = 1.0
-        IF(Z_ADW.EQ.0.0) WRITE(*, *) 'APINIT Z_ADW ', Z_ADW
+        IF(Z_ADW == 0.0) WRITE(*, *) 'APINIT Z_ADW ', Z_ADW
         !
         DADW = -REZ / Z_ADW
         DADW = MIN(DADW, 10.0 * ADW)
         DADW = MAX(DADW, -0.9 * ADW)
         ADW = ADW + DADW
         !
-        IF(RLXMIN.LT.0.2) THEN
+        IF(RLXMIN < 0.2) THEN
             !cc          WRITE(*,*) 'APINIT filtering GAM'
             CALL FILTER(GAM, 0.2 * II, II)
         ENDIF
         !cc        WRITE(*,*) 'APINIT Vind iter,TSUM,ADW ',ITERG,TSUM,ADW
         !cc        WRITE(*,*) 'APINIT ADW,DADW,DCLMAX ',ADW,DADW,DCLMAX
         !
-        IF(ABS(DCLMAX) .LT. 0.001) GO TO 101
+        IF(ABS(DCLMAX) < 0.001) GO TO 101
         !
     end do
     !cc      WRITE(*,*) 'APINIT No convergence'
@@ -1509,7 +1509,7 @@ SUBROUTINE APITER(ISPEC, ICON)
     do ITER = 1, MAX(NITERA, 1)
         !
         !---- if wake advance ratio changed, recalculate Vtan influence coefficients
-        IF(FREE .OR. ITER.EQ.1) THEN
+        IF(FREE .OR. ITER == 1) THEN
             IF(FAST) THEN
                 CALL GRADMO(IX, II, NBLDS, DUCT, RAKE, &
                         XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
@@ -1549,7 +1549,7 @@ SUBROUTINE APITER(ISPEC, ICON)
         !     to compensate for the Vt term at one (representative) radial station
         !
         DO I = 1, II
-            IF(XI(I).GT.0.75) GO TO 40
+            IF(XI(I) > 0.75) GO TO 40
         END DO
         40   I75 = I
         CALL CSCALC(I75, UTOT, WA, WT, &
@@ -1634,7 +1634,7 @@ SUBROUTINE APITER(ISPEC, ICON)
         end do
         !
         !---- equivalent prop will be used to define inviscid thrust
-        IF(ISPEC.EQ.1) THEN
+        IF(ISPEC == 1) THEN
             !----- drive thrust to specified value
             T_SPEC = TSPEC / (RHO * VEL**2 * RAD**2)
             DQ(K1) = TWAK + TVIS - T_SPEC
@@ -1647,7 +1647,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             !
             FRESMX = MAX(FRESMX, ABS(DQ(K1)))
             !
-        ELSE IF(ISPEC.EQ.2) THEN
+        ELSE IF(ISPEC == 2) THEN
             !----- drive torque (= PTOT*ADV) to specified value
             Q_SPEC = QSPEC / (RHO * VEL**2 * RAD**3)
             DQ(K1) = (PWAK + PVIS) * ADV - Q_SPEC
@@ -1660,7 +1660,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             !
             FRESMX = MAX(FRESMX, ABS(DQ(K1)))
             !
-        ELSE IF(ISPEC.EQ.3) THEN
+        ELSE IF(ISPEC == 3) THEN
             !----- drive power to specified value
             P_SPEC = PSPEC / (RHO * VEL**3 * RAD**2)
             DQ(K1) = PWAK + PVIS - P_SPEC
@@ -1673,7 +1673,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             !
             FRESMX = MAX(FRESMX, ABS(DQ(K1)))
             !
-        ELSE IF(ISPEC.EQ.4) THEN
+        ELSE IF(ISPEC == 4) THEN
             !----- fix advance ratio
             DQ(K1) = 0.
             DO J = 1, II
@@ -1683,7 +1683,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             Q(K1, K2) = 0.
             Q(K1, K3) = 0.
             !
-        ELSE IF(ISPEC.EQ.5) THEN
+        ELSE IF(ISPEC == 5) THEN
             !----- drive power to value given by RPM
             P_SPEC = PSPEC / (RHO * VEL**3 * RAD**2)
             P_SPEC_ADV = 0.0
@@ -1719,8 +1719,8 @@ SUBROUTINE APITER(ISPEC, ICON)
         DO J = 1, K3
             Q(K3, J) = 0.
         ENDDO
-        IF(ICON.EQ.1) Q(K3, K1) = 1.0      ! advance ratio(rpm) fixed
-        IF(ICON.EQ.2) Q(K3, K3) = 1.0      ! blade pitch fixed
+        IF(ICON == 1) Q(K3, K1) = 1.0      ! advance ratio(rpm) fixed
+        IF(ICON == 2) Q(K3, K3) = 1.0      ! blade pitch fixed
         !
         !---- solve linearized Newton system
         CALL GAUSS(IQ, K3, Q(1, 1), DQ(1), 1)
@@ -1728,7 +1728,7 @@ SUBROUTINE APITER(ISPEC, ICON)
         !
         RLX = 1.0
         !---  Set initial iterations to underrelax
-        IF(ITER .LE. 2) RLX = 0.2
+        IF(ITER <= 2) RLX = 0.2
         !---- Apply limiters to the Newton updates based on physical properties
         DO I = 1, II
             DGAM(I) = -DQ(I)
@@ -1740,7 +1740,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             !
             DCLLIM = MIN(0.5, DCLMIN, DCLMAX)
             DCLLIM = MAX(DCLLIM, 0.01)
-            IF(RLX * ABS(DCL) .GT. DCLLIM) THEN
+            IF(RLX * ABS(DCL) > DCLLIM) THEN
                 RLX = MIN(RLX, DCLLIM / ABS(DCL))
                 !cc      write(1,998) 'DCL lim i,rlx,cl,dcl ',i,rlx,cl(i),dcl,dcllim
                 !cc      write(1,998) 'clmax,clmin,dclstall ',i,clmax(i),clmin(i),
@@ -1749,8 +1749,8 @@ SUBROUTINE APITER(ISPEC, ICON)
             998    format(a, 2x, i5, 4(2x, F12.5))
             !
             !---- limit GAM changes that change sign
-            IF(DGAM(I) * DGAMOLD(I) .LT. 0.0) THEN
-                IF(ABS(DGAM(I)).GT.0.2 * ABS(DGAMOLD(I))) THEN
+            IF(DGAM(I) * DGAMOLD(I) < 0.0) THEN
+                IF(ABS(DGAM(I)) > 0.2 * ABS(DGAMOLD(I))) THEN
                     RLX = MIN(RLX, 0.2)
                     !c        write(*,998) 'DGAM lim i,rlx,gam,dgam ',i,rlx,gam(i),
                     !c     &               dgam(i),dgamold(i)
@@ -1763,23 +1763,23 @@ SUBROUTINE APITER(ISPEC, ICON)
         DADW = -DQ(K2)
         DBET = -DQ(K3)
         !
-        IF(NITERA .EQ. 0) RLX = 0.0
+        IF(NITERA == 0) RLX = 0.0
         !
         !---- limit blade angle change to 0.05 radians  (~3 degrees)
-        IF(RLX * DBET .GT. 0.05) RLX = MIN(RLX, 0.05 / DBET)
-        IF(RLX * DBET .LT. -.05) RLX = MIN(RLX, -0.05 / DBET)
+        IF(RLX * DBET > 0.05) RLX = MIN(RLX, 0.05 / DBET)
+        IF(RLX * DBET < -.05) RLX = MIN(RLX, -0.05 / DBET)
         !
         !---- limit advance ratio changes
-        !      IF(RLX*DADV .GT. 0.8*ADV) RLX = MIN(RLX,0.8*ADV/DADV)
-        !      IF(RLX*DADV .LT. -.5*ADV) RLX = MIN(RLX,-.5*ADV/DADV)
+        !      IF(RLX*DADV > 0.8*ADV) RLX = MIN(RLX,0.8*ADV/DADV)
+        !      IF(RLX*DADV < -.5*ADV) RLX = MIN(RLX,-.5*ADV/DADV)
         !
-        !      IF(RLX*DADW .GT. 0.8*ADW) RLX = MIN(RLX, 0.8*ADW/DADW)
-        !      IF(RLX*DADW .LT. -.5*ADW) RLX = MIN(RLX,-0.5*ADW/DADW)
+        !      IF(RLX*DADW > 0.8*ADW) RLX = MIN(RLX, 0.8*ADW/DADW)
+        !      IF(RLX*DADW < -.5*ADW) RLX = MIN(RLX,-0.5*ADW/DADW)
         !
-        IF(RLX * DADV .GT. 0.5 * ADV) RLX = MIN(RLX, 0.5 * ADV / DADV)
-        IF(RLX * DADV .LT. -.3 * ADV) RLX = MIN(RLX, -.3 * ADV / DADV)
-        IF(RLX * DADW .GT. 0.5 * ADW) RLX = MIN(RLX, 0.5 * ADW / DADW)
-        IF(RLX * DADW .LT. -.3 * ADW) RLX = MIN(RLX, -0.3 * ADW / DADW)
+        IF(RLX * DADV > 0.5 * ADV) RLX = MIN(RLX, 0.5 * ADV / DADV)
+        IF(RLX * DADV < -.3 * ADV) RLX = MIN(RLX, -.3 * ADV / DADV)
+        IF(RLX * DADW > 0.5 * ADW) RLX = MIN(RLX, 0.5 * ADW / DADW)
+        IF(RLX * DADW < -.3 * ADW) RLX = MIN(RLX, -0.3 * ADW / DADW)
         !---- update circulation, blade angle arrays
         RMS = 0.
         GMX = 0.
@@ -1790,7 +1790,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             BETA0(I) = BETA0(I) + RLX * DBET
             !
             RMS = RMS + DGAM(I)**2 / (1.0 + 1.0 / ADV**2)
-            IF(ABS(DGAM(I)) .GE. ABS(GMX)) THEN
+            IF(ABS(DGAM(I)) >= ABS(GMX)) THEN
                 GMX = DGAM(I)
                 IMX = I
             ENDIF
@@ -1819,13 +1819,13 @@ SUBROUTINE APITER(ISPEC, ICON)
         !
         !
         !---- Smooth filter the GAM for low relaxation factors
-        IF(RLX.LT.0.2) THEN
+        IF(RLX < 0.2) THEN
             WRITE(*, *) 'APITER filtering GAM'
             CALL FILTER(GAM, 0.2 * II, II)
         ENDIF
         !
         !---- test for convergence
-        IF(RMS .LE. EPS) THEN
+        IF(RMS <= EPS) THEN
             !----- final update of various quantities corresponding to converged solution
             !
             IF(FREE) THEN
@@ -1850,7 +1850,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             CONV = .TRUE.
             RETURN
         ENDIF
-        !c      IF(MOD(ITER,5).EQ.0) CALL APINIT
+        !c      IF(MOD(ITER,5) == 0) CALL APINIT
         !
     end do
     !
@@ -2028,11 +2028,11 @@ SUBROUTINE SETXW
             DELXWO = -REZ / REZ_XWO
             !
             RLX = 1.0
-            IF(ABS(DELXWO) .GT. 0.2 * (XWO - XWM))&
+            IF(ABS(DELXWO) > 0.2 * (XWO - XWM))&
                     RLX = 0.2 * (XWO - XWM) / ABS(DELXWO)
             !
             XWO = XWO + RLX * DELXWO
-            IF(ABS(DELXWO).LT.1.0E-6) GO TO 101
+            IF(ABS(DELXWO) < 1.0E-6) GO TO 101
             !
         END DO
         WRITE(*, 990) 'SETXW: Xw convergence failed.  i, r/R, dXw :', &
@@ -2214,7 +2214,7 @@ SUBROUTINE TPQ(ITYPE)
         AL_P = -1.0
         !
         !
-        IF(ITYPE.EQ.1) THEN
+        IF(ITYPE == 1) THEN
             !------- analysis case:  fix local Beta (except for pitch change)
             !
             !------- set alfa(Gi,dBeta,Adv,Vt) sensitivites
@@ -2244,7 +2244,7 @@ SUBROUTINE TPQ(ITYPE)
             CH_VT = 0.
             CH_VA = 0.
             !
-        ELSE IF(ITYPE.EQ.2) THEN
+        ELSE IF(ITYPE == 2) THEN
             !------- design case:  fix local CL and set chord based on circulation
             !
             !------- set alfa(Gi,dBeta,Adv,Adw,Vt) sensitivites
@@ -2267,11 +2267,11 @@ SUBROUTINE TPQ(ITYPE)
             CHNEW = 2.0 * GAM(I) / (W * CL(I))
             !--- Check for chord going zero or negative and use nearby station data
             !    for this iteration
-            IF(CHNEW.LE.0.0) THEN
+            IF(CHNEW <= 0.0) THEN
                 !c           write(*,*) 'TPQ negative chord @I = ',I,CHNEW
-                IF(I.EQ.1) THEN
+                IF(I == 1) THEN
                     CH(I) = CH(I + 1)
-                ELSEIF(I.EQ.II) THEN
+                ELSEIF(I == II) THEN
                     CH(I) = CH(I - 1)
                 ELSE
                     CH(I) = 0.5 * (CH(I - 1) + CH(I + 1))
@@ -2291,7 +2291,7 @@ SUBROUTINE TPQ(ITYPE)
             BETA(I) = ALFA + PHI
             BETA0(I) = BETA(I)
             !
-        ELSE IF(ITYPE.EQ.3) THEN
+        ELSE IF(ITYPE == 3) THEN
             !------- design case:  fix local chord and set angles based on CL
             !
             !------- set CL(Gi,dBeta,Adv,Adw,Vt) sensitivites
@@ -2774,7 +2774,7 @@ SUBROUTINE HELICO(IMAX, II, NBLDS, LDUCT, RAKE, &
             AN_GAM(0:IDIM, 0:IDIM), AN_ADW(0:IDIM)
     DIMENSION SYS(4, IDIM)
     !
-    IF(IDIM.LT.IMAX) STOP 'HELICO: Array overflow:  Increase IDIM.'
+    IF(IDIM < IMAX) STOP 'HELICO: Array overflow:  Increase IDIM.'
     !
     PI = 4.0 * ATAN(1.0)
     !
@@ -2811,7 +2811,7 @@ SUBROUTINE HELICO(IMAX, II, NBLDS, LDUCT, RAKE, &
         DX = (X(II + 4) - X(II + 3)) * XFAC
         DO I = II + 5, IDIM - 1
             X(I) = X(I - 1) + DX
-            IF(X(I) .GE. XINF) GO TO 5
+            IF(X(I) >= XINF) GO TO 5
             DX = DX * XFAC
         ENDDO
         WRITE(*, *) 'HELICO: Local array too small. Increase IDIM.'
@@ -3024,7 +3024,7 @@ SUBROUTINE FILTER(Q, SMLEN, N)
     PARAMETER (NMAX = 500)
     DIMENSION A(NMAX), B(NMAX), C(NMAX)
     !
-    IF(N.GT.NMAX) THEN
+    IF(N > NMAX) THEN
         WRITE(*, *) 'FILTER:  Array overflow.  No action taken'
         RETURN
     ENDIF

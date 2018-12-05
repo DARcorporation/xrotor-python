@@ -88,15 +88,15 @@ SUBROUTINE VRTXCO(IMAX, II, NBLDS, LDUCT, RAKE, &
     THET = 0.0
     DTH = DTH1
     DO I = 1, NTDIM
-        IF(THET.LT.THET1) THEN
+        IF(THET < THET1) THEN
             THETSPC(I) = THET
             THET = THET + DTH
             DTH = DTH + DDTH1
-        ELSEIF(THET.LT.THET2) THEN
+        ELSEIF(THET < THET2) THEN
             THETSPC(I) = THET
             THET = THET + DTH
             DTH = DTH + DDTH2
-        ELSEIF(THET.LT.THET3) THEN
+        ELSEIF(THET < THET3) THEN
             THETSPC(I) = THET
             DTH = DTH3
             THET = THET + DTH
@@ -199,7 +199,7 @@ SUBROUTINE VRTXCO(IMAX, II, NBLDS, LDUCT, RAKE, &
                         R1Z = R2Z
                         R1_ADW = R2_ADW
                         !
-                        !               if(i.eq.1) then
+                        !               if(i == 1) then
                         !                write(88,10) r1x,r1y,r1z
                         !                write(*,10) 'r1 ',i,j,n,l,r2x,r2y,r2z
                         !               endif
@@ -218,7 +218,7 @@ SUBROUTINE VRTXCO(IMAX, II, NBLDS, LDUCT, RAKE, &
                 !     influence matrix
                 !
                 !---Open wake, interdigitate all vortex lines
-                IF(J.LE.II) THEN
+                IF(J <= II) THEN
                     VIND_GAM(1, I, J) = -VSUM(1)
                     VIND_GAM(2, I, J) = -VSUM(2)
                     VIND_GAM(3, I, J) = -VSUM(3)
@@ -226,7 +226,7 @@ SUBROUTINE VRTXCO(IMAX, II, NBLDS, LDUCT, RAKE, &
                     VIND_ADW(2, I) = VIND_ADW(2, I) - VADW(2) * GAM(J)
                     VIND_ADW(3, I) = VIND_ADW(3, I) - VADW(3) * GAM(J)
                 ENDIF
-                IF(J.GT.1) THEN
+                IF(J > 1) THEN
                     VIND_GAM(1, I, J - 1) = VIND_GAM(1, I, J - 1) + VSUM(1)
                     VIND_GAM(2, I, J - 1) = VIND_GAM(2, I, J - 1) + VSUM(2)
                     VIND_GAM(3, I, J - 1) = VIND_GAM(3, I, J - 1) + VSUM(3)
@@ -287,7 +287,7 @@ SUBROUTINE VORSEGVEL(A, B, UVW, UVW_A, UVW_B)
     ENDDO
     !
     !---- contribution from the vortex leg
-    IF (AMAG * BMAG .NE. 0.0) THEN
+    IF (AMAG * BMAG /= 0.0) THEN
         AXB(1) = A(2) * B(3) - A(3) * B(2)
         AXB(2) = A(3) * B(1) - A(1) * B(3)
         AXB(3) = A(1) * B(2) - A(2) * B(1)

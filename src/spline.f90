@@ -35,9 +35,9 @@ SUBROUTINE SPLINE(X, XS, S, N)
     !     N        number of points           (input)       |
     !                                                       |
     !-------------------------------------------------------
-    IF(N.GT.NMAX) STOP 'SPLINE: array overflow, increase NMAX'
+    IF(N > NMAX) STOP 'SPLINE: array overflow, increase NMAX'
     !
-    IF(N.EQ.1) THEN
+    IF(N == 1) THEN
         XS(1) = 0.
         RETURN
     ENDIF
@@ -88,9 +88,9 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
     !              If = -999.0, use zero 3rd derivative     |
     !                                                       |
     !-------------------------------------------------------
-    IF(N.GT.NMAX) STOP 'SPLIND: array overflow, increase NMAX'
+    IF(N > NMAX) STOP 'SPLIND: array overflow, increase NMAX'
     !
-    IF(N.EQ.1) THEN
+    IF(N == 1) THEN
         XS(1) = 0.
         RETURN
     ENDIF
@@ -105,12 +105,12 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
     end do
     !
     !---- set left end condition
-    IF(XS1.EQ.999.0) THEN
+    IF(XS1 == 999.0) THEN
         !----- zero 2nd derivative
         A(1) = 2.0
         C(1) = 1.0
         XS(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
-    ELSE IF(XS1.EQ.-999.0) THEN
+    ELSE IF(XS1 == -999.0) THEN
         !----- set zero 3rd derivative
         A(1) = 1.0
         C(1) = 1.0
@@ -123,12 +123,12 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
     ENDIF
     !
     !---- set right end condition
-    IF(XS2.EQ.999.0) THEN
+    IF(XS2 == 999.0) THEN
         !----- zero 2nd derivative
         B(N) = 1.0
         A(N) = 2.0
         XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-    ELSE IF(XS2.EQ.-999.0) THEN
+    ELSE IF(XS2 == -999.0) THEN
         !----- zero 3rd derivative
         B(N) = 1.0
         A(N) = 1.0
@@ -141,7 +141,7 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
     ENDIF
     !
     !---- if only two points, cannot have zero third derivatives at both ends
-    IF(N.EQ.2 .AND. XS1.EQ.-999.0 .AND. XS2.EQ.-999.0) THEN
+    IF(N == 2 .AND. XS1 == -999.0 .AND. XS2 == -999.0) THEN
         !----- set zero 2nd derivative at right end (left end will also be zero)
         B(N) = 1.0
         A(N) = 2.0
@@ -175,7 +175,7 @@ SUBROUTINE SPLINA(X, XS, S, N)
     !                                                       |
     !-------------------------------------------------------
     !
-    IF(N.EQ.1) THEN
+    IF(N == 1) THEN
         XS(1) = 0.
         RETURN
     ENDIF
@@ -183,7 +183,7 @@ SUBROUTINE SPLINA(X, XS, S, N)
     LEND = .TRUE.
     do I = 1, N - 1
         DS = S(I + 1) - S(I)
-        IF (DS.EQ.0.) THEN
+        IF (DS == 0.) THEN
             XS(I) = XS1
             LEND = .TRUE.
         ELSE
@@ -249,7 +249,7 @@ FUNCTION SEVAL(SS, X, XS, S, N)
     !     Calculates X(SS)                             |
     !     XS array must have been calculated by SPLINE |
     !--------------------------------------------------
-    IF(N.EQ.1) THEN
+    IF(N == 1) THEN
         SEVAL = X(1)
         RETURN
     ENDIF
@@ -257,10 +257,10 @@ FUNCTION SEVAL(SS, X, XS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -283,7 +283,7 @@ FUNCTION DEVAL(SS, X, XS, S, N)
     !     Calculates dX/dS(SS)                         |
     !     XS array must have been calculated by SPLINE |
     !--------------------------------------------------
-    IF(N.EQ.1) THEN
+    IF(N == 1) THEN
         DEVAL = XS(1)
         RETURN
     ENDIF
@@ -291,10 +291,10 @@ FUNCTION DEVAL(SS, X, XS, S, N)
     ILOW = 1
     I = N
     !
-    10 IF(I - ILOW .LE. 1) GO TO 11
+    10 IF(I - ILOW <= 1) GO TO 11
     !
     IMID = (I + ILOW) / 2
-    IF(SS .LT. S(IMID)) THEN
+    IF(SS < S(IMID)) THEN
         I = IMID
     ELSE
         ILOW = IMID
@@ -321,17 +321,17 @@ SUBROUTINE SEGSPL(X, XS, S, N)
     !     at segment joints.  Segment joints are    |
     !     defined by identical successive S values. |
     !-----------------------------------------------
-    IF(N.EQ.1) THEN
+    IF(N == 1) THEN
         XS(1) = 0.
         RETURN
     ENDIF
     !
-    IF(S(1).EQ.S(2)) STOP 'SEGSPL:  First input point duplicated'
-    IF(S(N).EQ.S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
+    IF(S(1) == S(2)) STOP 'SEGSPL:  First input point duplicated'
+    IF(S(N) == S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
     !
     ISEG0 = 1
     do ISEG = 2, N - 2
-        IF(S(ISEG).EQ.S(ISEG + 1)) THEN
+        IF(S(ISEG) == S(ISEG + 1)) THEN
             NSEG = ISEG - ISEG0 + 1
             !cc         CALL SPLINE(X(ISEG0),XS(ISEG0),S(ISEG0),NSEG)
             CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)

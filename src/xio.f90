@@ -33,12 +33,12 @@ SUBROUTINE LOAD(FNAME1)
     LU = LUTEMP
     !
     FNAME = FNAME1
-    IF(FNAME(1:1) .EQ. ' ') CALL ASKS('Enter filename^', FNAME)
+    IF(FNAME(1:1) == ' ') CALL ASKS('Enter filename^', FNAME)
     OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 200)
     !
     !--- Check for new format/old format XROTOR file
     CALL RDLINE(LU, LINE)
-    IF(LINE.EQ.'END' .OR. LINE.EQ.'ERR') GO TO 210
+    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 210
     READ(LINE(17:22), *) FILEVERS
     WRITE(*, 1005) FILEVERS
     !
@@ -89,7 +89,7 @@ SUBROUTINE LOAD(FNAME1)
     !
     WRITE(*, *) ' '
     CALL RDLINE(LU, LINE)
-    IF(LINE.EQ.'END' .OR. LINE.EQ.'ERR') GO TO 210
+    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 210
     READ(LINE, *, ERR = 210) IIX, NBLDS
     DO I = 1, IIX
         CALL RDLINE(LU, LINE)
@@ -102,35 +102,35 @@ SUBROUTINE LOAD(FNAME1)
     !--- Optional duct velocity
     URDUCT = 1.0
     CALL RDLINE(LU, LINE)
-    IF(LINE.EQ.'END' .OR. LINE.EQ.'ERR') GO TO 19
+    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 19
     READ(LINE, *, END = 19) URDUCT
     !
     !---- Optional slipstream velocities
     19   NADD = 0
     CALL RDLINE(LU, LINE)
-    IF(LINE.EQ.'END' .OR. LINE.EQ.'ERR') GO TO 21
+    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 21
     READ(LINE, *, END = 21) NADD
-    IF(NADD.GT.IX) THEN
+    IF(NADD > IX) THEN
         NADD = IX
         WRITE(*, *) 'Warning, slipstream data terminated at ', IX
     ENDIF
     DO I = 1, NADD
         CALL RDLINE(LU, LINE)
-        IF(LINE.EQ.'END' .OR. LINE.EQ.'ERR') GO TO 20
+        IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 20
         READ(LINE, *, ERR = 20, END = 20) RADD(I), UADD(I), VADD(I)
     END DO
-    IF(I.LT.NADD) THEN
+    IF(I < NADD) THEN
         NADD = I - 1
         WRITE(*, *) 'Warning, slipstream data terminated at ', NADD
     ENDIF
     GO TO 21
     !
-    20   IF(I.GT.2) THEN
+    20   IF(I > 2) THEN
         NADD = I - 1
     ENDIF
     !
     21   CLOSE(LU)
-    IF(NADD.GT.1) THEN
+    IF(NADD > 1) THEN
         WRITE(*, *)
         WRITE(*, *) 'Slipstream profiles read with #points ', NADD
     ENDIF
@@ -138,10 +138,10 @@ SUBROUTINE LOAD(FNAME1)
     CONV = .FALSE.
     !
     !--- Check for number of analysis stations to use
-    IF(IIX.NE.II) THEN
+    IF(IIX /= II) THEN
         22     WRITE(*, 23) IIX, II, II
         READ(*, 24) LINE
-        IF(LINE.NE.' ') THEN
+        IF(LINE /= ' ') THEN
             READ(LINE, *, ERR = 22) II
         ENDIF
         23     FORMAT(/'Read  # input stations = ', I3, &
@@ -230,10 +230,10 @@ SUBROUTINE RDLINE(LUN, LINE)
     20 READ (LUN, 1000, END = 80, ERR = 90) LINE
     !
     !---- skip comment line
-    IF(INDEX('!#', LINE(1:1)) .NE. 0) GO TO 20
+    IF(INDEX('!#', LINE(1:1)) /= 0) GO TO 20
     !
     !---- skip blank line
-    IF(LINE.EQ.' ') GO TO 20
+    IF(LINE == ' ') GO TO 20
     !
     !---- normal return after significant line
     RETURN

@@ -52,7 +52,7 @@ SUBROUTINE SETIAERO
     DO I = 1, II
         IAERO(I) = 1
         DO N = 1, NAERO
-            IF(XIAERO(N).LE.XI(I)) THEN
+            IF(XIAERO(N) <= XI(I)) THEN
                 IAERO(I) = N
             ENDIF
         END DO
@@ -69,7 +69,7 @@ SUBROUTINE PUTAERO(N, XISECT, A0, CLMAX, CLMIN, &
     !--------------------------------------------------------
     INCLUDE 'XROTOR.INC'
     !
-    IF(N.GT.NAX) THEN
+    IF(N > NAX) THEN
         WRITE(*, *) 'Too many aero sections defined...'
         RETURN
     ENDIF
@@ -115,12 +115,12 @@ SUBROUTINE GETCLCDCM(IS, ALF, W, REY, &
     !
     !--- Check for installed aero data section index
     N = IAERO(IS)
-    IF(N.LT.1 .OR. N.GT.NAERO) THEN
+    IF(N < 1 .OR. N > NAERO) THEN
         !
-        IF(NAERO.GT.1) THEN
+        IF(NAERO > 1) THEN
             !--- Find lower index of aero data sections XIAERO(N) bounding XI(IS)
             DO N = 1, NAERO
-                IF(XIAERO(N).LE.XI(IS)) THEN
+                IF(XIAERO(N) <= XI(IS)) THEN
                     !c          write(*,*) 'getcl iaero= ',N,' is= ',is,xiaero(N),xi(is)
                     IAERO(IS) = N
                 ELSE
@@ -159,10 +159,10 @@ SUBROUTINE GETCLCDCM(IS, ALF, W, REY, &
     !
     !--- Check for another bounding section, if not we are done,
     !    if we have another section linearly interpolate data to station IS
-    IF(N.LT.NAERO) THEN
+    IF(N < NAERO) THEN
         XISECT2 = XIAERO(N + 1)
         FRAC = (XI(IS) - XISECT1) / (XISECT2 - XISECT1)
-        IF(FRAC.LE.0.0 .OR. FRAC.GT.1.0) THEN
+        IF(FRAC <= 0.0 .OR. FRAC > 1.0) THEN
             !c         write(*,*) 'CL n,is,xi,frac = ',n,is,xi(is),frac
         ENDIF
         !
@@ -237,7 +237,7 @@ SUBROUTINE GETALF(IS, CLIFT, W, ALF, ALF_CL, ALF_W, STALLF)
         ALF = ALF + DALF
         ALF_CL = 1.0 / CL_ALF
         ALF_W = -CL_W / CL_ALF
-        IF(ABS(DALF).LT.EPS) RETURN
+        IF(ABS(DALF) < EPS) RETURN
     END DO
     !
     20 WRITE(*, *) 'GETALF: alpha(CL) function inversion failed'
@@ -303,7 +303,7 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     !---- Prandtl-Glauert compressibility factor
     MSQ = W * W * VEL**2 / VSO**2
     MSQ_W = 2.0 * W * VEL**2 / VSO**2
-    IF(MSQ.GE.1.0) THEN
+    IF(MSQ >= 1.0) THEN
         WRITE(*, *)&
                 'CLFUNC: Local Mach number limited to 0.99, was ', MSQ
         MSQ = 0.99
@@ -315,7 +315,7 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     !---- Mach number and dependence on velocity
     MACH = SQRT(MSQ)
     MACH_W = 0.0
-    IF(MACH.NE.0.0) MACH_W = 0.5 * MSQ_W / MACH
+    IF(MACH /= 0.0) MACH_W = 0.5 * MSQ_W / MACH
     !
     !
     !------------------------------------------------------------
@@ -340,7 +340,7 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     CLLIM = DCL_STALL * DLOG((1.0D0 + ECMAX) / (1.0D0 + ECMIN))
     CLLIM_CLA = ECMAX / (1.0 + ECMAX) + ECMIN / (1.0 + ECMIN)
     !
-    !      if(CLLIM.GT.0.001) then
+    !      if(CLLIM > 0.001) then
     !      write(*,999) 'cla,cllim,ecmax,ecmin ',cla,cllim,ecmax,ecmin
     !      endif
     ! 999  format(a,2(1x,f10.6),3(1x,d12.6))
@@ -354,8 +354,8 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     CL_W = CLA_W - (1.0 - FSTALL) * CLLIM_CLA * CLA_W
     !
     STALLF = .FALSE.
-    IF(CLIFT.GT.CLMAX) STALLF = .TRUE.
-    IF(CLIFT.LT.CLMIN) STALLF = .TRUE.
+    IF(CLIFT > CLMAX) STALLF = .TRUE.
+    IF(CLIFT < CLMIN) STALLF = .TRUE.
     !
     !
     !------------------------------------------------------------
@@ -369,7 +369,7 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     !--- CD from profile drag, stall drag and compressibility drag
     !
     !---- Reynolds number scaling factor
-    IF(REY.LE.0) THEN
+    IF(REY <= 0) THEN
         RCORR = 1.0
         RCORR_REY = 0.0
     ELSE
@@ -402,7 +402,7 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     CRITMACH = MCRIT - CLMFACTOR * ABS(CLIFT - CLDMIN) - DMDD
     CRITMACH_ALF = -CLMFACTOR * ABS(CL_ALF)
     CRITMACH_W = -CLMFACTOR * ABS(CL_W)
-    IF(MACH.LT.CRITMACH) THEN
+    IF(MACH < CRITMACH) THEN
         CDC = 0.0
         CDC_ALF = 0.0
         CDC_W = 0.0

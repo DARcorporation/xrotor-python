@@ -68,7 +68,7 @@ SUBROUTINE GAUSS(NSIZ, NN, Z, R, NRHS)
         do K = NP1, NN
             ZTMP = Z(K, NP)
             !
-            !          IF(ZTMP.EQ.0.0) GO TO 15
+            !          IF(ZTMP == 0.0) GO TO 15
             !
             do L = NP1, NN
                 Z(K, L) = Z(K, L) - ZTMP * Z(NP, L)
