@@ -36,15 +36,15 @@ SUBROUTINE GAUSS(NSIZ, NN, Z, R, NRHS)
     !
     DIMENSION Z(NSIZ, NSIZ), R(NSIZ, NRHS)
     !
-    DO 1 NP = 1, NN - 1
+    do NP = 1, NN - 1
         NP1 = NP + 1
         !
         !------ find max pivot index NX
         NX = NP
-        DO 11 N = NP1, NN
+        do N = NP1, NN
             IF(ABS(Z(N, NP)) - ABS(Z(NX, NP))) 11, 11, 111
             111      NX = N
-        11   CONTINUE
+        11 end do
         !
         PIVOT = 1.0 / Z(NX, NP)
         !
@@ -52,48 +52,48 @@ SUBROUTINE GAUSS(NSIZ, NN, Z, R, NRHS)
         Z(NX, NP) = Z(NP, NP)
         !
         !------ switch rows & normalize pivot row
-        DO 12 L = NP1, NN
+        do L = NP1, NN
             TEMP = Z(NX, L) * PIVOT
             Z(NX, L) = Z(NP, L)
             Z(NP, L) = TEMP
-        12   CONTINUE
+        end do
         !
-        DO 13 L = 1, NRHS
+        do L = 1, NRHS
             TEMP = R(NX, L) * PIVOT
             R(NX, L) = R(NP, L)
             R(NP, L) = TEMP
-        13   CONTINUE
+        end do
         !
         !------ forward eliminate everything
-        DO 15 K = NP1, NN
+        do K = NP1, NN
             ZTMP = Z(K, NP)
             !
             !          IF(ZTMP.EQ.0.0) GO TO 15
             !
-            DO 151 L = NP1, NN
+            do L = NP1, NN
                 Z(K, L) = Z(K, L) - ZTMP * Z(NP, L)
-            151     CONTINUE
-            DO 152 L = 1, NRHS
+            end do
+            do L = 1, NRHS
                 R(K, L) = R(K, L) - ZTMP * R(NP, L)
-            152     CONTINUE
-        15   CONTINUE
+            end do
+        end do
         !
-    1 CONTINUE
+    end do
     !
     !---- solve for last row
-    DO 2 L = 1, NRHS
+    do L = 1, NRHS
         R(NN, L) = R(NN, L) / Z(NN, NN)
-    2 CONTINUE
+    end do
     !
     !---- back substitute everything
-    DO 3 NP = NN - 1, 1, -1
+    do NP = NN - 1, 1, -1
         NP1 = NP + 1
-        DO 31 L = 1, NRHS
-            DO 310 K = NP1, NN
+        do L = 1, NRHS
+            do K = NP1, NN
                 R(NP, L) = R(NP, L) - Z(NP, K) * R(K, L)
-            310     CONTINUE
-        31   CONTINUE
-    3 CONTINUE
+            end do
+        end do
+    end do
     !
     RETURN
 END

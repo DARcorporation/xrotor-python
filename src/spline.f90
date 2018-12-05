@@ -42,14 +42,14 @@ SUBROUTINE SPLINE(X, XS, S, N)
         RETURN
     ENDIF
     !
-    DO 1 I = 2, N - 1
+    do I = 2, N - 1
         DSM = S(I) - S(I - 1)
         DSP = S(I + 1) - S(I)
         B(I) = DSP
         A(I) = 2.0 * (DSM + DSP)
         C(I) = DSM
         XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
-    1 CONTINUE
+    end do
     !
     !---- set zero second derivative end conditions
     A(1) = 2.0
@@ -95,14 +95,14 @@ SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
         RETURN
     ENDIF
     !
-    DO 1 I = 2, N - 1
+    do I = 2, N - 1
         DSM = S(I) - S(I - 1)
         DSP = S(I + 1) - S(I)
         B(I) = DSP
         A(I) = 2.0 * (DSM + DSP)
         C(I) = DSM
         XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
-    1 CONTINUE
+    end do
     !
     !---- set left end condition
     IF(XS1.EQ.999.0) THEN
@@ -181,7 +181,7 @@ SUBROUTINE SPLINA(X, XS, S, N)
     ENDIF
     !
     LEND = .TRUE.
-    DO 1 I = 1, N - 1
+    do I = 1, N - 1
         DS = S(I + 1) - S(I)
         IF (DS.EQ.0.) THEN
             XS(I) = XS1
@@ -197,7 +197,7 @@ SUBROUTINE SPLINA(X, XS, S, N)
             ENDIF
         ENDIF
         XS1 = XS2
-    1 CONTINUE
+    end do
     XS(N) = XS1
     !
     RETURN
@@ -223,19 +223,19 @@ SUBROUTINE TRISOL(A, B, C, D, KK)
     !     the solution.  A, C are destroyed.  |
     !-----------------------------------------
     !
-    DO 1 K = 2, KK
+    do K = 2, KK
         KM = K - 1
         C(KM) = C(KM) / A(KM)
         D(KM) = D(KM) / A(KM)
         A(K) = A(K) - B(K) * C(KM)
         D(K) = D(K) - B(K) * D(KM)
-    1 CONTINUE
+    end do
     !
     D(KK) = D(KK) / A(KK)
     !
-    DO 2 K = KK - 1, 1, -1
+    do K = KK - 1, 1, -1
         D(K) = D(K) - C(K) * D(K + 1)
-    2 CONTINUE
+    end do
     !
     RETURN
 END
@@ -330,14 +330,14 @@ SUBROUTINE SEGSPL(X, XS, S, N)
     IF(S(N).EQ.S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
     !
     ISEG0 = 1
-    DO 10 ISEG = 2, N - 2
+    do ISEG = 2, N - 2
         IF(S(ISEG).EQ.S(ISEG + 1)) THEN
             NSEG = ISEG - ISEG0 + 1
             !cc         CALL SPLINE(X(ISEG0),XS(ISEG0),S(ISEG0),NSEG)
             CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)
             ISEG0 = ISEG + 1
         ENDIF
-    10 CONTINUE
+    end do
     !
     NSEG = N - ISEG0 + 1
     !cc      CALL SPLINE(X(ISEG0),XS(ISEG0),S(ISEG0),NSEG)

@@ -1333,7 +1333,7 @@ SUBROUTINE APINIT
     !     Use momentum theory to estimate axial induced velocity to drive
     !     equation for wake advance ratio
     !
-    DO 100 ITERG = 1, NITERG
+    do ITERG = 1, NITERG
         !
         CALL GRADMO(IX, II, NBLDS, DUCT, RAKE, &
                 XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
@@ -1344,7 +1344,7 @@ SUBROUTINE APINIT
         DCLMAX = 0.
         RLXMIN = 1.0
         !
-        DO 10 I = 1, II
+        do I = 1, II
             !
             !--- Redefine VT and VA to diagonal self-influences
             VT = VIND_GAM(3, I, I) * GAM(I)
@@ -1446,7 +1446,7 @@ SUBROUTINE APINIT
             T_VT = BLDS * GAM(I) * CI_VT * DXI(I) * COSR
             T_ADW = T_ADW + (T_G + T_VT * VT_GAM) * G_ADW&
                     + T_VT * VT_ADW
-        10     CONTINUE
+        end do
         !
         !---- Momentum theory estimate of induced axial velocity
         VHSQ = 0.5 * TSUM / PI
@@ -1472,7 +1472,7 @@ SUBROUTINE APINIT
         !
         IF(ABS(DCLMAX) .LT. 0.001) GO TO 101
         !
-    100  CONTINUE
+    end do
     !cc      WRITE(*,*) 'APINIT No convergence'
     !
     101  RETURN
@@ -1506,7 +1506,7 @@ SUBROUTINE APITER(ISPEC, ICON)
     K3 = II + 3
     WRITE(*, 2000)
     !
-    DO 1000 ITER = 1, MAX(NITERA, 1)
+    do ITER = 1, MAX(NITERA, 1)
         !
         !---- if wake advance ratio changed, recalculate Vtan influence coefficients
         IF(FREE .OR. ITER.EQ.1) THEN
@@ -1587,7 +1587,7 @@ SUBROUTINE APITER(ISPEC, ICON)
         ENDIF
         !
         !---- go over stations, enforcing Gamma-CL relation at real prop
-        DO 100 I = 1, II
+        do I = 1, II
             !
             CALL CSCALC(I, UTOT, WA, WT, &
                     VT, VT_ADW, &
@@ -1631,7 +1631,7 @@ SUBROUTINE APITER(ISPEC, ICON)
             !
             GRESMX = MAX(GRESMX, ABS(DQ(I) / (0.1 * W)))
             !
-        100 CONTINUE
+        end do
         !
         !---- equivalent prop will be used to define inviscid thrust
         IF(ISPEC.EQ.1) THEN
@@ -1852,7 +1852,7 @@ SUBROUTINE APITER(ISPEC, ICON)
         ENDIF
         !c      IF(MOD(ITER,5).EQ.0) CALL APINIT
         !
-    1000 CONTINUE
+    end do
     !
     RETURN
 END
@@ -1985,7 +1985,7 @@ SUBROUTINE SETXW
     XWM_ADW = 0.
     !cc      write(*,*) 'setxw adv,adw ',adv,adw
     !
-    DO 1000 I = 1, II
+    do I = 1, II
         XDX = XI(I) * DXI(I)
         !
         CALL CSCALC(I, UTOT, WA, WT, &
@@ -2128,7 +2128,7 @@ SUBROUTINE SETXW
             XWM_GAM(J) = 2.0 * XW_GAM(I, J) - XWM_GAM(J)
         END DO
         !
-    1000 CONTINUE
+    end do
     !
     XWTIP = XWM
     !      write(*,*) 'xwtip ',xwtip
@@ -2193,7 +2193,7 @@ SUBROUTINE TPQ(ITYPE)
     !
     !---- go over radial stations, setting viscous thrust and power
     BLDS = FLOAT(NBLDS)
-    DO 1000 I = 1, II
+    do I = 1, II
         BDX = BLDS * DXI(I)
         !
         XX = XI(I) / ADV
@@ -2577,7 +2577,7 @@ SUBROUTINE TPQ(ITYPE)
         VATavg = VATavg + DTW * (VA + VD)
         VAAavg = VAAavg + 2.0 * PI * XI(I) * DXI(I) * (VA + VD)
         !
-    1000 CONTINUE
+    end do
     !cc        write(20,*) '&'
     !cc        write(21,*) '&'
     !
@@ -2695,7 +2695,7 @@ SUBROUTINE GRADMO(IMAX, II, NBLDS, LDUCT, RAKE, &
         SFAC = SQRT(1.0 + 1.0 / ADW**2)
         SF_ADW = 0.5 / SFAC * (-2.0 / ADW**3)
         !
-        DO 20 I = 1, II
+        do I = 1, II
             !
             DO J = 1, II
                 VIND_GAM(1, I, J) = 0.
@@ -2725,7 +2725,7 @@ SUBROUTINE GRADMO(IMAX, II, NBLDS, LDUCT, RAKE, &
             !         VIND_ADW(3,I)   = -VIND_ADW(3,I)
             !cc          VA_ADW = VIND_ADW(1,I) - VA/ADW
             !
-        20  CONTINUE
+        end do
     ENDIF
     !
     RETURN
@@ -2850,7 +2850,7 @@ SUBROUTINE HELICO(IMAX, II, NBLDS, LDUCT, RAKE, &
     ENDIF
     !
     !==== Loop over all NN harmonics for n = 2,4,6,...
-    DO 10 N = 2, NN, 2
+    do N = 2, NN, 2
         RN = FLOAT(N)
         !
         !------ set up and factor tridiagonal system for this n
@@ -2948,7 +2948,7 @@ SUBROUTINE HELICO(IMAX, II, NBLDS, LDUCT, RAKE, &
             VIND_ADW(3, I) = VIND_ADW(3, I) + AN_ADW(I)
         ENDDO
         !
-    10   CONTINUE
+    end do
     !
     !
     !---- extrapolate the series to the next NN terms
@@ -3034,11 +3034,11 @@ SUBROUTINE FILTER(Q, SMLEN, N)
     CON = SMLEN**2
     A(1) = 1.0
     C(1) = 0.
-    DO 10 I = 2, N - 1
+    do I = 2, N - 1
         B(I) = -CON
         A(I) = 2.0 * CON + 1.0
         C(I) = -CON
-    10 CONTINUE
+    end do
     A(N) = 1.0
     B(N) = 0.
     !

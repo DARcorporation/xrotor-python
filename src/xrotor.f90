@@ -329,7 +329,7 @@ SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
     ENDIF
     !
     !---- linearly interpolate quantities from tabulated values
-    DO 10 I = 2, N
+    do I = 2, N
         IF(ALSPEC.GT.ALT(I)) GO TO 10
         !
         DALT = ALT(I) - ALT(I - 1)
@@ -345,7 +345,7 @@ SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
         RMUALT = RMUALT * 1.0E-5
         !
         RETURN
-    10 CONTINUE
+    10 end do
     !
     !
     IF(ALSPEC.GT.ALT(N)) THEN
@@ -358,9 +358,9 @@ SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
     ENDIF
     !
     !      IF(FIRST) THEN
-    !       DO 20 I=1, N
+    !       do I=1, N
     !         RHO(I) = ALOG(RHO(I))
-    ! 20    CONTINUE
+    ! end do
     !       CALL SPLINE(VSO,VSOH,ALT,N)
     !       CALL SPLIND(RHO,RHOH,ALT,N,999.0,0.0)
     !       CALL SPLINE(RMU,RMUH,ALT,N)
@@ -446,7 +446,7 @@ SUBROUTINE SETX
     DT = 0.5 * PI / FLOAT(II)
     XM = XI0
     XV(1) = XI0
-    DO 10 I = 1, II
+    do I = 1, II
         T(I) = DT * (FLOAT(I) - 0.5)
         TP = DT * FLOAT(I)
         !
@@ -465,7 +465,7 @@ SUBROUTINE SETX
         !
         XM = XP
         XV(I + 1) = XP
-    10 CONTINUE
+    end do
     XV(II + 1) = XITIP
     !
     RETURN
@@ -660,7 +660,7 @@ SUBROUTINE OUTPUT(LU)
         WRITE(LU, 1120) IFIX(REEXP)
     ENDIF
     !
-    DO 10 I = 1, II, IADD
+    do I = 1, II, IADD
         !
         !------ use equivalent prop to define local efficiency
         CALL UVADD(XI(I), WA, WT)
@@ -694,7 +694,7 @@ SUBROUTINE OUTPUT(LU)
                 I, XI(I), CH(I), BDEG, CL(I), SCHAR, CD(I), XRE, MACH, &
                 EFFI, EFFP(I), UBODY(I)
         !c     &    ,rad*ch(i)*sin(beta(i))*39.36
-    10 CONTINUE
+    end do
     !c      WRITE(LU,1000)
     !c      WRITE(LU,*   ) ' '
     !

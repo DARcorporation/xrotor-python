@@ -92,9 +92,9 @@ SUBROUTINE BEND
     GO TO 900
     !
     !-------------------------------------------------------------
-    50   DO 51 I = 1, II
+    50   do I = 1, II
         BETA(I) = BETA0(I)
-    51   CONTINUE
+    end do
     CONV = .FALSE.
     GO TO 900
     !
@@ -196,12 +196,12 @@ SUBROUTINE EILOAD(FNAME1)
     READ(LU, 1000) DUMMY
     READ(LU, 1000) DUMMY
     READ(LU, 1000) DUMMY
-    DO 10 IT = 1, IX
+    do IT = 1, IX
         READ(LU, *, END = 11, ERR = 210) XT(IT), &
                 W0(IT), W1(IT), W2(IT), W3(IT), W4(IT), &
                 W5(IT), W6(IT), W7(IT), W8(IT), W9(IT)
         XT(IT) = XT(IT) / RAD
-    10   CONTINUE
+    end do
     WRITE(*, *) 'EILOAD: Array overflow.  Too many radial stations.'
     11   CONTINUE
     NT = IT - 1
@@ -218,7 +218,7 @@ SUBROUTINE EILOAD(FNAME1)
     CALL SEGSPL(W8, T8, XT, NT)
     CALL SEGSPL(W9, T9, XT, NT)
     !
-    DO 30 I = 1, II
+    do I = 1, II
         EIXXB(I) = SEVAL(XI(I), W0, T0, XT, NT)
         EIYYB(I) = SEVAL(XI(I), W1, T1, XT, NT)
         EAB(I) = SEVAL(XI(I), W2, T2, XT, NT)
@@ -229,16 +229,16 @@ SUBROUTINE EILOAD(FNAME1)
         XOCG(I) = SEVAL(XI(I), W7, T7, XT, NT)
         XOSC(I) = SEVAL(XI(I), W8, T8, XT, NT)
         RSTB(I) = SEVAL(XI(I), W9, T9, XT, NT)
-    30   CONTINUE
+    end do
     !
     MASS = 0.0
     MRSQ = 0.0
     MAXX = 0.0
-    DO 50 I = 1, II
+    do I = 1, II
         MASS = MASS + MB(I) * RAD * DXI(I)
         MRSQ = MRSQ + MB(I) * RAD * DXI(I) * (XI(I) * RAD)**2
         MAXX = MAXX + MXXB(I) * RAD * DXI(I)
-    50   CONTINUE
+    end do
     !
     WRITE(*, 3100) MASS, MAXX, MRSQ
     !
@@ -267,7 +267,7 @@ END
 SUBROUTINE STCLR
     INCLUDE 'XROTOR.INC'
     !
-    DO 10 I = 1, II
+    do I = 1, II
         TX(I) = 0.0
         TY(I) = 0.0
         TZ(I) = 0.0
@@ -280,7 +280,7 @@ SUBROUTINE STCLR
         SHRX(I) = 0.0
         SHRY(I) = 0.0
         SHRZ(I) = 0.0
-    10   CONTINUE
+    end do
     !
     RETURN
 END
@@ -290,11 +290,11 @@ END
 SUBROUTINE MCLR
     INCLUDE 'XROTOR.INC'
     !
-    DO 10 I = 1, II
+    do I = 1, II
         MB(I) = 0.0
         MXXB(I) = 0.0
         EKB(I) = 0.0
-    10   CONTINUE
+    end do
     !
     RETURN
 END
@@ -321,7 +321,7 @@ SUBROUTINE STLOAD
     SINR = SIN(RAKE)
     COSR = COS(RAKE)
     !
-    DO 10 I = 1, II
+    do I = 1, II
         !
         DXII = DXI(I) / COSR
         !
@@ -422,7 +422,7 @@ SUBROUTINE STLOAD
         MZ_TX(I) = - MPREC
         MZ_WZ(I) = MPREC / XI(I)
         !
-    10   CONTINUE
+    end do
     !
     !--- Print the blade aerodynamic forces
     WRITE(*, 20) FX * RHO * VEL**2 * RAD**2, &
@@ -469,20 +469,20 @@ SUBROUTINE STCALC
     WRITE(*, *)
     !
     !---- Newton iteration loop
-    DO 100 ITER = 1, 10
+    do ITER = 1, 10
         !
         CALL STLOAD
         !
-        DO 8 I = 1, II + 1
-            DO 81 K = 1, 12
-                DO 811 J = 1, 12
+        do I = 1, II + 1
+            do K = 1, 12
+                do J = 1, 12
                     AA(K, J, I) = 0.0
                     BB(K, J, I) = 0.0
                     CC(K, J, I) = 0.0
-                811      CONTINUE
+                end do
                 RR(K, I) = 0.0
-            81     CONTINUE
-        8    CONTINUE
+            end do
+        end do
         !
         !
         !---- fix deflection angles at root
@@ -503,7 +503,7 @@ SUBROUTINE STCALC
         COSR = COS(RAKE)
         !
         !---- go over radial intervals
-        DO 10 I = 1, II
+        do I = 1, II
             !
             DXII = DXI(I) / COSR
             !
@@ -761,7 +761,7 @@ SUBROUTINE STCALC
             AA(12, 1, I + 1) = 0.5 * DXII
             AA(12, 12, I + 1) = -1.0
             !
-        10   CONTINUE
+        end do
         !
         !---- set tip  M,S  to zero
         I = II + 1
@@ -775,39 +775,39 @@ SUBROUTINE STCALC
         !
         CALL B12SOL(AA, BB, CC, RR, II + 1)
         !
-        !      do 5 i=1, ii+1
+        !      do i=1, ii+1
         !        write(*,6666) i, (rr(k,i),k=1, 9)
         ! 6666   format(1x,i2,9f8.3)
-        ! 5    continue
+        ! end do
         !
         RMAX = 0.0
         RMS = 0.0
         !
         !---- set under-relaxation factors
-        DO 16 K = 1, 12
+        do K = 1, 12
             RLXR(K) = 1.0
-        16   CONTINUE
+        end do
         !
-        DO 18 I = 1, II + 1
-            DO 181 K = 1, 12
+        do I = 1, II + 1
+            do K = 1, 12
                 IF(RLXR(K) * RR(K, I) .GT.  RRLIM(K)) RLXR(K) = RRLIM(K) / RR(K, I)
                 IF(RLXR(K) * RR(K, I) .LT. -RRLIM(K)) RLXR(K) = -RRLIM(K) / RR(K, I)
                 !
                 RMAX = MAX(RMAX, ABS(RR(K, I) / RRLIM(K)))
                 RMS = RMS + (RR(K, I) / RRLIM(K))**2
-            181    CONTINUE
-        18   CONTINUE
+            end do
+        end do
         !
         RMS = SQRT(RMS / FLOAT(9 * II))
         !
         !---- set minimum under-relaxation factor over all variables
         RLX = 1.0
-        DO 19 K = 1, 12
+        do K = 1, 12
             RLX = AMIN1(RLX, RLXR(K))
-        19   CONTINUE
+        end do
         !
         !---- update solution
-        DO 20 I = 1, II + 1
+        do I = 1, II + 1
             TX(I) = TX(I) - RLX * RR(1, I)
             TY(I) = TY(I) - RLX * RR(2, I)
             TZ(I) = TZ(I) - RLX * RR(3, I)
@@ -824,7 +824,7 @@ SUBROUTINE STCALC
             !        WRITE(*,*) I
             !        WRITE(*,1200) (RR(K,I),K=1,12)
             ! 1200   FORMAT( 4(1X, 3E12.4 /) )
-        20   CONTINUE
+        end do
         !
         !
         !c      WRITE(*,1250) (RLXR(K), K=1, 12)
@@ -835,7 +835,7 @@ SUBROUTINE STCALC
         !
         IF(RMAX .LE. EPS) GO TO 101
         !
-    100  CONTINUE
+    end do
     WRITE(*, *) 'STCALC: Convergence failed.  Continuing ...'
     !
     101  CONTINUE
@@ -843,9 +843,9 @@ SUBROUTINE STCALC
     !---- integrate towards tip for X displacements
     !      I = 1
     !      WX(I) = 0.0
-    !      DO 40 I=1, II
+    !      do I=1, II
     !        WX(I+1) =  WX(I)  -  (  TZ(I) +   TZ(I+1))*0.5 * DXII
-    ! 40   CONTINUE
+    ! end do
     !
     RETURN
 END
@@ -859,9 +859,9 @@ SUBROUTINE STADD
     !     Adds on structural twist to static blade angles
     !------------------------------------------------------
     !
-    DO 10 I = 1, II
+    do I = 1, II
         BETA(I) = BETA0(I) + (TY(I) + TY(I + 1)) * 0.5
-    10   CONTINUE
+    end do
     !
     WRITE(*, 1000) (BETA(II) - BETA0(II)) * 180.0 / PI
     !
@@ -880,9 +880,9 @@ SUBROUTINE STSET
     !     Removes structural twist to get static blade angles
     !------------------------------------------------------
     !
-    DO 10 I = 1, II
+    do I = 1, II
         BETA0(I) = BETA(I) - (TY(I) + TY(I + 1)) * 0.5
-    10   CONTINUE
+    end do
     !
     WRITE(*, 1000) (BETA(II) - BETA0(II)) * 180.0 / PI
     !
@@ -912,7 +912,7 @@ SUBROUTINE STWRIT(LU)
     MOMREF = RHO * VEL**2 * RAD**3
     !
     !--- Deflections, moments and forces on blade beam
-    DO 10 I = 1, II, IADD
+    do I = 1, II, IADD
         !
         !********* still need to be averaged to i+1/2
         !
@@ -934,7 +934,7 @@ SUBROUTINE STWRIT(LU)
         SZA = SHRZ(I) * RHO * VEL**2 * RAD**2
         !
         WRITE(LU, 1035) I, XI(I), WXA, WZA, TYA, MZA, MXA, MYA, SYA, SXA, SZA
-    10 CONTINUE
+    end do
     !
     !....................................................................
     !
@@ -957,7 +957,7 @@ SUBROUTINE STWRIT(LU)
     COSR = COS(RAKE)
     WRITE(LU, 2020)
     !
-    DO 20 I = 1, II, IADD
+    do I = 1, II, IADD
         !
         RST = RSTB(I) / RAD
         DXII = DXI(I) / COSR
@@ -974,7 +974,7 @@ SUBROUTINE STWRIT(LU)
         EMAX = SQRT(EX**2 + EZ**2) + EY
         !
         WRITE(LU, 2030) I, XI(I), EX, EZ, EY, EMAX, GT
-    20   CONTINUE
+    end do
     !
     RETURN
 
@@ -1009,7 +1009,7 @@ SUBROUTINE B12SOL(A, B, C, R, II)
     NRHS = 1
     !
     !CC** Forward sweep: Elimination of lower block diagonal (B's).
-    DO 1 I = 1, II
+    do I = 1, II
         !
         IM = I - 1
         !
@@ -1017,8 +1017,8 @@ SUBROUTINE B12SOL(A, B, C, R, II)
         IF(I.EQ.1) GO TO 12
         !
         !------ eliminate Bi block, thus modifying Ai and Ci blocks
-        DO 11 K = 1, 12
-            DO 111 L = 1, 12
+        do K = 1, 12
+            do L = 1, 12
                 A(K, L, I) = A(K, L, I)&
                         - (B(K, 1, I) * C(1, L, IM)&
                                 + B(K, 2, I) * C(2, L, IM)&
@@ -1032,8 +1032,8 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                                 + B(K, 10, I) * C(10, L, IM)&
                                 + B(K, 11, I) * C(11, L, IM)&
                                 + B(K, 12, I) * C(12, L, IM))
-            111     CONTINUE
-            DO 112 L = 1, NRHS
+            end do
+            do L = 1, NRHS
                 R(K, L, I) = R(K, L, I)&
                         - (B(K, 1, I) * R(1, L, IM)&
                                 + B(K, 2, I) * R(2, L, IM)&
@@ -1047,8 +1047,8 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                                 + B(K, 10, I) * R(10, L, IM)&
                                 + B(K, 11, I) * R(11, L, IM)&
                                 + B(K, 12, I) * R(12, L, IM))
-            112     CONTINUE
-        11   CONTINUE
+            end do
+        end do
         !
         !                                                              -1
         !CC---- multiply Ci block and righthand side Ri vectors by (Ai)
@@ -1056,15 +1056,15 @@ SUBROUTINE B12SOL(A, B, C, R, II)
         !
         !cc        CALL SHOBLK(12,I,A(1,1,I))
         !
-        12   DO 13 KPIV = 1, 11
+        12   do KPIV = 1, 11
             KP1 = KPIV + 1
             !
             !-------- find max pivot index KX
             KX = KPIV
-            DO 131 K = KP1, 12
+            do K = KP1, 12
                 IF(ABS(A(K, KPIV, I)) - ABS(A(KX, KPIV, I))) 131, 131, 1311
                 1311        KX = K
-            131     CONTINUE
+            131 end do
             !
             IF(A(KX, KPIV, I).EQ.0.0) THEN
                 WRITE(*, *) 'Singular A block, i = ', I
@@ -1077,31 +1077,31 @@ SUBROUTINE B12SOL(A, B, C, R, II)
             A(KX, KPIV, I) = A(KPIV, KPIV, I)
             !
             !-------- switch rows & normalize pivot row
-            DO 132 L = KP1, 12
+            do L = KP1, 12
                 TEMP = A(KX, L, I) * PIVOT
                 A(KX, L, I) = A(KPIV, L, I)
                 A(KPIV, L, I) = TEMP
-            132     CONTINUE
+            end do
             !
-            DO 133 L = 1, 12
+            do L = 1, 12
                 TEMP = C(KX, L, I) * PIVOT
                 C(KX, L, I) = C(KPIV, L, I)
                 C(KPIV, L, I) = TEMP
-            133     CONTINUE
+            end do
             !
-            DO 134 L = 1, NRHS
+            do L = 1, NRHS
                 TEMP = R(KX, L, I) * PIVOT
                 R(KX, L, I) = R(KPIV, L, I)
                 R(KPIV, L, I) = TEMP
-            134     CONTINUE
+            end do
             !
             !-------- forward eliminate everything
-            DO 135 K = KP1, 12
+            do K = KP1, 12
                 ATMP = -A(K, KPIV, I)
                 IF(ATMP.EQ.0.0) GO TO 135
-                DO 1351 L = KP1, 12
+                do L = KP1, 12
                     A(K, L, I) = A(K, L, I) + ATMP * A(KPIV, L, I)
-                1351       CONTINUE
+                end do
                 C(K, 1, I) = C(K, 1, I) + ATMP * C(KPIV, 1, I)
                 C(K, 2, I) = C(K, 2, I) + ATMP * C(KPIV, 2, I)
                 C(K, 3, I) = C(K, 3, I) + ATMP * C(KPIV, 3, I)
@@ -1114,12 +1114,12 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                 C(K, 10, I) = C(K, 10, I) + ATMP * C(KPIV, 10, I)
                 C(K, 11, I) = C(K, 11, I) + ATMP * C(KPIV, 11, I)
                 C(K, 12, I) = C(K, 12, I) + ATMP * C(KPIV, 12, I)
-                DO 1352 L = 1, NRHS
+                do L = 1, NRHS
                     R(K, L, I) = R(K, L, I) + ATMP * R(KPIV, L, I)
-                1352       CONTINUE
-            135     CONTINUE
+                end do
+        135 end do
             !
-        13   CONTINUE
+        end do
         !
         !------ solve for last row
         IF(A(12, 12, I).EQ.0.0) THEN
@@ -1139,14 +1139,14 @@ SUBROUTINE B12SOL(A, B, C, R, II)
         C(12, 10, I) = C(12, 10, I) * PIVOT
         C(12, 11, I) = C(12, 11, I) * PIVOT
         C(12, 12, I) = C(12, 12, I) * PIVOT
-        DO 14 L = 1, NRHS
+        do L = 1, NRHS
             R(12, L, I) = R(12, L, I) * PIVOT
-        14   CONTINUE
+        end do
         !
         !------ back substitute everything
-        DO 15 KPIV = 10, 1, -1
+        do KPIV = 10, 1, -1
             KP1 = KPIV + 1
-            DO 151 K = KP1, 12
+            do K = KP1, 12
                 C(KPIV, 1, I) = C(KPIV, 1, I) - A(KPIV, K, I) * C(K, 1, I)
                 C(KPIV, 2, I) = C(KPIV, 2, I) - A(KPIV, K, I) * C(K, 2, I)
                 C(KPIV, 3, I) = C(KPIV, 3, I) - A(KPIV, K, I) * C(K, 3, I)
@@ -1159,18 +1159,18 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                 C(KPIV, 10, I) = C(KPIV, 10, I) - A(KPIV, K, I) * C(K, 10, I)
                 C(KPIV, 11, I) = C(KPIV, 11, I) - A(KPIV, K, I) * C(K, 11, I)
                 C(KPIV, 12, I) = C(KPIV, 12, I) - A(KPIV, K, I) * C(K, 12, I)
-                DO 1511 L = 1, NRHS
+                do L = 1, NRHS
                     R(KPIV, L, I) = R(KPIV, L, I) - A(KPIV, K, I) * R(K, L, I)
-                1511       CONTINUE
-            151     CONTINUE
-        15   CONTINUE
-    1 CONTINUE
+                end do
+            end do
+        end do
+    end do
     !
     !CC** Backward sweep: Back substitution using upper block diagonal (Ci's).
-    DO 2 I = II - 1, 1, -1
+    do I = II - 1, 1, -1
         IP = I + 1
-        DO 21 L = 1, NRHS
-            DO 211 K = 1, 12
+        do L = 1, NRHS
+            do K = 1, 12
                 R(K, L, I) = R(K, L, I)&
                         - (R(1, L, IP) * C(K, 1, I)&
                                 + R(2, L, IP) * C(K, 2, I)&
@@ -1184,9 +1184,9 @@ SUBROUTINE B12SOL(A, B, C, R, II)
                                 + R(10, L, IP) * C(K, 10, I)&
                                 + R(11, L, IP) * C(K, 11, I)&
                                 + R(12, L, IP) * C(K, 12, I))
-            211     CONTINUE
-        21   CONTINUE
-    2 CONTINUE
+            end do
+        end do
+    end do
     !
     RETURN
 END

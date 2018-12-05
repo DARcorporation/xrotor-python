@@ -442,7 +442,7 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
     THOBS = ATAN2(-YOBS, ZOBS)
     !
     !---- rotate one blade through 360 degrees in NT steps
-    DO 5 IT = 0, NT
+    do IT = 0, NT
         !
         !------ set rotation angle,  TH=0 is for blade vertical (along Z direction)
         TH = 2.0 * PI * FLOAT(IT) / FLOAT(NT) + THOBS + 0.5 * PI
@@ -454,7 +454,7 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
         TAU = TH / OMEGA
         !
         !------ go over blade elements at current rotation angle
-        DO 51 I = 1, II
+        do I = 1, II
             !
             XX = XI(I) / ADV
             !
@@ -563,8 +563,8 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
             TOB = TAU + R / VSO
             TEL(IT, I) = TOB - TDELAY
             !
-        51     CONTINUE
-    5    CONTINUE
+        end do
+    end do
     !
     !
     !---- make sure pressure is exactly periodic
@@ -594,18 +594,18 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
     ENDDO
     !
     !---- go over pressure components
-    DO 10 L = 1, 3
+    do L = 1, 3
         !------ periodic-spline p(t) for each blade element
         DO I = 1, II
             CALL PSPLIN(PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
         ENDDO
         !
         !------ set total acoustic p(t) by adding up all blade elements from all blades
-        DO 105 IT = 1, NT
+        do IT = 1, NT
             PSUM = 0.
             !
             !-------- go over all radial stations
-            DO 1055 I = 1, II
+            do I = 1, II
                 TEL0 = TEL(0, I)
                 TELN = TEL(NT, I)
                 !
@@ -626,16 +626,16 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
                     PSUM = PSUM&
                             + SEVAL(TOFF, PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
                 ENDDO
-            1055     CONTINUE
+            end do
             !
             !-------- set total pressure signal at current observer time
             PRES(IT, L) = PSUM
             !
-        105    CONTINUE
+        end do
         !
         !------ make sure pressure is exactly periodic
         PRES(0, L) = PRES(NT, L)
-    10   CONTINUE
+    end do
     !
     TIME0 = TIME(0)
     DO IT = 0, NT
@@ -678,29 +678,29 @@ SUBROUTINE SFT(Y, T, N, FAMPL, PHASE, NF)
     !
     OMEGA = 2.0 * PI / (T(N + 1) - T(1))
     !
-    DO 10 K = 1, NF
+    do K = 1, NF
         RK = FLOAT(K)
         !
-        DO 110 I = 1, N
+        do I = 1, N
             TK = OMEGA * RK * T(I)
             SINT(I) = SIN(TK)
             COST(I) = COS(TK)
-        110   CONTINUE
+        end do
         SINT(N + 1) = SINT(1)
         COST(N + 1) = COST(1)
         !
         SSUM = 0.
         CSUM = 0.
-        DO 120 IO = 1, N
+        do IO = 1, N
             IP = IO + 1
             DT = T(IP) - T(IO)
             SSUM = SSUM + 0.5 * (SINT(IO) * Y(IO) + SINT(IP) * Y(IP)) * DT
             CSUM = CSUM + 0.5 * (COST(IO) * Y(IO) + COST(IP) * Y(IP)) * DT
-        120   CONTINUE
+        end do
         !
         FAMPL(K) = SQRT(SSUM**2 + CSUM**2) * OMEGA / PI
         PHASE(K) = ATAN2(SSUM, CSUM)
-    10 CONTINUE
+    end do
     !
     RETURN
 END
@@ -715,7 +715,7 @@ SUBROUTINE PSPLIN(X, XP, S, II)
     IF(II.GT.480)     STOP 'PSPLIN: Array overflow'
     IF(X(II).NE.X(1)) STOP 'PSPLIN: Data not periodic'
     !
-    DO 1 I = 1, II - 1
+    do I = 1, II - 1
         !
         !------ Periodic point
         IF(I.EQ.1) THEN
@@ -737,7 +737,7 @@ SUBROUTINE PSPLIN(X, XP, S, II)
         C(I) = DSPI
         XP(I) = 3.0 * (DXP * DSPI**2 + DXM * DSMI**2)
         !
-    1    CONTINUE
+    end do
     !
     CALL PTRISO(A, B, C, XP, II - 1)
     !
@@ -751,7 +751,7 @@ SUBROUTINE PTRISO(A, B, C, D, KK)
     !
     DIMENSION A(KK), B(KK), C(KK), D(KK)
     !
-    DO 1 K = 2, KK
+    do K = 2, KK
         KM = K - 1
         AINV = 1.0 / A(KM)
         C(KM) = C(KM) * AINV
@@ -764,22 +764,22 @@ SUBROUTINE PTRISO(A, B, C, D, KK)
         ELSE
             A(K) = A(K) - B(K) * B(KM)
         ENDIF
-    1   CONTINUE
+    end do
     !
     C(KK) = C(KK) / A(KK)
     D(KK) = D(KK) / A(KK)
     !
-    DO 2 K = KK, 2, -1
+    do K = KK, 2, -1
         KM = K - 1
         D(KM) = D(KM) - C(KM) * D(K) - B(KM) * D(KK)
         C(KM) = - C(KM) * C(K) - B(KM) * C(KK)
-    2   CONTINUE
+    end do
     !
     D(1) = D(1) / (1.0 + C(1))
     !
-    DO 3 K = 2, KK
+    do K = 2, KK
         D(K) = D(K) - C(K) * D(1)
-    3   CONTINUE
+    end do
     !
     RETURN
 END
@@ -842,11 +842,11 @@ SUBROUTINE DBFOOT(NBLDS, II, XI, DXI, AOC, CH, GAM, &
     J0 = 1
     5    CONTINUE
     !
-    DO 10 I = 1, NX
+    do I = 1, NX
         WRITE(*, 1300) I, NX
         1300   FORMAT(5X, I3, ' /', I3)
         !
-        DO 105 J = J0, NY
+        do J = J0, NY
             !-------- set observer position assuming airplane is level
             XG = X(I, J) / UNITL
             YG = Y(I, J) / UNITL
@@ -876,7 +876,7 @@ SUBROUTINE DBFOOT(NBLDS, II, XI, DXI, AOC, CH, GAM, &
             PRMS = SQRT(PRMS / (TIME(NT) - TIME(0)))
             !
             D(I, J) = 20.0 * ALOG10(PRMS / 20.0E-6)
-        105    CONTINUE
+        end do
         !
         !------ set values for negative y by symmetry
         DO J = 1, J0 - 1
@@ -884,7 +884,7 @@ SUBROUTINE DBFOOT(NBLDS, II, XI, DXI, AOC, CH, GAM, &
             D(I, J) = D(I, JPOS)
         ENDDO
         !
-    10   CONTINUE
+    end do
     !
     RETURN
 END
