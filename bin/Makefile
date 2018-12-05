@@ -48,26 +48,26 @@ xrotor: $(XROTOROBJS)
 	$(FC) -o xrotor $(XROTOROBJS) $(LIBS)
 
 
-xrotor.o: $(SRC)/xrotor.f $(SRC)/XROTOR.INC
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xrotor.f
-xoper.o: $(SRC)/xoper.f $(SRC)/XROTOR.INC
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xoper.f
-xio.o: $(SRC)/xio.f $(SRC)/XROTOR.INC
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xio.f
-xaero.o: $(SRC)/xaero.f $(SRC)/XROTOR.INC
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xaero.f
-xnoise.o: $(SRC)/xnoise.f $(SRC)/XROTOR.INC
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xnoise.f
-xbend.o: $(SRC)/xbend.f $(SRC)/XROTOR.INC
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xbend.f
-xutils.o: $(SRC)/xutils.f
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xutils.f
-spline.o: $(SRC)/spline.f
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/spline.f
-userio.o: $(SRC)/userio.f
-	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/userio.f
-vortex.o: $(SRC)/vortex.f
-	$(FC) -c -I$(SRC) $(FFLOPT) $(SRC)/vortex.f
+xrotor.o: $(SRC)/xrotor.f90 $(SRC)/XROTOR.INC
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xrotor.f90
+xoper.o: $(SRC)/xoper.f90 $(SRC)/XROTOR.INC
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xoper.f90
+xio.o: $(SRC)/xio.f90 $(SRC)/XROTOR.INC
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xio.f90
+xaero.o: $(SRC)/xaero.f90 $(SRC)/XROTOR.INC
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xaero.f90
+xnoise.o: $(SRC)/xnoise.f90 $(SRC)/XROTOR.INC
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xnoise.f90
+xbend.o: $(SRC)/xbend.f90 $(SRC)/XROTOR.INC
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xbend.f90
+xutils.o: $(SRC)/xutils.f90
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/xutils.f90
+spline.o: $(SRC)/spline.f90
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/spline.f90
+userio.o: $(SRC)/userio.f90
+	$(FC) -c -I$(SRC) $(FFLAGS) $(SRC)/userio.f90
+vortex.o: $(SRC)/vortex.f90
+	$(FC) -c -I$(SRC) $(FFLOPT) $(SRC)/vortex.f90
 
 
 
