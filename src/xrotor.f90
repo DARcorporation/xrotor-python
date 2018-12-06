@@ -18,7 +18,7 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 !
-PROGRAM XROTOR
+SUBROUTINE XROTOR
     !
     !--- module statement for Windoze DVFortran
     !cc   USE DFLIB
