@@ -19,7 +19,6 @@ module common
     DIMENSION Q(IQ, IQ)
     !
     !
-    LOGICAL LPLOT, LGRID, LLAND, LCURS, LSLOPE
     CHARACTER*80 SAVFIL, FNAME
     CHARACTER*32 NAME
     !
@@ -28,8 +27,6 @@ module common
     LOGICAL CONV, GREEK, TERSE, VRTX, FAST, FREE, DUCT, LSTRUC, &
             LDESINI, LOPRINI, LROTOR, LVNORM, LPWRVAR, &
             WIND, DEST, DESP, STALL(IX), LEGEND
-    !
-    COMMON/CHAR_X/ SAVFIL, FNAME, NAME
     !
     REAL RHO, RMU, VSO, VEL, RAD, GEE, ALT
     !
@@ -93,12 +90,6 @@ module common
             W5(IWX), W6(IWX), W7(IWX), W8(IWX), W9(IWX), &
             T0(IWX), T1(IWX), T2(IWX), T3(IWX), T4(IWX), &
             T5(IWX), T6(IWX), T7(IWX), T8(IWX), T9(IWX)
-    !
-    INTEGER IDEV, IDEVRP, IPSLU, NCOLOR
-    REAL SIZE, SCRNFR, PAR, CSIZE, &
-            XWIND, YWIND, &
-            XPAGE, YPAGE, XMARG, YMARG, &
-            XYOFF(2), XYFAC(2)
     !
     REAL RADDES, VELDES, ADVDES, RPMDES, R0DES, RWDES, &
             TDDES, PDDES, &
@@ -300,26 +291,6 @@ module common
     !
     !   W0-9(.)     Temporary work arrays
     !   T0-9(.)     Temporary work arrays
-    !
-    !   SIZE        Plot width in inches
-    !   SCRNFR      Fraction of screen taken up by graphics window
-    !   PAR         Plot height/width aspect ratio
-    !   CSIZE       Character size/plot width ratio
-    !   XWIND,YWIND Dimensions of X-window
-    !   XPAGE,YPAGE Dimensions of PostScript output page
-    !   XMARG,YMARG Margins on plot page
-    !   XYOFF(.)    x,y plot offsets  for current x-y plot, if any
-    !   XYFAC(.)    x,y scale factors for current x-y plot, if any
-    !
-    !   IDEV        Screen window flag
-    !   IDEVRP      Replotting flag
-    !   IPSLU       PostScript output-file flag
-    !   NCOLOR      Number of colors in spectrum
-    !
-    !   LPLOT       T if a plot is active
-    !   LGRID       T if grid is to be overlaid on x,y plots
-    !   LLAND       T if plots are in Landscape mode
-    !   LSLOPE      T if slope matching is to be used in cursor-modifications
     !
     !   RADDES      Design rotor radius             (dimensioned)
     !   VELDES      Design speed                    (dimensioned)

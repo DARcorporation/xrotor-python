@@ -204,12 +204,6 @@ SUBROUTINE INIT
         IAERO(I) = 0
     END DO
     !
-    !---- no x-y plot active yat
-    XYOFF(1) = 0.
-    XYOFF(2) = 0.
-    XYFAC(1) = 0.
-    XYFAC(2) = 0.
-    !
     RETURN
 END
 ! INIT
@@ -267,13 +261,8 @@ SUBROUTINE SETDEF
     DUCT = .FALSE.  ! Ducted (T)             / Free-tip (F)  flag
     !
     TERSE = .FALSE.  ! terse-output flag
-    LLAND = .TRUE.   ! landscape-mode plot flag
-    LGRID = .TRUE.   ! grid plotting flag
     !
     LVNORM = .TRUE.  ! flight speed used for normalization
-    !
-    PAR = 0.6        ! plot aspect ratio
-    CSIZE = 0.014    ! character size / plot-width
     !
     RETURN
 END
