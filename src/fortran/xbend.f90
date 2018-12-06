@@ -19,7 +19,8 @@
 !***********************************************************************
 !
 SUBROUTINE BEND
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     CHARACTER*4 COMAND
     CHARACTER*132 COMARG
     !
@@ -168,7 +169,8 @@ END
 
 
 SUBROUTINE EILOAD(FNAME1)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     CHARACTER*(*) FNAME1
     DIMENSION XT(IX)
     !----------------------------------------------------
@@ -265,7 +267,8 @@ END
 
 
 SUBROUTINE STCLR
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     do I = 1, II
         TX(I) = 0.0
@@ -288,7 +291,8 @@ END
 
 
 SUBROUTINE MCLR
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     do I = 1, II
         MB(I) = 0.0
@@ -303,7 +307,8 @@ END
 
 
 SUBROUTINE STLOAD
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !-----------------------------------------------------------
     !     Calculates force and moment loadings along blade.
     ! HHY 3/99 a local x',y',z' system is assumed that is tilted by
@@ -440,7 +445,8 @@ END
 
 
 SUBROUTINE STCALC
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !------------------------------------------------------------
     !     Updates resultants and deflections along blade.
     !     Uses current loading distributions PX,PY,PZ, MX,MY,MZ.
@@ -854,7 +860,8 @@ END
 
 
 SUBROUTINE STADD
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !------------------------------------------------------
     !     Adds on structural twist to static blade angles
     !------------------------------------------------------
@@ -875,7 +882,8 @@ END
 
 
 SUBROUTINE STSET
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !------------------------------------------------------
     !     Removes structural twist to get static blade angles
     !------------------------------------------------------
@@ -897,7 +905,8 @@ END
 
 
 SUBROUTINE STWRIT(LU)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !---------------------------------------------
     !     Dumps blade force output to unit LU
     !---------------------------------------------

@@ -18,12 +18,13 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 !
-SUBROUTINE XROTOR
+PROGRAM XROTOR
     !
     !--- module statement for Windoze DVFortran
     !cc   USE DFLIB
     !
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     CHARACTER*7 COMAND
     CHARACTER*128 COMARG
     !
@@ -131,7 +132,8 @@ END
 
 
 SUBROUTINE INIT
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !--------------------------------------
     !     Initializes everything
     !--------------------------------------
@@ -215,7 +217,8 @@ END
 
 
 SUBROUTINE SETDEF
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     !---- hard-wired start-up defaults
     !ccIHI
@@ -396,7 +399,8 @@ END
 
 
 SUBROUTINE REINIT
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     LOGICAL YES
     !-----------------------------------------------
     !     Re-initializes advance ratio and gammas
@@ -437,7 +441,8 @@ END
 ! REINIT
 
 SUBROUTINE SETX
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     !-------------------------------------------------------
     !     Fills stretched radial coordinate array X (and XV)
@@ -536,7 +541,8 @@ END
 
 
 SUBROUTINE OUTPUT(LU)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     LOGICAL LHELI
     CHARACTER*1 SCHAR
     !---------------------------------------------
@@ -746,7 +752,8 @@ END
 
 
 SUBROUTINE UVADD(XIW, WA, WT)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     WA = 0.0
     WT = 0.0

@@ -25,7 +25,8 @@ SUBROUTINE LOAD(FNAME1)
     !     This format saves more information and can have optional comment
     !     lines beginning with a ! character.
     !------------------------------------------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     CHARACTER*(*) FNAME1
     CHARACTER*128 LINE
     GREEK = .FALSE.

@@ -3,6 +3,7 @@ project(xrotor Fortran)
 
 enable_language(Fortran)
 add_executable(xrotor
+        src/fortran/common.f90
         src/fortran/spline.f90
         src/fortran/userio.f90
         src/fortran/vortex.f90

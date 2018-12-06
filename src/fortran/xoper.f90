@@ -19,7 +19,8 @@
 !***********************************************************************
 
 SUBROUTINE OPER
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     CHARACTER*4 COMAND, ANS
     CHARACTER*132 COMARG, ANSARG
     CHARACTER*1 CHKEY
@@ -917,7 +918,8 @@ END
 
 
 SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     DIMENSION RINPUT(*)
     !---------------------------------------------------
     !     Sets operating parameters over a range
@@ -1226,7 +1228,8 @@ END
 
 
 SUBROUTINE APER(ISPEC, ICON, LINIT)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     LOGICAL LINIT
     !-------------------------------------------
     !     Sets reasonable initial circulation.
@@ -1266,7 +1269,8 @@ END
 
 
 SUBROUTINE APINIT
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !---------------------------------------------------------
     !     Sets reasonable initial circulation.
     !     Initial circulations are set w/o induced effects
@@ -1495,7 +1499,8 @@ SUBROUTINE APITER(ISPEC, ICON)
     !       ICON = 1    Advance ratio(rpm) fixed
     !       ICON = 2    Blade pitch fixed
     !-------------------------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     DIMENSION CLMAX(IX), CLMIN(IX), DCLSTALL(IX)
     !
     !---- convergence tolerance
@@ -1870,7 +1875,8 @@ SUBROUTINE CSCALC(I, UTOT, WA, WT, &
     !
     !---- Calculate velocity components at radial station I on real prop
     !
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     VT = VIND(3, I)
     VT_ADW = VIND_ADW(3, I)
@@ -1922,7 +1928,8 @@ END
 
 
 SUBROUTINE XWINIT
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !------------------------------------------------------------
     !     Initial estimate for equivalent prop radial coordinate
     !     array (XW)
@@ -1966,7 +1973,8 @@ END
 
 
 SUBROUTINE SETXW
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     REAL XWM_GAM(IX), Z_GAM(IX)
     !---------------------------------------------------------------------
     !     Calculates Xw (radial coordinate) and Vwak (Vtheta) for
@@ -2143,7 +2151,8 @@ END
 
 
 SUBROUTINE TPQ(ITYPE)
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !----------------------------------------------------------
     !     Sets Thrust, Torque, Power, and their sensitivities
     !     wrt  beta, chord(i), Vtan(i), and lambda
@@ -2612,7 +2621,8 @@ END
 
 
 SUBROUTINE VCALC
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !---------------------------------------------
     !     Calculates cartesian induced velocities
     !---------------------------------------------

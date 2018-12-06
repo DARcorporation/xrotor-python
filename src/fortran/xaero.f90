@@ -46,7 +46,8 @@ SUBROUTINE SETIAERO
     !     Sets up indices referring to aero section for
     !     each radial station
     !--------------------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     !--- Find lower index of aero data sections XIAERO(N) bounding XI(IS)
     DO I = 1, II
@@ -67,7 +68,8 @@ SUBROUTINE PUTAERO(N, XISECT, A0, CLMAX, CLMIN, &
     !--------------------------------------------------------
     !     Puts aero data into stored section array at index N
     !--------------------------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     IF(N > NAX) THEN
         WRITE(*, *) 'Too many aero sections defined...'
@@ -110,7 +112,8 @@ SUBROUTINE GETCLCDCM(IS, ALF, W, REY, &
     !      CD(alpha),
     !       CM(alpha) interpolation function for blade at station IS
     !-------------------------------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     LOGICAL STALLF, STALLF2
     !
     !--- Check for installed aero data section index
@@ -214,7 +217,8 @@ SUBROUTINE GETALF(IS, CLIFT, W, ALF, ALF_CL, ALF_W, STALLF)
     !     Inverse alpha(CL) function
     !     Uses Newton-Raphson iteration to get ALF from CL function
     !------------------------------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     LOGICAL STALLF
     DATA NITER / 10 /
     DATA EPS   / 1.0E-5 /
@@ -283,7 +287,8 @@ SUBROUTINE CLCDCM(ALF, W, REY, &
     !     varying only with Mach by Prandtl-Glauert scaling
     !------------------------------------------------------------
     !
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     LOGICAL STALLF
     DOUBLE PRECISION ECMIN, ECMAX
     !

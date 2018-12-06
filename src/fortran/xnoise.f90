@@ -24,7 +24,8 @@ SUBROUTINE NOISE
     !     time history of the propeller
     !     at specified observer positions.
     !---------------------------------------
-    INCLUDE 'XROTOR.INC'
+    USE common
+    IMPLICIT REAL (M)
     !
     PARAMETER (NTX = 160)
     PARAMETER (NHARX = NTX / 2)
