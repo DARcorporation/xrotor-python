@@ -10,8 +10,8 @@ been removed. The only main menu options that are available in this stripped dow
 * DISP, which displays the current propeller characteristics data onscreen.
 
 This repo can be used in two ways:
-1 The stripped down version of XROTOR can be build as a standalone console application, like to original XROTOR program;
-2 A python module can be build, which allows for all subroutines to be called directly from python.
+ 1. The stripped down version of XROTOR can be build as a standalone console application, like to original XROTOR program;
+ 2. A python module can be build, which allows for all subroutines to be called directly from python.
 
 Building the Console Application
 --------------------------------
