@@ -19,6 +19,10 @@
 !***********************************************************************
 !
 PROGRAM XROTOR
+   CALL ROTOR()
+END
+
+SUBROUTINE ROTOR
     !
     !--- module statement for Windoze DVFortran
     !cc   USE DFLIB
@@ -128,7 +132,7 @@ PROGRAM XROTOR
             /'   LOAD f Read rotor from restart file'&
             /'   DISP   Display current design point')
 END
-! XROTOR
+! ROTOR
 
 
 SUBROUTINE INIT
