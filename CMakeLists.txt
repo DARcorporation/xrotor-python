@@ -3,13 +3,13 @@ project(xrotor Fortran)
 
 enable_language(Fortran)
 add_executable(xrotor
-        src/spline.f90
-        src/userio.f90
-        src/vortex.f90
-        src/xaero.f90
-        src/xbend.f90
-        src/xio.f90
-        src/xnoise.f90
-        src/xoper.f90
-        src/xrotor.f90
-        src/xutils.f90)
+        src/fortran/spline.f90
+        src/fortran/userio.f90
+        src/fortran/vortex.f90
+        src/fortran/xaero.f90
+        src/fortran/xbend.f90
+        src/fortran/xio.f90
+        src/fortran/xnoise.f90
+        src/fortran/xoper.f90
+        src/fortran/xrotor.f90
+        src/fortran/xutils.f90)
