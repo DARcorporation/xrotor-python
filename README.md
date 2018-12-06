@@ -1,7 +1,7 @@
 
 General
 -------
-This is a containerized, stripped down version of XROTOR. All the modification, design, and graphical functionality has
+This is a stripped down version of XROTOR. All the modification, design, and graphical functionality has
 been removed. The only main menu options that are available in this stripped down version are:
 * OPER, which allows for the calculation of performance characteristics at given operating conditions;
 * BEND, which allows for the calculation of structural loads and deformations;
@@ -9,22 +9,29 @@ been removed. The only main menu options that are available in this stripped dow
 * LOAD, which loads a propeller definition file; and
 * DISP, which displays the current propeller characteristics data onscreen.
 
-Installation
-------------
-The installation is straightforward thanks to the containerization. The only requirement is that [Docker]() is installed
-on the system and that the `docker` command is in the `PATH` of whichever console environment is used. 
-Then simply type:
-```bash
-docker build -t xrotor .
-docker run -it xrotor
+This repo can be used in two ways:
+1 The stripped down version of XROTOR can be build as a standalone console application, like to original XROTOR program;
+2 A python module can be build, which allows for all subroutines to be called directly from python.
+
+Building the Console Application
+--------------------------------
+CMake is used to manage the building of the console application. Make sure CMake is available on the PATH, and that it 
+is able to find a suitable Fortran 90 compiler. Then run the following command from the root of this repo:
 ```
-The first of these two commands will build the Docker image, installing all dependencies and building and installing
-XROTOR. The `-t xrotor` option tags the container image with 'xrotor'. The second command starts the container and 
-presents the user with a interactive shell. Through this shell, XROTOR can be started simply by entering the command
- `xrotor`.
- 
- The container can be stopped using `CTRL-C` on any UNIX system (e.g. Linux, Mac OSx). On Windows machines, however, 
- this will only cause the terminal to exit the container's shell. To actually stop the container, Windows users should 
- therefore also issue the command `docker stop xrotor` after they exit the container's shell.
- 
+cmake --build path/to/output/dir --target xrotor
+```
+The compiled application will be created in the directory pointed to by `path/to/output/dir`.
+
+Building the python module
+--------------------------
+Make sure a working version of python is installed and on the path. Make sure Numpy is installed for this python 
+environment. Then run the following command from the root of this repo:
+```
+python setup.py build
+```
+The module library will be created under `build/lib` as a `.pyd` file. This file can be copied to a suitable location
+and can be imported as if it were any old python module. Note that the `lib` directory may be post-fixed with the 
+architecture the build was performed on (for example, `lib.win-amd64-3.6`). The `.pyd` file is also likely to be 
+post-fixed. Note, however, that it can simply be imported in python using `import xrotor`, without specifying the 
+post-fix.
  
