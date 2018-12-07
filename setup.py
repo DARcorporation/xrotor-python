@@ -1,9 +1,9 @@
 import glob
-from numpy.distutils.core import Extension
+from numpy.distutils.core import Extension, setup
 
-ext = Extension(name='xrotor', sources=glob.glob("src/fortran/*.f90"), extra_f90_compile_args=['-Ofast'])
+flib = Extension(name='xrotor.flib', sources=glob.glob("src_fortran/*.f90"), extra_f90_compile_args=['-Ofast'])
 
 if __name__ == '__main__':
-    from numpy.distutils.core import setup
-    setup(name='example',
-          ext_modules=[ext])
+    setup(name='xrotor',
+          packages=['xrotor'],
+          ext_modules=[flib])
