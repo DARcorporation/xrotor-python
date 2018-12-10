@@ -22,8 +22,8 @@ PROGRAM XROTOR
    CALL ROTOR()
 END
 
-SUBROUTINE ROTOR
-    !
+SUBROUTINE ROTOR    !
+
     !--- module statement for Windoze DVFortran
     !cc   USE DFLIB
     !
@@ -108,6 +108,7 @@ SUBROUTINE ROTOR
     !
     IF(COMAND == 'OPER') CALL OPER
     IF(COMAND == 'BEND') CALL BEND
+    IF(COMAND == 'SAVE') CALL SAVE(COMARG)
     IF(COMAND == 'LOAD') CALL LOAD(COMARG)
     IF(COMAND == 'NOIS') CALL NOISE
     IF(COMAND == 'DISP') GO TO 100
@@ -129,6 +130,7 @@ SUBROUTINE ROTOR
             /'  .OPER   Calculate off-design operating points'&
             /'  .BEND   Calculate structural loads and deflections'&
             /'  .NOIS   Calculate and plot acoustic signature'&
+            /'   SAVE f Save rotor to restart file'&
             /'   LOAD f Read rotor from restart file'&
             /'   DISP   Display current design point')
 END

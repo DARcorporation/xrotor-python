@@ -61,6 +61,37 @@ SUBROUTINE SETIAERO
     RETURN
 END
 
+SUBROUTINE GETAERO(N, XISECT, A0, CLMAX, CLMIN, &
+        DCLDA, DCLDA_STALL, DCL_STALL, &
+        CDMIN, CLDMIN, DCDCL2, CMCON, MCRIT, REREF, REXP)
+    !---------------------------------------------
+    !     Gets aero data from stored section array
+    !---------------------------------------------
+    USE common
+    IMPLICIT REAL(M)
+    !
+    IF(N < 1 .OR. N > NAERO) THEN
+        WRITE(*, *) 'Error: index of aero section out of bounds'
+        RETURN
+    ENDIF
+    !
+    A0 = AERODATA(1, N)
+    CLMAX = AERODATA(2, N)
+    CLMIN = AERODATA(3, N)
+    DCLDA = AERODATA(4, N)
+    DCLDA_STALL = AERODATA(5, N)
+    DCL_STALL = AERODATA(6, N)
+    CDMIN = AERODATA(7, N)
+    CLDMIN = AERODATA(8, N)
+    DCDCL2 = AERODATA(9, N)
+    CMCON = AERODATA(10, N)
+    REREF = AERODATA(11, N)
+    REXP = AERODATA(12, N)
+    MCRIT = AERODATA(13, N)
+    XISECT = XIAERO(N)
+    !
+    RETURN
+END
 
 SUBROUTINE PUTAERO(N, XISECT, A0, CLMAX, CLMIN, &
         DCLDA, DCLDA_STALL, DCL_STALL, &
