@@ -151,6 +151,25 @@ SUBROUTINE LOAD(FNAME1)
         24     FORMAT(A)
     ENDIF
     !
+    200 WRITE(*, 1010) FNAME(1:32)
+    RETURN
+    !
+    210 WRITE(*, 1020) FNAME(1:32)
+    CLOSE(LU)
+    CONV = .FALSE.
+    RETURN
+    !..............................
+    1000 FORMAT(A)
+    1005 FORMAT(' Reading file from XROTOR Version ', F5.2)
+    1010 FORMAT(' File  ', A, ' not found'/)
+    1020 FORMAT(' File  ', A, ' has incompatible format'/&
+            ' Loading not completed'/)
+    !
+END
+
+SUBROUTINE INITCASE
+    USE common
+    IMPLICIT REAL (M)
     !---- spline blade geometry to "old" radial locations
     DO I = 1, IIX
         W1(I) = XI(I)
@@ -200,20 +219,6 @@ SUBROUTINE LOAD(FNAME1)
     !---- rotor now exists
     LROTOR = .TRUE.
     RETURN
-    !
-    200 WRITE(*, 1010) FNAME(1:32)
-    RETURN
-    !
-    210 WRITE(*, 1020) FNAME(1:32)
-    CLOSE(LU)
-    CONV = .FALSE.
-    RETURN
-    !..............................
-    1000 FORMAT(A)
-    1005 FORMAT(' Reading file from XROTOR Version ', F5.2)
-    1010 FORMAT(' File  ', A, ' not found'/)
-    1020 FORMAT(' File  ', A, ' has incompatible format'/&
-            ' Loading not completed'/)
 END
 ! LOAD
 
