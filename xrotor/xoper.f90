@@ -285,7 +285,6 @@ SUBROUTINE OPER
     !
     CONV = .FALSE.
     BSAV = BETA(II)
-    CALL OUTPUT(LUWRIT)
     IF(ANS == 'P') CALL APER(1, 2, LOPRINI)
     IF(ANS == 'R') THEN
         CALL ASKR('rpm:^', RPM)
