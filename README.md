@@ -6,7 +6,8 @@ been removed. The only main menu options that are available in this stripped dow
 * OPER, which allows for the calculation of performance characteristics at given operating conditions;
 * BEND, which allows for the calculation of structural loads and deformations;
 * NOIS, which allows for the calculation of the acoustic signature;
-* LOAD, which loads a propeller definition file; and
+* LOAD, which loads a propeller definition file from the disk;
+* SAVE, which saves a propeller definition file to the disk; and
 * DISP, which displays the current propeller characteristics data onscreen.
 
 Installing the Python Module
