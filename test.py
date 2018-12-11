@@ -2,85 +2,106 @@ import numpy as np
 import unittest
 import xrotor
 
-conditions = {'rho': 1.2260,
-              'vso': 340.00,
-              'mu' : 0.17800E-04,
-              'alt': 999.00,
-              'vel': 0.70000,
-              'adv': 0.60000}
-
-aero = {'a0': 0.00000E+00, 'dclda': 5.0000, 'clmax': 1.5000, 'clmin': -1.0000,
-        'dclda_stall': 0.10000, 'dcl_stall': 0.10000, 'cm': -0.10000, 'mcrit': 0.80000,
-        'cdmin': 0.44000E-01, 'clcdmin': 0.20000, 'dcddcl2': 0.60000E-01,
-        're': 5000.0, 'reexp': -0.50000}
-
-distr = np.array([
-    [0.26168E-01, 0.17808E-01, 93.391, 0.00000E+00],
-    [0.78432E-01, 0.52674E-01, 88.750, 0.00000E+00],
-    [0.13048, 0.85299E-01, 84.219, 0.00000E+00],
-    [0.18217, 0.11449, 79.858, 0.00000E+00],
-    [0.23337, 0.13943, 75.716, 0.00000E+00],
-    [0.28392, 0.15973, 71.830, 0.00000E+00],
-    [0.33369, 0.17534, 68.218, 0.00000E+00],
-    [0.38255, 0.18649, 64.889, 0.00000E+00],
-    [0.43036, 0.19358, 61.840, 0.00000E+00],
-    [0.47700, 0.19710, 59.063, 0.00000E+00],
-    [0.52232, 0.19755, 56.542, 0.00000E+00],
-    [0.56621, 0.19543, 54.262, 0.00000E+00],
-    [0.60855, 0.19118, 52.204, 0.00000E+00],
-    [0.64923, 0.18520, 50.351, 0.00000E+00],
-    [0.68812, 0.17781, 48.686, 0.00000E+00],
-    [0.72513, 0.16931, 47.193, 0.00000E+00],
-    [0.76015, 0.15992, 45.856, 0.00000E+00],
-    [0.79308, 0.14983, 44.663, 0.00000E+00],
-    [0.82384, 0.13920, 43.602, 0.00000E+00],
-    [0.85235, 0.12816, 42.662, 0.00000E+00],
-    [0.87852, 0.11681, 41.833, 0.00000E+00],
-    [0.90228, 0.10523, 41.108, 0.00000E+00],
-    [0.92356, 0.93494E-01, 40.480, 0.00000E+00],
-    [0.94232, 0.81664E-01, 39.943, 0.00000E+00],
-    [0.95849, 0.69801E-01, 39.491, 0.00000E+00],
-    [0.97204, 0.57980E-01, 39.120, 0.00000E+00],
-    [0.98292, 0.46330E-01, 38.828, 0.00000E+00],
-    [0.99111, 0.35193E-01, 38.611, 0.00000E+00],
-    [0.99658, 0.25575E-01, 38.467, 0.00000E+00],
-    [0.99931, 0.19616E-01, 38.396, 0.00000E+00]
-])
-
-case = {'name': 'test',
-        'free': True, 'duct': False, 'wind': False,
-        'conditions': conditions,
-        'disk': {'nblds': 2,
-                 'blade': {'sections': {0: aero},
-                           'geom': {'r_hub' : 0.00000E+00,
-                                    'r_tip' : 0.30000,
-                                    'r_wake': 0.00000E+00,
-                                    'rake'  : 0.00000E+00,
-                                    'radii' : distr[:, 0],
-                                    'chord' : distr[:, 1],
-                                    'twist' : distr[:, 2]
-                                    }
-                           }
-                 }
-
+case = {
+    'name': 'Test Propeller',
+    'free': True, 'duct': False, 'wind': False,
+    'conditions': {
+        # Standard atmosphere at sea level
+        'rho': 1.225,
+        'vso': 340,
+        'mu' : 1.789e-5,
+        'alt': 1,
+        # Operating conditions in accordance with NACA TR 212 (V = 200 mph, RPM = 2000, R_tip = 32.75 inches)
+        # adv = V / (Omega * R) = V / (RPM * pi/30 * R)
+        'vel': 27,
+        'adv': 0.15
+    },
+    'disk': {
+        'nblds': 2,
+        'blade': {
+            'sections': {
+                0: {
+                    # NACA 6412 at Re = 500,000
+                    'a0': -4.5,
+                    'dclda': 6,
+                    'clmax': 1,
+                    'clmin': -0.1,
+                    'dclda_stall': 1.2,
+                    'dcl_stall': 0.14,
+                    'cm': -0.08,
+                    'mcrit': 0.6,
+                    'cdmin': 0.018,
+                    'clcdmin': 0.57,
+                    'dcddcl2': 0.16,
+                    're': 5000000,
+                    'reexp': -0.5
+                }
+            },
+            'geom': {
+                # Geometry of the example prop. in NACA TR 212
+                'r_hub' : 0.06,
+                'r_tip' : 0.83,
+                'r_wake': 0.0,
+                'rake'  : 0.0,
+                'radii' : np.array([0.15, 0.30, 0.45, 0.60, 0.75, 0.90]),
+                'chord' : np.array([0.15, 0.16, 0.17, 0.16, 0.13, 0.09]),
+                'twist' : np.array([50.0, 30.7, 21.6, 16.5, 13.4, 11.3])
+            }
         }
+    }
+
+}
+
+
+def print_perf(perf):
+    print('\nrpm: {:10.3G}, thrust(N): {:10.8G}, torque(Nm): {:10.8G}, power(W): {:10.8G}, eff: {:10.9G}'
+          .format(perf['rpm'], perf['thrust'], perf['torque'], perf['power'], perf['efficiency']))
 
 
 class TestXRotor(unittest.TestCase):
+    """Test whether the XROTOR module functions properly."""
 
     def test_solve_for_rpm(self):
+        """Run the test case at an RPM of 2000 and make sure the performance results match the expected values.
+
+        Expected performance at 2000 rev/min:
+             - Thrust     : T ≈   481 N
+             - Torque     : Q ≈   105 Nm
+             - Power      : P ≈ 21908 W
+             - Efficiency : η ≈ 0.5933
+        """
         xrotor.set_case(case)
-        self.assertTrue(xrotor.operate(rpm=1000), 'XROTOR did not converge')
+        self.assertTrue(xrotor.operate(rpm=2000), 'XROTOR did not converge')
         perf = xrotor.get_performance()
 
-        print('\nrpm: {:10.3G}, thrust(N): {:10.8G}, torque(Nm): {:10.8G}, power(W): {:10.8G}, eff: {:10.9G}'
-              .format(perf['rpm'], perf['thrust'], perf['torque'], perf['power'], perf['efficiency']))
+        print_perf(perf)
 
-        self.assertAlmostEqual(perf['rpm'], 1000, 0)
-        self.assertAlmostEqual(perf['thrust'], 6.98, 2)
-        self.assertAlmostEqual(perf['torque'], 0.57, 2)
-        self.assertAlmostEqual(perf['power'], 60.08, 2)
-        self.assertAlmostEqual(perf['efficiency'], 0.0813, 4)
+        self.assertAlmostEqual(perf['rpm'], 2000, 0)
+        self.assertAlmostEqual(perf['thrust'], 481, 0)
+        self.assertAlmostEqual(perf['torque'], 105, 0)
+        self.assertAlmostEqual(perf['power'], 21908, 0)
+        self.assertAlmostEqual(perf['efficiency'], 0.5933, 4)
+
+    def test_solve_for_thrust(self):
+        """Run the test case at a thrust of 500 N and make sure the performance results match the expected values.
+
+        Expected performance for a thrust of 500 N:
+            - RPM        : Ω ≈  2019 rev/min
+            - Torque     : Q ≈   107 Nm
+            - Power      : P ≈ 22642 W
+            - Efficiency : η ≈ 0.5962
+        """
+        xrotor.set_case(case)
+        self.assertTrue(xrotor.operate(thrust=500), 'XROTOR did not converge')
+        perf = xrotor.get_performance()
+
+        print_perf(perf)
+
+        self.assertAlmostEqual(perf['rpm'], 2019, 0)
+        self.assertAlmostEqual(perf['thrust'], 500, 0)
+        self.assertAlmostEqual(perf['torque'], 107, 0)
+        self.assertAlmostEqual(perf['power'], 22642, 0)
+        self.assertAlmostEqual(perf['efficiency'], 0.5962, 4)
 
 
 if __name__ == '__main__':
