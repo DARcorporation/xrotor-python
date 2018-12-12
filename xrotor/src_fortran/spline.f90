@@ -74,97 +74,97 @@ contains
         call trisol(a, b, c, xs, n)
     end
     ! spline
+
+    function splind(s, x, xs1, xs2) result(xs)
+        real, intent(in) :: s(:), x(:), xs1, xs2
+        real, allocatable :: xs(:), a(:), b(:), c(:)
+
+        integer :: i, n
+        real :: dsm, dsp
+        !-------------------------------------------------------
+        !     Calculates spline coefficients for x(s).          |
+        !     Specified 1st derivative and/or zero 2nd          |
+        !     or 3rd derivative end conditions can be used.     |
+        !     To evaluate the spline at some value of s,        |
+        !     use seval and/or deval.                           |
+        !                                                       |
+        !     s        independent variable array (input)       |
+        !     x        dependent variable array   (input)       |
+        !     xs       dx/ds array                (calculated)  |
+        !     n        number of points           (input)       |
+        !     xs1,xs2  endpoint derivatives       (input)       |
+        !              If =  999.0, use zero 2nd derivative     |
+        !              If = -999.0, use zero 3rd derivative     |
+        !                                                       |
+        !-------------------------------------------------------
+        n = min(size(s), size(x))
+        allocate (xs(n))
+
+        if (n == 1) then
+            xs(1) = 0.
+            return
+        end if
+
+        allocate (a(n), b(n), c(n))
+
+        do i = 2, n - 1
+            dsm = s(i) - s(i - 1)
+            dsp = s(i + 1) - s(i)
+            b(i) = dsp
+            a(i) = 2.0 * (dsm + dsp)
+            c(i) = dsm
+            xs(i) = 3.0 * ((x(i + 1) - x(i)) * dsm / dsp + (x(i) - x(i - 1)) * dsp / dsm)
+        end do
+
+        !---- set left end condition
+        if(xs1 == 999.0) then
+            !----- zero 2nd derivative
+            a(1) = 2.0
+            c(1) = 1.0
+            xs(1) = 3.0 * (x(2) - x(1)) / (s(2) - s(1))
+        else if(xs1 == -999.0) then
+            !----- set zero 3rd derivative
+            a(1) = 1.0
+            c(1) = 1.0
+            xs(1) = 2.0 * (x(2) - x(1)) / (s(2) - s(1))
+        else
+            !----- specified 1st derivative
+            a(1) = 1.0
+            c(1) = 0.
+            xs(1) = xs1
+        endif
+
+        !---- set right end condition
+        if(xs2 == 999.0) then
+            !----- zero 2nd derivative
+            b(n) = 1.0
+            a(n) = 2.0
+            xs(n) = 3.0 * (x(n) - x(n - 1)) / (s(n) - s(n - 1))
+        else if(xs2 == -999.0) then
+            !----- zero 3rd derivative
+            b(n) = 1.0
+            a(n) = 1.0
+            xs(n) = 2.0 * (x(n) - x(n - 1)) / (s(n) - s(n - 1))
+        else
+            !----- specified 1st derivative
+            a(n) = 1.0
+            b(n) = 0.
+            xs(n) = xs2
+        endif
+
+        !---- if only two points, cannot have zero third derivatives at both ends
+        if(n == 2 .and. xs1 == -999.0 .and. xs2 == -999.0) then
+            !----- set zero 2nd derivative at right end (left end will also be zero)
+            b(n) = 1.0
+            a(n) = 2.0
+            xs(n) = 3.0 * (x(n) - x(n - 1)) / (s(n) - s(n - 1))
+        endif
+
+        !---- solve for derivative array xs
+        call trisol(a, b, c, xs, n)
+    end
+    ! splind
 end module mod_spline
-
-
-SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION X(N), XS(N), S(N)
-    PARAMETER (NMAX = 1000)
-    COMMON /SPLCOM/ A(NMAX), B(NMAX), C(NMAX)
-    !-------------------------------------------------------
-    !     Calculates spline coefficients for X(S).          |
-    !     Specified 1st derivative and/or zero 2nd          |
-    !     or 3rd derivative end conditions can be used.     |
-    !     To evaluate the spline at some value of S,        |
-    !     use SEVAL and/or DEVAL.                           |
-    !                                                       |
-    !     S        independent variable array (input)       |
-    !     X        dependent variable array   (input)       |
-    !     XS       dX/dS array                (calculated)  |
-    !     N        number of points           (input)       |
-    !     XS1,XS2  endpoint derivatives       (input)       |
-    !              If =  999.0, use zero 2nd derivative     |
-    !              If = -999.0, use zero 3rd derivative     |
-    !                                                       |
-    !-------------------------------------------------------
-    IF(N > NMAX) STOP 'SPLIND: array overflow, increase NMAX'
-    !
-    IF(N == 1) THEN
-        XS(1) = 0.
-        RETURN
-    ENDIF
-    !
-    do I = 2, N - 1
-        DSM = S(I) - S(I - 1)
-        DSP = S(I + 1) - S(I)
-        B(I) = DSP
-        A(I) = 2.0 * (DSM + DSP)
-        C(I) = DSM
-        XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
-    end do
-    !
-    !---- set left end condition
-    IF(XS1 == 999.0) THEN
-        !----- zero 2nd derivative
-        A(1) = 2.0
-        C(1) = 1.0
-        XS(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
-    ELSE IF(XS1 == -999.0) THEN
-        !----- set zero 3rd derivative
-        A(1) = 1.0
-        C(1) = 1.0
-        XS(1) = 2.0 * (X(2) - X(1)) / (S(2) - S(1))
-    ELSE
-        !----- specified 1st derivative
-        A(1) = 1.0
-        C(1) = 0.
-        XS(1) = XS1
-    ENDIF
-    !
-    !---- set right end condition
-    IF(XS2 == 999.0) THEN
-        !----- zero 2nd derivative
-        B(N) = 1.0
-        A(N) = 2.0
-        XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-    ELSE IF(XS2 == -999.0) THEN
-        !----- zero 3rd derivative
-        B(N) = 1.0
-        A(N) = 1.0
-        XS(N) = 2.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-    ELSE
-        !----- specified 1st derivative
-        A(N) = 1.0
-        B(N) = 0.
-        XS(N) = XS2
-    ENDIF
-    !
-    !---- if only two points, cannot have zero third derivatives at both ends
-    IF(N == 2 .AND. XS1 == -999.0 .AND. XS2 == -999.0) THEN
-        !----- set zero 2nd derivative at right end (left end will also be zero)
-        B(N) = 1.0
-        A(N) = 2.0
-        XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-    ENDIF
-    !
-    !---- solve for derivative array XS
-    CALL TRISOL(A, B, C, XS, N)
-    !
-    RETURN
-END
-! SPLIND
-
 
 
 SUBROUTINE SPLINA(X, XS, S, N)
@@ -323,6 +323,7 @@ END
 
 
 SUBROUTINE SEGSPL(X, XS, S, N)
+    use mod_spline
     IMPLICIT REAL (A-H, M, O-Z)
     DIMENSION X(N), XS(N), S(N)
     !-----------------------------------------------
@@ -343,15 +344,13 @@ SUBROUTINE SEGSPL(X, XS, S, N)
     do ISEG = 2, N - 2
         IF(S(ISEG) == S(ISEG + 1)) THEN
             NSEG = ISEG - ISEG0 + 1
-            !cc         CALL SPLINE(X(ISEG0),XS(ISEG0),S(ISEG0),NSEG)
-            CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)
+            xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
             ISEG0 = ISEG + 1
         ENDIF
     end do
     !
     NSEG = N - ISEG0 + 1
-    !cc      CALL SPLINE(X(ISEG0),XS(ISEG0),S(ISEG0),NSEG)
-    CALL SPLIND(X(ISEG0), XS(ISEG0), S(ISEG0), NSEG, -999.0, -999.0)
+    xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
     !
     RETURN
 END
