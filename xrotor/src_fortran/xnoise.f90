@@ -312,6 +312,7 @@ SUBROUTINE NOISE
     !
     AOCX(1:NA) = spline(XA(1:NA), AOC(1:NA))
     DO I = 1, II
+        ! TODO: test this
         AOCI(I) = SEVAL(XI(I), AOC, AOCX, XA)
     ENDDO
     AOC0 = 0.0
@@ -414,6 +415,8 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
     !                  (over one blade-passing period, non-uniformly spaced)
     !
     !------------------------------------------------------------------------
+    use mod_spline
+
     IMPLICIT REAL(A-H, M, O-Z)
     !
     DIMENSION AOC(II), XI(II), DXI(II), CH(II), GAM(II)
@@ -625,8 +628,9 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
                         WRITE(*, *) 't   t0   tN', TOFF, TEL0, TELN
                     ENDIF
                     !
-                    PSUM = PSUM&
-                            + SEVAL_OLD(TOFF, PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
+                    ! TODO: test this
+                    ! PSUM = PSUM + SEVAL_OLD(TOFF, PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
+                    PSUM = PSUM + seval(TOFF, PEL(0:NT, I, L), PEL_T(0:NT, I), TEL(0:NT, I))
                 ENDDO
             end do
             !

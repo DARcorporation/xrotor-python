@@ -351,38 +351,3 @@ contains
     end
     ! segspl
 end module mod_spline
-
-
-FUNCTION SEVAL_OLD(SS, X, XS, S, N)
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION X(N), XS(N), S(N)
-    !--------------------------------------------------
-    !     Calculates X(SS)                             |
-    !     XS array must have been calculated by SPLINE |
-    !--------------------------------------------------
-    IF(N == 1) THEN
-        SEVAL = X(1)
-        RETURN
-    ENDIF
-    !
-    ILOW = 1
-    I = N
-    !
-    10 IF(I - ILOW <= 1) GO TO 11
-    !
-    IMID = (I + ILOW) / 2
-    IF(SS < S(IMID)) THEN
-        I = IMID
-    ELSE
-        ILOW = IMID
-    ENDIF
-    GO TO 10
-    !
-    11 DS = S(I) - S(I - 1)
-    T = (SS - S(I - 1)) / DS
-    CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-    CX2 = DS * XS(I) - X(I) + X(I - 1)
-    SEVAL = T * X(I) + (1.0 - T) * X(I - 1) + (T - T * T) * ((1.0 - T) * CX1 - T * CX2)
-    RETURN
-END
-! SEVAL

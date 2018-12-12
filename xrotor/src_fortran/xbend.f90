@@ -210,6 +210,7 @@ SUBROUTINE EILOAD(FNAME1)
     NT = IT - 1
     CLOSE(LU)
     !
+    ! TODO: test these
     T0(1:NT) = SEGSPL(XT(1:NT), W0(1:NT))
     T1(1:NT) = SEGSPL(XT(1:NT), W1(1:NT))
     T2(1:NT) = SEGSPL(XT(1:NT), W2(1:NT))
@@ -222,6 +223,7 @@ SUBROUTINE EILOAD(FNAME1)
     T9(1:NT) = SEGSPL(XT(1:NT), W9(1:NT))
     !
     do I = 1, II
+        ! TODO: test these
         EIXXB(I) = SEVAL(XI(I), W0, T0, XT)
         EIYYB(I) = SEVAL(XI(I), W1, T1, XT)
         EAB(I) = SEVAL(XI(I), W2, T2, XT)
