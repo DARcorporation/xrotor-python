@@ -71,7 +71,7 @@ contains
         xs(n) = 3.0 * (x(n) - x(n - 1)) / (s(n) - s(n - 1))
 
         !---- solve for derivative array xs
-        call trisol(a, b, c, xs, n)
+        call trisol(a, b, c, xs)
     end
     ! spline
 
@@ -161,7 +161,7 @@ contains
         endif
 
         !---- solve for derivative array xs
-        call trisol(a, b, c, xs, n)
+        call trisol(a, b, c, xs)
     end
     ! splind
 
@@ -215,42 +215,40 @@ contains
         xs(n) = xs1
     end
     ! splina
+
+    subroutine trisol(a, b, c, d)
+        real, intent(inout) :: a(:), b(:), c(:), d(:)
+        integer :: k, kk, km
+        !-----------------------------------------
+        !     Solves kk long, tri-diagonal system |
+        !                                         |
+        !             a c          d              |
+        !             b a c        d              |
+        !               b a .      .              |
+        !                 . . c    .              |
+        !                   b a    d              |
+        !                                         |
+        !     The righthand side d is replaced by |
+        !     the solution.  a, c are destroyed.  |
+        !-----------------------------------------
+        kk = min(size(a), size(b), size(c), size(d))
+
+        do k = 2, kk
+            km = k - 1
+            c(km) = c(km) / a(km)
+            d(km) = d(km) / a(km)
+            a(k) = a(k) - b(k) * c(km)
+            d(k) = d(k) - b(k) * d(km)
+        end do
+
+        d(kk) = d(kk) / a(kk)
+
+        do k = kk - 1, 1, -1
+            d(k) = d(k) - c(k) * d(k + 1)
+        end do
+    end
+    ! trisol
 end module mod_spline
-
-
-SUBROUTINE TRISOL(A, B, C, D, KK)
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION A(KK), B(KK), C(KK), D(KK)
-    !-----------------------------------------
-    !     Solves KK long, tri-diagonal system |
-    !                                         |
-    !             A C          D              |
-    !             B A C        D              |
-    !               B A .      .              |
-    !                 . . C    .              |
-    !                   B A    D              |
-    !                                         |
-    !     The righthand side D is replaced by |
-    !     the solution.  A, C are destroyed.  |
-    !-----------------------------------------
-    !
-    do K = 2, KK
-        KM = K - 1
-        C(KM) = C(KM) / A(KM)
-        D(KM) = D(KM) / A(KM)
-        A(K) = A(K) - B(K) * C(KM)
-        D(K) = D(K) - B(K) * D(KM)
-    end do
-    !
-    D(KK) = D(KK) / A(KK)
-    !
-    do K = KK - 1, 1, -1
-        D(K) = D(K) - C(K) * D(K + 1)
-    end do
-    !
-    RETURN
-END
-! TRISOL
 
 
 FUNCTION SEVAL(SS, X, XS, S, N)

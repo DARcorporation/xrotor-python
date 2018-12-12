@@ -3029,6 +3029,7 @@ SUBROUTINE FILTER(Q, SMLEN, N)
     !     SMLEN is the number of points over
     !     which information is smeared.
     !-----------------------------------------
+    use mod_spline
     IMPLICIT REAL (A-H, M, O-Z)
     DIMENSION Q(N)
     !
@@ -3053,7 +3054,7 @@ SUBROUTINE FILTER(Q, SMLEN, N)
     A(N) = 1.0
     B(N) = 0.
     !
-    CALL TRISOL(A, B, C, Q, N)
+    CALL TRISOL(A, B, C, Q)
     !
     RETURN
 END
