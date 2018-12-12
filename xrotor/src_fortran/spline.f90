@@ -248,10 +248,44 @@ contains
         end do
     end
     ! trisol
+
+    real function seval(ss, x, xs, s) result(val)
+        real, intent(in) :: ss, x(:), xs(:), s(:)
+        integer :: i, ilow, imid, n
+        real :: ds, t, cx1, cx2
+        !--------------------------------------------------
+        !     Calculates x(ss)                             |
+        !     xs array must have been calculated by spline |
+        !--------------------------------------------------
+        n = min(size(x), size(xs), size(s))
+        if(n == 1) then
+            val = x(1)
+            return
+        endif
+
+        ilow = 1
+        i = n
+
+        do while (i - ilow > 1)
+            imid = (i + ilow) / 2
+            if(ss < s(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        end do
+
+        ds = s(i) - s(i - 1)
+        t = (ss - s(i - 1)) / ds
+        cx1 = ds * xs(i - 1) - x(i) + x(i - 1)
+        cx2 = ds * xs(i) - x(i) + x(i - 1)
+        val = t * x(i) + (1.0 - t) * x(i - 1) + (t - t * t) * ((1.0 - t) * cx1 - t * cx2)
+    end
+    ! seval
 end module mod_spline
 
 
-FUNCTION SEVAL(SS, X, XS, S, N)
+FUNCTION SEVAL_OLD(SS, X, XS, S, N)
     IMPLICIT REAL (A-H, M, O-Z)
     DIMENSION X(N), XS(N), S(N)
     !--------------------------------------------------

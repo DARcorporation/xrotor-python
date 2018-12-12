@@ -571,7 +571,7 @@ SUBROUTINE OUTPUT(LU)
     !
     !---- blade solidity
     W1(1:II) = spline(XI(1:II), CH(1:II))
-    CH34 = SEVAL(0.75, CH, W1, XI, II)
+    CH34 = SEVAL(0.75, CH, W1, XI)
     SIGMA = FLOAT(NBLDS) * CH34 / PI
     !
     !---- standard coefficients based on forward speed
@@ -749,6 +749,8 @@ END
 
 SUBROUTINE UVADD(XIW, WA, WT)
     USE common
+    use mod_spline
+
     IMPLICIT REAL (M)
     !
     WA = 0.0
@@ -758,8 +760,8 @@ SUBROUTINE UVADD(XIW, WA, WT)
     !
     RDIM = XIW * RAD
     IF(RDIM >= RADD(1) .AND. RDIM <= RADD(NADD)) THEN
-        WA = SEVAL(RDIM, UADD, UADDR, RADD, NADD) / VEL
-        WT = SEVAL(RDIM, VADD, VADDR, RADD, NADD) / VEL
+        WA = SEVAL(RDIM, UADD, UADDR, RADD) / VEL
+        WT = SEVAL(RDIM, VADD, VADDR, RADD) / VEL
     ENDIF
     !
     RETURN

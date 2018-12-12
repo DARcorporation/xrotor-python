@@ -319,9 +319,9 @@ SUBROUTINE INITCASE(IIX, LOSOLVE)
     !
     !---- interpolate read-in geometry to generated radial stations
     DO I = 1, II
-        CH(I) = SEVAL(XI(I), W2, W3, W1, IIX)
-        BETA(I) = SEVAL(XI(I), W4, W5, W1, IIX)
-        UBODY(I) = SEVAL(XI(I), W6, W7, W1, IIX)
+        CH(I) = SEVAL(XI(I), W2(1:IIX), W3(1:IIX), W1(1:IIX))
+        BETA(I) = SEVAL(XI(I), W4(1:IIX), W5(1:IIX), W1(1:IIX))
+        UBODY(I) = SEVAL(XI(I), W6(1:IIX), W7(1:IIX), W1(1:IIX))
         BETA0(I) = BETA(I)
         !c        write(*,*) 'load trp i,ch,beta ',i,ch(i),beta(i)
     ENDDO

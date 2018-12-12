@@ -414,10 +414,10 @@ SUBROUTINE OPER
     CALL SETX
     IF(LROTOR) THEN
         DO I = 1, II
-            CH(I) = SEVAL(XI(I), W2, W3, W1, IISAV)
-            BETA(I) = SEVAL(XI(I), W4, W5, W1, IISAV)
-            UBODY(I) = SEVAL(XI(I), W6, W7, W1, IISAV)
-            CLDES(I) = SEVAL(XI(I), W8, W9, W1, IISAV)
+            CH(I) = SEVAL(XI(I), W2, W3, W1)
+            BETA(I) = SEVAL(XI(I), W4, W5, W1)
+            UBODY(I) = SEVAL(XI(I), W6, W7, W1)
+            CLDES(I) = SEVAL(XI(I), W8, W9, W1)
             BETA0(I) = BETA(I)
         ENDDO
     ENDIF
@@ -1501,6 +1501,8 @@ SUBROUTINE APITER(ISPEC, ICON)
     !       ICON = 2    Blade pitch fixed
     !-------------------------------------------------------
     USE common
+    use mod_spline
+
     IMPLICIT REAL (M)
     DIMENSION CLMAX(IX), CLMIN(IX), DCLSTALL(IX)
     !
@@ -1699,8 +1701,8 @@ SUBROUTINE APITER(ISPEC, ICON)
                 !
                 !----- fix 5/15/03 use linear interpolation for engine power/rpm line
                 !cc         CALL SEVLIN(RPM,PWRVAR,RPMVAR,NPWRVAR,PSPEC,PSPEC_RPM)
-                PSPEC = SEVAL(RPM, PWRVAR, XPWRVAR, RPMVAR, NPWRVAR)
-                PSPEC_RPM = DEVAL(RPM, PWRVAR, XPWRVAR, RPMVAR, NPWRVAR)
+                PSPEC = SEVAL(RPM, PWRVAR(1:NPWRVAR), XPWRVAR(1:NPWRVAR), RPMVAR(1:NPWRVAR))
+                PSPEC_RPM = DEVAL(RPM, PWRVAR(1:NPWRVAR), XPWRVAR(1:NPWRVAR), RPMVAR(1:NPWRVAR))
                 !
                 PSPEC_ADV = PSPEC_RPM * RPM_ADV
                 !

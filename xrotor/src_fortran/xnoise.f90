@@ -312,7 +312,7 @@ SUBROUTINE NOISE
     !
     AOCX(1:NA) = spline(XA(1:NA), AOC(1:NA))
     DO I = 1, II
-        AOCI(I) = SEVAL(XI(I), AOC, AOCX, XA, NA)
+        AOCI(I) = SEVAL(XI(I), AOC, AOCX, XA)
     ENDDO
     AOC0 = 0.0
     !
@@ -626,7 +626,7 @@ SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
                     ENDIF
                     !
                     PSUM = PSUM&
-                            + SEVAL(TOFF, PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
+                            + SEVAL_OLD(TOFF, PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
                 ENDDO
             end do
             !

@@ -170,6 +170,7 @@ END
 
 SUBROUTINE EILOAD(FNAME1)
     USE common
+    use mod_spline
     IMPLICIT REAL (M)
     CHARACTER*(*) FNAME1
     DIMENSION XT(IX)
@@ -221,16 +222,16 @@ SUBROUTINE EILOAD(FNAME1)
     CALL SEGSPL(W9, T9, XT, NT)
     !
     do I = 1, II
-        EIXXB(I) = SEVAL(XI(I), W0, T0, XT, NT)
-        EIYYB(I) = SEVAL(XI(I), W1, T1, XT, NT)
-        EAB(I) = SEVAL(XI(I), W2, T2, XT, NT)
-        GJB(I) = SEVAL(XI(I), W3, T3, XT, NT)
-        EKB(I) = SEVAL(XI(I), W4, T4, XT, NT)
-        MB(I) = SEVAL(XI(I), W5, T5, XT, NT)
-        MXXB(I) = SEVAL(XI(I), W6, T6, XT, NT)
-        XOCG(I) = SEVAL(XI(I), W7, T7, XT, NT)
-        XOSC(I) = SEVAL(XI(I), W8, T8, XT, NT)
-        RSTB(I) = SEVAL(XI(I), W9, T9, XT, NT)
+        EIXXB(I) = SEVAL(XI(I), W0, T0, XT)
+        EIYYB(I) = SEVAL(XI(I), W1, T1, XT)
+        EAB(I) = SEVAL(XI(I), W2, T2, XT)
+        GJB(I) = SEVAL(XI(I), W3, T3, XT)
+        EKB(I) = SEVAL(XI(I), W4, T4, XT)
+        MB(I) = SEVAL(XI(I), W5, T5, XT)
+        MXXB(I) = SEVAL(XI(I), W6, T6, XT)
+        XOCG(I) = SEVAL(XI(I), W7, T7, XT)
+        XOSC(I) = SEVAL(XI(I), W8, T8, XT)
+        RSTB(I) = SEVAL(XI(I), W9, T9, XT)
     end do
     !
     MASS = 0.0
