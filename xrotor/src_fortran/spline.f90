@@ -317,6 +317,39 @@ contains
         val = val / ds
     end
     ! deval
+
+    function segspl(s, x) result(xs)
+        real, intent(in) :: s(:), x(:)
+        real, allocatable :: xs(:)
+        integer :: iseg0, iseg, nseg, n
+        !-----------------------------------------------
+        !     Splines x(s) array just like spline,      |
+        !     but allows derivative discontinuities     |
+        !     at segment joints.  Segment joints are    |
+        !     defined by identical successive s values. |
+        !-----------------------------------------------
+        n = min(size(s), size(x))
+        if(n == 1) then
+            xs(1) = 0.
+            return
+        endif
+
+        if(s(1) == s(2)) stop 'segspl:  First input point duplicated'
+        if(s(n) == s(n - 1)) stop 'segspl:  Last  input point duplicated'
+
+        iseg0 = 1
+        do iseg = 2, n - 2
+            if(s(iseg) == s(iseg + 1)) then
+                nseg = iseg - iseg0 + 1
+                xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
+                iseg0 = iseg + 1
+            endif
+        end do
+
+        nseg = n - iseg0 + 1
+        xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
+    end
+    ! segspl
 end module mod_spline
 
 
@@ -353,38 +386,3 @@ FUNCTION SEVAL_OLD(SS, X, XS, S, N)
     RETURN
 END
 ! SEVAL
-
-
-SUBROUTINE SEGSPL(X, XS, S, N)
-    use mod_spline
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION X(N), XS(N), S(N)
-    !-----------------------------------------------
-    !     Splines X(S) array just like SPLINE,      |
-    !     but allows derivative discontinuities     |
-    !     at segment joints.  Segment joints are    |
-    !     defined by identical successive S values. |
-    !-----------------------------------------------
-    IF(N == 1) THEN
-        XS(1) = 0.
-        RETURN
-    ENDIF
-    !
-    IF(S(1) == S(2)) STOP 'SEGSPL:  First input point duplicated'
-    IF(S(N) == S(N - 1)) STOP 'SEGSPL:  Last  input point duplicated'
-    !
-    ISEG0 = 1
-    do ISEG = 2, N - 2
-        IF(S(ISEG) == S(ISEG + 1)) THEN
-            NSEG = ISEG - ISEG0 + 1
-            xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
-            ISEG0 = ISEG + 1
-        ENDIF
-    end do
-    !
-    NSEG = N - ISEG0 + 1
-    xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
-    !
-    RETURN
-END
-! SEGSPL
