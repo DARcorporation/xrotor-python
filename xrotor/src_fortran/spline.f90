@@ -282,6 +282,41 @@ contains
         val = t * x(i) + (1.0 - t) * x(i - 1) + (t - t * t) * ((1.0 - t) * cx1 - t * cx2)
     end
     ! seval
+
+    function deval(ss, x, xs, s) result(val)
+        real, intent(in) :: ss, x(:), xs(:), s(:)
+        integer :: i, ilow, imid, n
+        real :: ds, t, cx1, cx2, val
+        !--------------------------------------------------
+        !     Calculates dx/ds(ss)                         |
+        !     xs array must have been calculated by spline |
+        !--------------------------------------------------
+         n = min(size(x), size(xs), size(s))
+        if(n == 1) then
+            val = x(1)
+            return
+        endif
+
+        ilow = 1
+        i = n
+
+        do while (i - ilow > 1)
+            imid = (i + ilow) / 2
+            if(ss < s(imid)) then
+                i = imid
+            else
+                ilow = imid
+            endif
+        end do
+
+        ds = s(i) - s(i - 1)
+        t = (ss - s(i - 1)) / ds
+        cx1 = ds * xs(i - 1) - x(i) + x(i - 1)
+        cx2 = ds * xs(i) - x(i) + x(i - 1)
+        val = x(i) - x(i - 1) + (1. - 4.0 * t + 3.0 * t * t) * cx1 + t * (3.0 * t - 2.) * cx2
+        val = val / ds
+    end
+    ! deval
 end module mod_spline
 
 
@@ -318,41 +353,6 @@ FUNCTION SEVAL_OLD(SS, X, XS, S, N)
     RETURN
 END
 ! SEVAL
-
-FUNCTION DEVAL(SS, X, XS, S, N)
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION X(N), XS(N), S(N)
-    !--------------------------------------------------
-    !     Calculates dX/dS(SS)                         |
-    !     XS array must have been calculated by SPLINE |
-    !--------------------------------------------------
-    IF(N == 1) THEN
-        DEVAL = XS(1)
-        RETURN
-    ENDIF
-    !
-    ILOW = 1
-    I = N
-    !
-    10 IF(I - ILOW <= 1) GO TO 11
-    !
-    IMID = (I + ILOW) / 2
-    IF(SS < S(IMID)) THEN
-        I = IMID
-    ELSE
-        ILOW = IMID
-    ENDIF
-    GO TO 10
-    !
-    11 DS = S(I) - S(I - 1)
-    T = (SS - S(I - 1)) / DS
-    CX1 = DS * XS(I - 1) - X(I) + X(I - 1)
-    CX2 = DS * XS(I) - X(I) + X(I - 1)
-    DEVAL = X(I) - X(I - 1) + (1. - 4.0 * T + 3.0 * T * T) * CX1 + T * (3.0 * T - 2.) * CX2
-    DEVAL = DEVAL / DS
-    RETURN
-END
-! DEVAL
 
 
 SUBROUTINE SEGSPL(X, XS, S, N)
