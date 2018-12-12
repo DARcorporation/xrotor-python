@@ -25,6 +25,7 @@ SUBROUTINE NOISE
     !     at specified observer positions.
     !---------------------------------------
     USE common
+    use mod_spline
     IMPLICIT REAL (M)
     !
     PARAMETER (NTX = 160)
@@ -309,7 +310,7 @@ SUBROUTINE NOISE
     NA = IA - 1
     CLOSE(LU)
     !
-    CALL SPLINE(AOC, AOCX, XA, NA)
+    AOCX(1:NA) = spline(XA(1:NA), AOC(1:NA))
     DO I = 1, II
         AOCI(I) = SEVAL(XI(I), AOC, AOCX, XA, NA)
     ENDDO

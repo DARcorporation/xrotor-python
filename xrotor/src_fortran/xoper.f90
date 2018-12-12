@@ -20,6 +20,7 @@
 
 SUBROUTINE OPER
     USE common
+    use mod_spline
     IMPLICIT REAL (M)
     CHARACTER*4 COMAND, ANS
     CHARACTER*132 COMARG, ANSARG
@@ -396,10 +397,10 @@ SUBROUTINE OPER
             W6(I) = UBODY(I)
             W8(I) = CLDES(I)
         ENDDO
-        CALL SPLINE(W2, W3, W1, II)
-        CALL SPLINE(W4, W5, W1, II)
-        CALL SPLINE(W6, W7, W1, II)
-        CALL SPLINE(W8, W9, W1, II)
+        W3(1:II) = spline(W1(1:II), W2(1:II))
+        W5(1:II) = spline(W1(1:II), W4(1:II))
+        W7(1:II) = spline(W1(1:II), W6(1:II))
+        W9(1:II) = spline(W1(1:II), W8(1:II))
     ENDIF
     !
     73   CALL ASKI('Enter new number of radial points^', II)

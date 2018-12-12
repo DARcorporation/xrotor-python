@@ -537,6 +537,7 @@ END
 
 SUBROUTINE OUTPUT(LU)
     USE common
+    use mod_spline
     IMPLICIT REAL (M)
     LOGICAL LHELI
     CHARACTER*1 SCHAR
@@ -569,7 +570,7 @@ SUBROUTINE OUTPUT(LU)
     TNACEL = (TWAK - TINV) * RHO * VEL**2 * RAD**2
     !
     !---- blade solidity
-    CALL SPLINE(CH, W1, XI, II)
+    W1(1:II) = spline(XI(1:II), CH(1:II))
     CH34 = SEVAL(0.75, CH, W1, XI, II)
     SIGMA = FLOAT(NBLDS) * CH34 / PI
     !
@@ -591,7 +592,7 @@ SUBROUTINE OUTPUT(LU)
     !
     !---- define low advance ratio (helicopter?) related data
     IF(ADV < 0.1) THEN
-        CALL SPLINE(CH, W1, XI, II)
+        W1(1:II) = spline(XI(1:II), CH(1:II))
         CTH = CT / 7.7516
         CPH = CP / 24.352
         CTOS = CTH / SIGMA

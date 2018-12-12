@@ -18,53 +18,63 @@
 !    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 !***********************************************************************
 
-SUBROUTINE SPLINE(X, XS, S, N)
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION X(N), XS(N), S(N)
-    PARAMETER (NMAX = 1000)
-    COMMON /SPLCOM/ A(NMAX), B(NMAX), C(NMAX)
-    !-------------------------------------------------------
-    !     Calculates spline coefficients for X(S).          |
-    !     Zero 2nd derivative end conditions are used.      |
-    !     To evaluate the spline at some value of S,        |
-    !     use SEVAL and/or DEVAL.                           |
-    !                                                       |
-    !     S        independent variable array (input)       |
-    !     X        dependent variable array   (input)       |
-    !     XS       dX/dS array                (calculated)  |
-    !     N        number of points           (input)       |
-    !                                                       |
-    !-------------------------------------------------------
-    IF(N > NMAX) STOP 'SPLINE: array overflow, increase NMAX'
-    !
-    IF(N == 1) THEN
-        XS(1) = 0.
-        RETURN
-    ENDIF
-    !
-    do I = 2, N - 1
-        DSM = S(I) - S(I - 1)
-        DSP = S(I + 1) - S(I)
-        B(I) = DSP
-        A(I) = 2.0 * (DSM + DSP)
-        C(I) = DSM
-        XS(I) = 3.0 * ((X(I + 1) - X(I)) * DSM / DSP + (X(I) - X(I - 1)) * DSP / DSM)
-    end do
-    !
-    !---- set zero second derivative end conditions
-    A(1) = 2.0
-    C(1) = 1.0
-    XS(1) = 3.0 * (X(2) - X(1)) / (S(2) - S(1))
-    B(N) = 1.0
-    A(N) = 2.0
-    XS(N) = 3.0 * (X(N) - X(N - 1)) / (S(N) - S(N - 1))
-    !
-    !---- solve for derivative array XS
-    CALL TRISOL(A, B, C, XS, N)
-    !
-    RETURN
-END
-! SPLINE
+module mod_spline
+    implicit none
+    public
+contains
+    function spline(s, x) result(xs)
+        real, intent(in) :: s(:), x(:)
+        real, allocatable :: xs(:), a(:), b(:), c(:)
+
+        integer :: i, n
+        real :: dsm, dsp
+        !-------------------------------------------------------
+        !     Calculates spline coefficients for x(s).          |
+        !     Zero 2nd derivative end conditions are used.      |
+        !     To evaluate the spline at some value of s,        |
+        !     use seval and/or deval.                           |
+        !                                                       |
+        !     s        independent variable array (input)       |
+        !     x        dependent variable array   (input)       |
+        !     xs       dx/ds array                (calculated)  |
+        !     n        number of points           (input)       |
+        !                                                       |
+        !-------------------------------------------------------
+        n = min(size(s), size(x))
+        allocate (xs(n))
+
+        if(n == 1) then
+            xs(1) = 0.
+            return
+        end if
+
+        allocate (a(n), b(n), c(n))
+
+        b(1) = 0.
+        c(n) = 0.
+
+        do i = 2, n - 1
+            dsm = s(i) - s(i - 1)
+            dsp = s(i + 1) - s(i)
+            b(i) = dsp
+            a(i) = 2.0 * (dsm + dsp)
+            c(i) = dsm
+            xs(i) = 3.0 * ((x(i + 1) - x(i)) * dsm / dsp + (x(i) - x(i - 1)) * dsp / dsm)
+        end do
+
+        !---- set zero second derivative end conditions
+        a(1) = 2.0
+        c(1) = 1.0
+        xs(1) = 3.0 * (x(2) - x(1)) / (s(2) - s(1))
+        b(n) = 1.0
+        a(n) = 2.0
+        xs(n) = 3.0 * (x(n) - x(n - 1)) / (s(n) - s(n - 1))
+
+        !---- solve for derivative array xs
+        call trisol(a, b, c, xs, n)
+    end
+    ! spline
+end module mod_spline
 
 
 SUBROUTINE SPLIND(X, XS, S, N, XS1, XS2)

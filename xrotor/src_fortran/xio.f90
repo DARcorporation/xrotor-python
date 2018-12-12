@@ -299,6 +299,7 @@ END
 
 SUBROUTINE INITCASE(IIX, LOSOLVE)
     USE common
+    use mod_spline
     IMPLICIT REAL (M)
     LOGICAL LOSOLVE
     !---- spline blade geometry to "old" radial locations
@@ -308,9 +309,9 @@ SUBROUTINE INITCASE(IIX, LOSOLVE)
         W4(I) = BETA(I)
         W6(I) = UBODY(I)
     ENDDO
-    CALL SPLINE(W2, W3, W1, IIX)
-    CALL SPLINE(W4, W5, W1, IIX)
-    CALL SPLINE(W6, W7, W1, IIX)
+    W3(1:IIX) = spline(W1(1:IIX), W2(1:IIX))
+    W5(1:IIX) = spline(W1(1:IIX), W4(1:IIX))
+    W7(1:IIX) = spline(W1(1:IIX), W6(1:IIX))
     !
     !---- set radial stations for built-in distribution scheme
     CALL SETX
