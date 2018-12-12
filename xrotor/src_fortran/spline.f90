@@ -164,57 +164,58 @@ contains
         call trisol(a, b, c, xs, n)
     end
     ! splind
+
+    function splina(s, x) result(xs)
+        real, intent(in) :: s(:), x(:)
+        real, allocatable :: xs(:)
+
+        logical :: lend
+        integer :: i, n
+        real :: ds, dx, xs1, xs2
+        !-------------------------------------------------------
+        !     Calculates spline coefficients for x(s).          |
+        !     A simple averaging of adjacent segment slopes     |
+        !     is used to achieve non-oscillatory curve          |
+        !     End conditions are set by end segment slope       |
+        !     To evaluate the spline at some value of s,        |
+        !     use seval and/or deval.                           |
+        !                                                       |
+        !     s        independent variable array (input)       |
+        !     x        dependent variable array   (input)       |
+        !     xs       dx/ds array                (calculated)  |
+        !     n        number of points           (input)       |
+        !                                                       |
+        !-------------------------------------------------------
+        n = min(size(s), size(x))
+        allocate (xs(n))
+
+        if (n == 1) then
+            xs(1) = 0.
+            return
+        end if
+
+        lend = .true.
+        do i = 1, n - 1
+            ds = s(i + 1) - s(i)
+            if (ds == 0.) then
+                xs(i) = xs1
+                lend = .true.
+            else
+                dx = x(i + 1) - x(i)
+                xs2 = dx / ds
+                if (lend) then
+                    xs(i) = xs2
+                    lend = .false.
+                else
+                    xs(i) = 0.5 * (xs1 + xs2)
+                endif
+            endif
+            xs1 = xs2
+        end do
+        xs(n) = xs1
+    end
+    ! splina
 end module mod_spline
-
-
-SUBROUTINE SPLINA(X, XS, S, N)
-    DIMENSION X(N), XS(N), S(N)
-    LOGICAL LEND
-    !-------------------------------------------------------
-    !     Calculates spline coefficients for X(S).          |
-    !     A simple averaging of adjacent segment slopes     |
-    !     is used to achieve non-oscillatory curve          |
-    !     End conditions are set by end segment slope       |
-    !     To evaluate the spline at some value of S,        |
-    !     use SEVAL and/or DEVAL.                           |
-    !                                                       |
-    !     S        independent variable array (input)       |
-    !     X        dependent variable array   (input)       |
-    !     XS       dX/dS array                (calculated)  |
-    !     N        number of points           (input)       |
-    !                                                       |
-    !-------------------------------------------------------
-    !
-    IF(N == 1) THEN
-        XS(1) = 0.
-        RETURN
-    ENDIF
-    !
-    LEND = .TRUE.
-    do I = 1, N - 1
-        DS = S(I + 1) - S(I)
-        IF (DS == 0.) THEN
-            XS(I) = XS1
-            LEND = .TRUE.
-        ELSE
-            DX = X(I + 1) - X(I)
-            XS2 = DX / DS
-            IF (LEND) THEN
-                XS(I) = XS2
-                LEND = .FALSE.
-            ELSE
-                XS(I) = 0.5 * (XS1 + XS2)
-            ENDIF
-        ENDIF
-        XS1 = XS2
-    end do
-    XS(N) = XS1
-    !
-    RETURN
-END
-! SPLINA
-
-
 
 
 SUBROUTINE TRISOL(A, B, C, D, KK)

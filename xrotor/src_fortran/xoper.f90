@@ -473,7 +473,7 @@ SUBROUTINE OPER
             PWRVAR(L) = PWRVAR(L)
         END DO
         WRITE(*, *) ' '
-        CALL SPLINA(PWRVAR, XPWRVAR, RPMVAR, NPWRVAR)
+        xpwrvar = splina(RPMVAR, PWRVAR)
         CLOSE(LU)
         LPWRVAR = .TRUE.
     ENDIF
