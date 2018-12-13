@@ -1,10 +1,11 @@
 import glob
 import os
-import re
+import regex as re
 
 re_typ = re.compile(r'\w+ *:: *')
-re_init_val = re.compile(r' *=.+?[,\n]')
-re_dim = re.compile(r'\([^)]+\)')
+re_brackets = re.compile(r'\(([^()]|(?R))*\)')
+re_init_val1 = re.compile(r'(?<=\w)=.*?,')
+re_init_val2 = re.compile(r'=.*$')
 re_sep = re.compile(r', *')
 re_word = re.compile(r'(\w+)')
 
@@ -25,9 +26,11 @@ with open('common.f90', 'r') as f:
             break
 
         if len(line):
+            line = re.sub(re_brackets, '', line)
             line = re.sub(re_typ, '', line)
-            line = re.sub(re_init_val, ',', line)
-            line = re.sub(re_dim, '', line)
+            line = re.sub(' ', '', line)
+            line = re.sub(re_init_val1, r',', line)
+            line = re.sub(re_init_val2, '', line)
             context += re.split(re_sep, line.lower())
 
 # Get a list of all source files except for common.f90
@@ -35,6 +38,16 @@ files = [file for file in glob.glob('*.f90') if file != 'common.f90']
 
 changed_subroutines = []
 
+re_use_common = re.compile(r'( *)use common *')
+re_subroutine_yargs_sub = re.compile(r'( *subroutine *\w+\()')
+re_subroutine_nargs_sub = re.compile(r'( *subroutine *\w+)')
+re_subroutine_yargs_find = re.compile(r' *subroutine *(\w+)')
+re_subroutine_nargs_find = re.compile(r' *subroutine *(\w+)')
+re_decl = re.compile(r'^ *(logical|character|integer|real|dimension|double precision)[*\d() ]*(.*)')
+re_preamble = re.compile(r'^ *(use|implicit|data|common|parameter)')
+re_space = re.compile(r'( *)\w')
+re_format = re.compile(r' *[0-9]* FORMAT')
+re_ignore = re.compile(r"^ *[!'/]")
 # Edit each file in turn
 for file in files:
     with open(file, 'r') as f:
@@ -55,7 +68,7 @@ for file in files:
 
             if uses_common:
                 # This function uses common variables
-                lines[d] = re.sub(r'( *)use common *', r'\1use mod_common', lines[d].lower())
+                lines[d] = re.sub(re_use_common, r'\1use mod_common', lines[d].lower())
 
                 # Get a list of input variables this function uses
                 i_start = lines[i].find('(')
@@ -66,29 +79,29 @@ for file in files:
                         l = lines[d].lower()
                         if d == i:
                             l = l[i_start + 1:]
-                        _inputs += re.sub(re_dim, '', l.strip(')&\n '))
+                        _inputs += re.sub(re_brackets, '', l.strip(')&\n '))
                         if lines[d].strip().endswith(')'):
                             break
 
                     local = re.split(re_sep, _inputs)
-                    lines[i] = re.sub(r'( *subroutine *\w+\()', r'\1ctxt, ', lines[i].lower())
-                    changed_subroutines += [(re.findall(r' *subroutine *(\w+)', lines[i])[0], False)]
+                    lines[i] = re.sub(re_subroutine_yargs_sub, r'\1ctxt, ', lines[i].lower())
+                    changed_subroutines += [(re.findall(re_subroutine_yargs_find, lines[i])[0], False)]
                 else:
                     d = i
-                    lines[i] = re.sub(r'( *subroutine *\w+)', r'\1(ctxt)', lines[i].lower())
-                    changed_subroutines += [(re.findall(r' *subroutine *(\w+)', lines[i])[0], True)]
+                    lines[i] = re.sub(re_subroutine_nargs_sub, r'\1(ctxt)', lines[i].lower())
+                    changed_subroutines += [(re.findall(re_subroutine_nargs_find, lines[i])[0], True)]
 
                 # Get a list of local variables declared by this function
                 d_last = d+1
                 for d in range(d+1, len(lines)):
-                    m = re.search(r'^ *(logical|character|integer|real|dimension|double precision)[*\d() ]*(.*)', lines[d].lower())
+                    m = re.search(re_decl, lines[d].lower())
                     if m is not None:
-                        decl = re.sub(re_dim, '', m.group(2))
+                        decl = re.sub(re_brackets, '', m.group(2))
                         local += re.split(re_sep, decl)
-                    elif re.search(r'^ *(use|implicit|data|common|parameter)', lines[d].lower()) is not None:
+                    elif re.search(re_preamble, lines[d].lower()) is not None:
                         d_last = d
                     elif not lines[d].strip().startswith('!') and len(lines[d].strip()):
-                        m = re.search('( *)\w', lines[d_last])
+                        m = re.search(re_space, lines[d_last])
                         space = ''
                         if m is not None:
                             space = m.group(1)
@@ -104,12 +117,21 @@ for file in files:
                         break
 
                     for param in re.findall(re_word, lines[d]):
-                        if re.search(r' *[0-9]* FORMAT', lines[d]) is None and re.search(r"^ *[!'/]", lines[d]) is None:
+                        if re.search(re_format, lines[d]) is None and re.search(re_ignore, lines[d]) is None:
                             if param.lower() in context:
                                 lines[d] = re.sub(r"(?<!\w)(?<!ctxt%)(?<!')({})(?!\w)".format(param.lower()), r'ctxt%\1', lines[d].lower())
 
     with open(os.path.join(output_dir, file), 'w') as f:
         f.writelines(lines)
+
+re_call_nargs = re.compile(r'call( *\w+)')
+re_call_yargs = re.compile(r'call( *\w+\()')
+re_caps = re.compile(r'([A-Z]+)(?![a-z])')
+
+
+def repl_caps(m):
+    return m.group(1).lower()
+
 
 for file in files:
     fname = os.path.join(output_dir, file)
@@ -122,11 +144,11 @@ for file in files:
             for changed_subroutine in changed_subroutines:
                 if m.group(1).lower() == changed_subroutine[0]:
                     if changed_subroutine[1]:
-                        lines[i] = re.sub(r'call( *\w+)', r'call\1(ctxt)', lines[i].lower())
+                        lines[i] = re.sub(re_call_nargs, r'call\1(ctxt)', lines[i].lower())
                     else:
-                        lines[i] = re.sub(r'call( *\w+\()', r'call\1ctxt, ', lines[i].lower())
+                        lines[i] = re.sub(re_call_yargs, r'call\1ctxt, ', lines[i].lower())
 
-        # lines[i] = re.sub(r'([A-Z]+)(?![a-z])', lambda m: m.group(1).lower(), lines[i])
+        lines[i] = re.sub(re_caps, repl_caps, lines[i])
 
     with open(fname, 'w') as f:
         f.writelines(lines)
