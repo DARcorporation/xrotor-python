@@ -1,144 +1,145 @@
 !***********************************************************************
 !    Module:  xnoise.f
 ! 
-!    Copyright (C) 2011 Mark Drela 
+!    Copyright (c) 2011 Mark Drela 
 ! 
 !    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
+!    it under the terms of the gnu General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
 !    (at your option) any later version.
 !
 !    This program is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+!    but without any warranty; without even the implied warranty of
+!    merchantability or fitness for a particular purpose.  See the
+!    gnu General Public License for more details.
 !
-!    You should have received a copy of the GNU General Public License
+!    You should have received a copy of the gnu General Public License
 !    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
 !***********************************************************************
 
-SUBROUTINE NOISE
+subroutine noise(ctxt)
     !---------------------------------------
     !     Calculates the sound pressure
     !     time history of the propeller
     !     at specified observer positions.
     !---------------------------------------
-    USE common
+    use mod_common
     use mod_spline
-    IMPLICIT REAL (M)
+    implicit real (m)
     !
-    PARAMETER (NTX = 160)
-    PARAMETER (NHARX = NTX / 2)
-    DIMENSION AOCI(IX), AOC(IX), AOCX(IX), XA(IX)
-    DIMENSION PCOMP(0:NTX, 3), PRES(0:NTX), TIME(0:NTX)
-    DIMENSION DECIB(0:NHARX), FAMPL(NHARX), PHASE(NHARX)
+    parameter (ntx = 160)
+    parameter (nharx = ntx / 2)
+    dimension aoci(ix), aoc(ix), aocx(ix), xa(ix)
+    dimension pcomp(0:ntx, 3), pres(0:ntx), time(0:ntx)
+    dimension decib(0:nharx), fampl(nharx), phase(nharx)
     !
-    PARAMETER (NXDIM = 81, NYDIM = 81)
-    DIMENSION ADB(NXDIM, NYDIM)
-    DIMENSION XDB(NXDIM, NYDIM)
-    DIMENSION YDB(NXDIM, NYDIM)
-    DIMENSION XLIM(2), YLIM(2)
-    DIMENSION NDBSIZ(2)
+    parameter (nxdim = 81, nydim = 81)
+    type(Common), intent(inout) :: ctxt
+    dimension adb(nxdim, nydim)
+    dimension xdb(nxdim, nydim)
+    dimension ydb(nxdim, nydim)
+    dimension xlim(2), ylim(2)
+    dimension ndbsiz(2)
     !
-    CHARACTER*80 PROMPT
-    CHARACTER*4 COMAND, ANS
-    CHARACTER*132 COMARG, ANSARG
+    character*80 prompt
+    character*4 comand, ans
+    character*132 comarg, ansarg
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR, LDBCON, LPTRAC
+    dimension iinput(20)
+    dimension rinput(20)
+    logical error, ldbcon, lptrac
     !
-    DIMENSION XYZOBS(3)
-    CHARACTER*2 ULNAM
+    dimension xyzobs(3)
+    character*2 ulnam
     !
-    SAVE NT
-    SAVE AOC0, XYZOBS
-    SAVE ULNAM, UNITL
+    save nt
+    save aoc0, xyzobs
+    save ulnam, unitl
     !
     !---- number of rotation steps for one full rotation
-    DATA NT / 80 /
+    data nt / 80 /
     !
     !---- default airfoil area/c^2 , observer location
-    DATA AOC0, XYZOBS / -1.0, 0.0, 0.0, -100.0 /
+    data aoc0, xyzobs / -1.0, 0.0, 0.0, -100.0 /
     !
     !---- start by using foot input
-    !cc   DATA ULNAM, UNITL / 'm ', 1.0 /
-    DATA ULNAM, UNITL / 'ft', 3.28084 /
+    !cc   data ulnam, unitl / 'm ', 1.0 /
+    data ulnam, unitl / 'ft', 3.28084 /
     !
     !
-    GREEK = .FALSE.
+    ctxt%greek = .false.
     !
-    LDBCON = .FALSE.
-    LPTRAC = .FALSE.
+    ldbcon = .false.
+    lptrac = .false.
     !
-    !---- i,j size of grid for dB footprint contour plot
-    NDBSIZ(1) = 21
-    NDBSIZ(2) = 11
+    !---- i,j size of grid for db footprint contour plot
+    ndbsiz(1) = 21
+    ndbsiz(2) = 11
     !
     !---- number of blade-passing harmonics to be calculated, and annotation delta
-    NHARM = NT / 2
-    DHARM = 5.0
+    nharm = nt / 2
+    dharm = 5.0
     !
-    IF(AOC0 /= 0.0) THEN
-        IF(AOC0 < 0.0) AOC0 = 0.0
-        DO I = 1, II
-            AOCI(I) = AOC0
-        ENDDO
-    ENDIF
+    if(aoc0 /= 0.0) then
+        if(aoc0 < 0.0) aoc0 = 0.0
+        do i = 1, ctxt%ii
+            aoci(i) = aoc0
+        enddo
+    endif
     !
-    IF(ULNAM == '(m) ') THEN
-        WRITE(*, *) 'Coordinates currently specified in meters'
-    ELSE
-        WRITE(*, *) 'Coordinates currently specified in feet'
-    ENDIF
+    if(ulnam == '(m) ') then
+        write(*, *) 'Coordinates currently specified in meters'
+    else
+        write(*, *) 'Coordinates currently specified in feet'
+    endif
     !
     !
-    WRITE(*, 8100)
-    8000 FORMAT(1X, A4, ' command not recognized.' //&
+    write(*, 8100)
+    8000 format(1x, a4, ' command not recognized.' //&
             '  Type "?" for list, <Return> to exit menu.')
-    8100 FORMAT(&
-            /'   P   rrr Calculate acoustic p(t) at observer x,y,z'&
-            /'   FOOT rr Calculate dB ground noise footprint'&
-            /'   NTIM i  Change number of time samples'&
-            /'   UNIT    Toggle coordinate unit  m,ft'&
-            //'   AOC  r  Set constant blade cross-sectional area/c**2'&
-            /'   AFIL f  Set blade cross-sectional area/c**2 from file')
+    8100 format(&
+            /'   p   rrr Calculate acoustic p(t) at observer x,y,z'&
+            /'   foot rr Calculate db ground noise footprint'&
+            /'   ntim i  Change number of time samples'&
+            /'   unit    Toggle coordinate unit  m,ft'&
+            //'   aoc  r  Set constant blade cross-sectional area/c**2'&
+            /'   afil f  Set blade cross-sectional area/c**2 from file')
     !
-    900  CONTINUE
-    CALL ASKC('.NOIS^', COMAND, COMARG)
+    900  continue
+    call askc('.nois^', comand, comarg)
     !
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
+    do i = 1, 20
+        iinput(i) = 0
+        rinput(i) = 0.0
+    enddo
+    ninput = 0
+    call getint(comarg, iinput, ninput, error)
+    ninput = 0
+    call getflt(comarg, rinput, ninput, error)
     !
-    IF(COMAND == '    ') RETURN
-    IF(COMAND == '?   ') WRITE(*, 8100)
-    IF(COMAND == '?   ') GO TO 900
-    IF(COMAND == 'P   ') GO TO 10
-    IF(COMAND == 'FOOT') GO TO 20
-    IF(COMAND == 'NTIM') GO TO 25
-    IF(COMAND == 'UNIT') GO TO 30
-    IF(COMAND == 'AOC ') GO TO 40
-    IF(COMAND == 'AFIL') GO TO 45
+    if(comand == '    ') return
+    if(comand == '?   ') write(*, 8100)
+    if(comand == '?   ') go to 900
+    if(comand == 'p   ') go to 10
+    if(comand == 'foot') go to 20
+    if(comand == 'ntim') go to 25
+    if(comand == 'unit') go to 30
+    if(comand == 'aoc ') go to 40
+    if(comand == 'afil') go to 45
 
-    WRITE(*, 8000) COMAND
-    GO TO 900
+    write(*, 8000) comand
+    go to 900
     !
     !===========================================================================
-    10   CONTINUE
-    IF(NINPUT >= 3) THEN
-        XYZOBS(1) = RINPUT(1)
-        XYZOBS(2) = RINPUT(2)
-        XYZOBS(3) = RINPUT(3)
-    ELSE
-        WRITE(*, 1050)
-        1050  FORMAT(/' Cartesian system fixed to airplane.'&
+    10   continue
+    if(ninput >= 3) then
+        xyzobs(1) = rinput(1)
+        xyzobs(2) = rinput(2)
+        xyzobs(3) = rinput(3)
+    else
+        write(*, 1050)
+        1050  format(/' Cartesian system fixed to airplane.'&
                 /'  (x forward, y left, z up):       '&
                 /'  '&
                 /'                              z         '&
@@ -154,743 +155,743 @@ SUBROUTINE NOISE
                 /'                              __\\__     '&
                 /'                                        ')
         !
-        !CC              123456789012345678901234567890123     4567      890
-        105  PROMPT = 'Enter observer x,y,z coordinates (' // ULNAM // '):  '
-        WRITE(*, 1100) PROMPT(1:40), (XYZOBS(K), K = 1, 3)
-        1100  FORMAT(1X, A, 3F12.2)
-        CALL READR(3, XYZOBS, ERROR)
-        IF(ERROR) GO TO 105
-    ENDIF
-    GO TO 100
-    !cc      GO TO 900
+        !cc              123456789012345678901234567890123     4567      890
+        105  prompt = 'Enter observer x,y,z coordinates (' // ulnam // '):  '
+        write(*, 1100) prompt(1:40), (xyzobs(k), k = 1, 3)
+        1100  format(1x, a, 3f12.2)
+        call readr(3, xyzobs, error)
+        if(error) go to 105
+    endif
+    go to 100
+    !cc      go to 900
     !
     !======================================================================
-    20   CONTINUE
-    IF(NINPUT >= 1) THEN
-        GALT = RINPUT(1)
-    ELSE
-        PROMPT = 'Enter flight altitude above ground (' // ULNAM // ')^'
-        CALL ASKR(PROMPT, GALT)
-    ENDIF
-    IF(NINPUT >= 2) THEN
-        DCLIMB = RINPUT(2)
-    ELSE
-        CALL ASKR('Enter climb angle (deg)^', DCLIMB)
-    ENDIF
+    20   continue
+    if(ninput >= 1) then
+        galt = rinput(1)
+    else
+        prompt = 'Enter flight altitude above ground (' // ulnam // ')^'
+        call askr(prompt, galt)
+    endif
+    if(ninput >= 2) then
+        dclimb = rinput(2)
+    else
+        call askr('Enter climb angle (deg)^', dclimb)
+    endif
     !
     !---- set default ground-grid limits
-    XLIM(1) = -2.0 * GALT
-    XLIM(2) = 2.0 * GALT
-    YLIM(1) = -1.0 * GALT
-    YLIM(2) = 1.0 * GALT
+    xlim(1) = -2.0 * galt
+    xlim(2) = 2.0 * galt
+    ylim(1) = -1.0 * galt
+    ylim(2) = 1.0 * galt
     !
-    WRITE(*, *)
-    1210 FORMAT(1X, A, 2F10.0)
-    !CC             1234567890123456789012345     6789      012
-    201  PROMPT = 'Enter footprint x limits (' // ULNAM // '):  '
-    WRITE(*, 1210) PROMPT(1:32), XLIM(1), XLIM(2)
-    CALL READR(2, XLIM, ERROR)
-    IF(ERROR) GO TO 201
+    write(*, *)
+    1210 format(1x, a, 2f10.0)
+    !cc             1234567890123456789012345     6789      012
+    201  prompt = 'Enter footprint x limits (' // ulnam // '):  '
+    write(*, 1210) prompt(1:32), xlim(1), xlim(2)
+    call readr(2, xlim, error)
+    if(error) go to 201
     !
-    202  PROMPT = 'Enter footprint y limits (' // ULNAM // '):  '
-    WRITE(*, 1210) PROMPT(1:32), YLIM(1), YLIM(2)
-    CALL READR(2, YLIM, ERROR)
-    IF(ERROR) GO TO 202
+    202  prompt = 'Enter footprint y limits (' // ulnam // '):  '
+    write(*, 1210) prompt(1:32), ylim(1), ylim(2)
+    call readr(2, ylim, error)
+    if(error) go to 202
     !
-    204  WRITE(*, 1250) 'Enter footprint grid size: ', NDBSIZ(1), NDBSIZ(2)
-    1250 FORMAT(1X, A, 2I6)
-    CALL READI(2, NDBSIZ, ERROR)
-    IF(ERROR) GO TO 204
-    IF(NDBSIZ(1) > NXDIM .OR. NDBSIZ(2) > NYDIM) THEN
-        WRITE(*, *) 'Array dimension limits are:', NXDIM, NYDIM
-        NDBSIZ(1) = MIN(NDBSIZ(1), NXDIM)
-        NDBSIZ(2) = MIN(NDBSIZ(2), NYDIM)
-        GO TO 204
-    ENDIF
+    204  write(*, 1250) 'Enter footprint grid size: ', ndbsiz(1), ndbsiz(2)
+    1250 format(1x, a, 2i6)
+    call readi(2, ndbsiz, error)
+    if(error) go to 204
+    if(ndbsiz(1) > nxdim .or. ndbsiz(2) > nydim) then
+        write(*, *) 'Array dimension limits are:', nxdim, nydim
+        ndbsiz(1) = min(ndbsiz(1), nxdim)
+        ndbsiz(2) = min(ndbsiz(2), nydim)
+        go to 204
+    endif
     !
     !
-    THX1 = ATAN2(XLIM(1), GALT)
-    THX2 = ATAN2(XLIM(2), GALT)
-    THY1 = ATAN2(YLIM(1), GALT)
-    THY2 = ATAN2(YLIM(2), GALT)
-    DO I = 1, NDBSIZ(1)
-        DO J = 1, NDBSIZ(2)
-            THX = THX1 + (THX2 - THX1) * FLOAT(I - 1) / FLOAT(NDBSIZ(1) - 1)
-            THY = THY1 + (THY2 - THY1) * FLOAT(J - 1) / FLOAT(NDBSIZ(2) - 1)
-            XDB(I, J) = GALT * TAN(THX)
-            YDB(I, J) = GALT * TAN(THY)
-        ENDDO
-    ENDDO
+    thx1 = atan2(xlim(1), galt)
+    thx2 = atan2(xlim(2), galt)
+    thy1 = atan2(ylim(1), galt)
+    thy2 = atan2(ylim(2), galt)
+    do i = 1, ndbsiz(1)
+        do j = 1, ndbsiz(2)
+            thx = thx1 + (thx2 - thx1) * float(i - 1) / float(ndbsiz(1) - 1)
+            thy = thy1 + (thy2 - thy1) * float(j - 1) / float(ndbsiz(2) - 1)
+            xdb(i, j) = galt * tan(thx)
+            ydb(i, j) = galt * tan(thy)
+        enddo
+    enddo
     !
-    WRITE(*, *)
-    WRITE(*, *) 'Calculating dB footprint...'
-    NT1 = NT
-    CALL DBFOOT(NBLDS, II, XI(1), DXI, AOCI, CH, GAM, &
-            ADV, RAD, VEL, VSO, RHO, &
-            GALT, DCLIMB, UNITL, NT1, &
-            NXDIM, NYDIM, NDBSIZ(1), NDBSIZ(2), XDB, YDB, ADB)
-    LDBCON = .TRUE.
+    write(*, *)
+    write(*, *) 'Calculating db footprint...'
+    nt1 = nt
+    call dbfoot(ctxt%nblds, ctxt%ii, ctxt%xi(1), ctxt%dxi, aoci, ctxt%ch, ctxt%gam, &
+            ctxt%adv, ctxt%rad, ctxt%vel, ctxt%vso, ctxt%rho, &
+            galt, dclimb, unitl, nt1, &
+            nxdim, nydim, ndbsiz(1), ndbsiz(2), xdb, ydb, adb)
+    ldbcon = .true.
     !
     !===========================================================================
-    25   CONTINUE
-    IF(NINPUT >= 1) THEN
-        NT = IINPUT(1)
-    ELSE
-        251    WRITE(*, 1251) NT
-        1251   FORMAT(/1X, ' Enter number of p(t) samples/revolution:', I7)
-        CALL READI(1, NT, ERROR)
-        IF(ERROR) GO TO 251
-    ENDIF
+    25   continue
+    if(ninput >= 1) then
+        nt = iinput(1)
+    else
+        251    write(*, 1251) nt
+        1251   format(/1x, ' Enter number of p(t) samples/revolution:', i7)
+        call readi(1, nt, error)
+        if(error) go to 251
+    endif
     !
-    IF(NT > NTX) THEN
-        NT = NTX
-        WRITE(*, *) 'Number of samples limited to array limit:', NTX
-    ENDIF
+    if(nt > ntx) then
+        nt = ntx
+        write(*, *) 'Number of samples limited to array limit:', ntx
+    endif
     !
-    NHARM = NT / 2
-    GO TO 900
+    nharm = nt / 2
+    go to 900
     !
     !======================================================================
-    30   IF(ULNAM == 'ft') THEN
-        ULNAM = 'm '
-        UNITL = 1.0
-        WRITE(*, *) 'Coordinates now specified in meters'
-    ELSE
-        ULNAM = 'ft'
-        UNITL = 3.28084
-        WRITE(*, *) 'Coordinates now specified in feet'
-    ENDIF
-    GO TO 900
+    30   if(ulnam == 'ft') then
+        ulnam = 'm '
+        unitl = 1.0
+        write(*, *) 'Coordinates now specified in meters'
+    else
+        ulnam = 'ft'
+        unitl = 3.28084
+        write(*, *) 'Coordinates now specified in feet'
+    endif
+    go to 900
     !
     !===========================================================================
-    40   CONTINUE
+    40   continue
     !                                      2
     !---- set local blade airfoil  area / c
     !     (this version assumes that it's constant)
-    IF(NINPUT >= 1) THEN
-        AOC0 = RINPUT(1)
-    ELSE
-        CALL ASKR&
-                ('Enter blade airfoil  (cross-sectional area)/chord**2^', AOC0)
-    ENDIF
+    if(ninput >= 1) then
+        aoc0 = rinput(1)
+    else
+        call askr&
+                ('Enter blade airfoil  (cross-sectional area)/chord**2^', aoc0)
+    endif
     !
-    DO I = 1, II
-        AOCI(I) = AOC0
-    ENDDO
+    do i = 1, ctxt%ii
+        aoci(i) = aoc0
+    enddo
     !
     !---- recalculate pressure signature if observer position has been chosen
-    IF(LPTRAC) GO TO 100
-    GO TO 900
+    if(lptrac) go to 100
+    go to 900
     !
     !===========================================================================
-    45   CONTINUE
-    !---- this version reads in an area distribution list with increasing r/R:
-    !       A/c^2   r/R
-    !       A/c^2   r/R
-    !       A/c^2   r/R
+    45   continue
+    !---- this version reads in an area distribution list with increasing r/r:
+    !       a/c^2   r/r
+    !       a/c^2   r/r
+    !       a/c^2   r/r
     !         .      .
     !         .      .
     !
     !     These are splined to the computational radial stations.
     !
-    FNAME = COMARG
-    IF(FNAME(1:1) == ' ') THEN
-        CALL ASKS&
-                ('Enter blade airfoil area/c**2 distribution filename^', FNAME)
-    ENDIF
+    ctxt%fname = comarg
+    if(ctxt%fname(1:1) == ' ') then
+        call asks&
+                ('enter blade airfoil area/c**2 distribution filename^', ctxt%fname)
+    endif
     !
-    LU = LUTEMP
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 459)
-    DO IA = 1, IX
-        READ(LU, *, END = 455, ERR = 458) XA(IA), AOC(IA)
-    ENDDO
-    WRITE(*, *) 'Array size limited.  Not all points read in.'
-    IA = IX + 1
-    455  CONTINUE
-    NA = IA - 1
-    CLOSE(LU)
+    lu = ctxt%lutemp
+    open(lu, file = ctxt%fname, status = 'old', err = 459)
+    do ia = 1, ix
+        read(lu, *, end = 455, err = 458) xa(ia), aoc(ia)
+    enddo
+    write(*, *) 'Array size limited.  Not all points read in.'
+    ia = ix + 1
+    455  continue
+    na = ia - 1
+    close(lu)
     !
-    AOCX(1:NA) = spline(XA(1:NA), AOC(1:NA))
-    DO I = 1, II
-        ! TODO: test this
-        AOCI(I) = SEVAL(XI(I), AOC, AOCX, XA)
-    ENDDO
-    AOC0 = 0.0
+    aocx(1:na) = spline(xa(1:na), aoc(1:na))
+    do i = 1, ctxt%ii
+        ! todo: test this
+        aoci(i) = seval(ctxt%xi(i), aoc, aocx, xa)
+    enddo
+    aoc0 = 0.0
     !
     !---- recalculate pressure signature if observer position has been chosen
-    IF(LPTRAC) GO TO 100
-    GO TO 900
+    if(lptrac) go to 100
+    go to 900
     !
-    458  WRITE(*, *) 'File READ error'
-    CLOSE(LU)
-    GO TO 900
+    458  write(*, *) 'File read error'
+    close(lu)
+    go to 900
     !
-    459  WRITE(*, *) 'File OPEN error'
-    GO TO 900
+    459  write(*, *) 'File open error'
+    go to 900
     !
     !===========================================================================
     !===========================================================================
     !---- p(t) signature calculation
-    100  CONTINUE
-    XOBS = XYZOBS(1) / UNITL
-    YOBS = XYZOBS(2) / UNITL
-    ZOBS = XYZOBS(3) / UNITL
-    CALL PTRACE(XOBS, YOBS, ZOBS, &
-            NBLDS, II, XI(1), DXI, AOCI, CH, GAM, &
-            ADV, RAD, VEL, VSO, RHO, &
-            NTX, NT, PCOMP, TIME)
+    100  continue
+    xobs = xyzobs(1) / unitl
+    yobs = xyzobs(2) / unitl
+    zobs = xyzobs(3) / unitl
+    call ptrace(xobs, yobs, zobs, &
+            ctxt%nblds, ctxt%ii, ctxt%xi(1), ctxt%dxi, aoci, ctxt%ch, ctxt%gam, &
+            ctxt%adv, ctxt%rad, ctxt%vel, ctxt%vso, ctxt%rho, &
+            ntx, nt, pcomp, time)
     !
     !---- set total p(t) signal
-    DO IT = 0, NT
-        PRES(IT) = PCOMP(IT, 1) + PCOMP(IT, 2) + PCOMP(IT, 3)
-    ENDDO
-    LPTRAC = .TRUE.
+    do it = 0, nt
+        pres(it) = pcomp(it, 1) + pcomp(it, 2) + pcomp(it, 3)
+    enddo
+    lptrac = .true.
     !
     !---- integrate p(t) for rms pressure
-    PRMS = 0.
-    DO IT = 1, NT
-        DELT = TIME(IT) - TIME(IT - 1)
-        PAVG = (PRES(IT) + PRES(IT - 1)) * 0.5
-        PRMS = PRMS + PAVG**2 * DELT
-    ENDDO
-    PRMS = SQRT(PRMS / (TIME(NT) - TIME(0)))
+    prms = 0.
+    do it = 1, nt
+        delt = time(it) - time(it - 1)
+        pavg = (pres(it) + pres(it - 1)) * 0.5
+        prms = prms + pavg**2 * delt
+    enddo
+    prms = sqrt(prms / (time(nt) - time(0)))
     !
     !---- get amplitude of each blade-passing harmonic component
-    CALL SFT(PRES, TIME, NT, FAMPL, PHASE, NHARM)
+    call sft(pres, time, nt, fampl, phase, nharm)
     !
     !---- set Decibels relative to 20 microPa for each harmonic component
-    DO IH = 1, NHARM
-        DECIB(IH) = 20.0 * ALOG10(SQRT(0.5) * FAMPL(IH) / 20.0E-6)
-    ENDDO
+    do ih = 1, nharm
+        decib(ih) = 20.0 * alog10(sqrt(0.5) * fampl(ih) / 20.0e-6)
+    enddo
     !
-    !---- set total dB level from r.m.s. pressure
-    DECIB(0) = 20.0 * ALOG10(PRMS / 20.0E-6)
+    !---- set total db level from r.m.s. pressure
+    decib(0) = 20.0 * alog10(prms / 20.0e-6)
     !
     !---- print out decibel spectrum
-    WRITE(*, 5000)  0, DECIB(0)
-    WRITE(*, 5010) (K, DECIB(K), K = 1, NHARM)
-    5000 FORMAT(&
+    write(*, 5000)  0, decib(0)
+    write(*, 5010) (k, decib(k), k = 1, nharm)
+    5000 format(&
             /' Sound level for each multiple of blade-passing frequency'&
-            //'      n      dB', &
-            /    1X, I6, F9.2, '  (total)')
-    5010 FORMAT(1X, I6, F9.2)
-    !CC            12    95.02
+            //'      n      db', &
+            /    1x, i6, f9.2, '  (total)')
+    5010 format(1x, i6, f9.2)
+    !cc            12    95.02
     !
-    !CC      GO TO 900
+    !cc      go to 900
     !.....................................................................
-END
+end
 
 
-SUBROUTINE PTRACE(XOBS, YOBS, ZOBS, &
-        NBLDS, II, XI, DXI, AOC, CH, GAM, &
-        ADV, RAD, VEL, VSO, RHO, &
-        NTMAX, NT, PRES, TIME)
+subroutine ptrace(xobs, yobs, zobs, &
+        nblds, ii, xi, dxi, aoc, ch, gam, &
+        adv, rad, vel, vso, rho, &
+        ntmax, nt, pres, time)
     !------------------------------------------------------------------------
     !     Calculates acoustic pressure p(t) trace
     !     over one blade-passing period.
     !
     !     Input:
-    !        XOBS    observer location relative to prop
-    !        YOBS     (X = fwd, Y = left, Z = up)
-    !        ZOBS
-    !        NBLDS   number of blades
-    !        II      number of radial stations
-    !        XI(.)   r/R radial coordinate array
-    !        CH(.)   c/R chord distribution
-    !        AOC(.)  airfoil area/chord**2 distribution
-    !        GAM(.)  Gamma/VR circulation distribution
-    !        ADV     advance ratio  V/wR
-    !        RAD     tip radius R
-    !        VEL     freestream speed V
-    !        VSO     freestream speed of sound
-    !        RHO     freestream density
-    !        NT      number of circumferential prop positions to be sampled
-    !                and length of PRES,TIME arrays returned
-    !                  (NT=90 works well for most cases)
+    !        xobs    observer location relative to prop
+    !        yobs     (x = fwd, y = left, z = up)
+    !        zobs
+    !        nblds   number of blades
+    !        ii      number of radial stations
+    !        xi(.)   r/r radial coordinate array
+    !        ch(.)   c/r chord distribution
+    !        aoc(.)  airfoil area/chord**2 distribution
+    !        gam(.)  Gamma/vr circulation distribution
+    !        adv     advance ratio  v/wr
+    !        rad     tip radius r
+    !        vel     freestream speed v
+    !        vso     freestream speed of sound
+    !        rho     freestream density
+    !        nt      number of circumferential prop positions to be sampled
+    !                and length of pres,time arrays returned
+    !                  (nt=90 works well for most cases)
     !     Output:
-    !        PRES(i,1)  near-field loading pressure,  i = 1..NT
-    !        PRES(i,2)  far-field  loading pressure
-    !        PRES(i,3)  thickness pressure
-    !        TIME(i,)   time coordinate for PRES
+    !        pres(i,1)  near-field loading pressure,  i = 1..nt
+    !        pres(i,2)  far-field  loading pressure
+    !        pres(i,3)  thickness pressure
+    !        time(i,)   time coordinate for pres
     !                  (over one blade-passing period, non-uniformly spaced)
     !
     !------------------------------------------------------------------------
     use mod_spline
 
-    IMPLICIT REAL(A-H, M, O-Z)
+    implicit real(a-h, m, o-z)
     !
-    DIMENSION AOC(II), XI(II), DXI(II), CH(II), GAM(II)
-    DIMENSION PRES(0:NTMAX, 3), TIME(0:NTMAX)
+    dimension aoc(ii), xi(ii), dxi(ii), ch(ii), gam(ii)
+    dimension pres(0:ntmax, 3), time(0:ntmax)
     !
-    PARAMETER (NTX = 160, IX = 40)
-    DIMENSION PEL(0:NTX, IX, 3), TEL(0:NTX, IX), PEL_T(0:NTX, IX)
+    parameter (ntx = 160, ix = 40)
+    dimension pel(0:ntx, ix, 3), tel(0:ntx, ix), pel_t(0:ntx, ix)
     !
-    PI = 4.0 * ATAN(1.0)
+    pi = 4.0 * atan(1.0)
     !
-    IF(II > IX) STOP 'PTRACE: Array overflow. IX too small.'
-    IF(NT > NTX) STOP 'PTRACE: Array overflow. NTX too small.'
+    if(ii > ix) stop 'ptrace: Array overflow. ix too small.'
+    if(nt > ntx) stop 'ptrace: Array overflow. ntx too small.'
     !
     !---- prop rotational speed
-    OMEGA = VEL / (ADV * RAD)
+    omega = vel / (adv * rad)
     !
     !---- freestream and tip speed Mach numbers
-    MACH = VEL / VSO
-    MTIP = MACH / ADV
+    mach = vel / vso
+    mtip = mach / adv
     !
-    RHOVR = RHO * VEL * RAD
-    VR = VEL * RAD
+    rhovr = rho * vel * rad
+    vr = vel * rad
     !
     !---- set distance to observer and average acoustic delay time
-    ROBS = SQRT(XOBS**2 + YOBS**2 + ZOBS**2)
-    TDELAY = ROBS / VSO
+    robs = sqrt(xobs**2 + yobs**2 + zobs**2)
+    tdelay = robs / vso
     !
-    THOBS = ATAN2(-YOBS, ZOBS)
+    thobs = atan2(-yobs, zobs)
     !
-    !---- rotate one blade through 360 degrees in NT steps
-    do IT = 0, NT
+    !---- rotate one blade through 360 degrees in nt steps
+    do it = 0, nt
         !
-        !------ set rotation angle,  TH=0 is for blade vertical (along Z direction)
-        TH = 2.0 * PI * FLOAT(IT) / FLOAT(NT) + THOBS + 0.5 * PI
+        !------ set rotation angle,  th=0 is for blade vertical (along z direction)
+        th = 2.0 * pi * float(it) / float(nt) + thobs + 0.5 * pi
         !
-        SINT = SIN(TH)
-        COST = COS(TH)
+        sint = sin(th)
+        cost = cos(th)
         !
         !------ set retarded time
-        TAU = TH / OMEGA
+        tau = th / omega
         !
         !------ go over blade elements at current rotation angle
-        do I = 1, II
+        do i = 1, ii
             !
-            XX = XI(I) / ADV
+            xx = xi(i) / adv
             !
             !-------- components and modulus of vector from blade element to observer
-            X = XOBS
-            Y = YOBS + XI(I) * RAD * SINT
-            Z = ZOBS - XI(I) * RAD * COST
-            R = SQRT(X * X + Y * Y + Z * Z)
+            x = xobs
+            y = yobs + xi(i) * rad * sint
+            z = zobs - xi(i) * rad * cost
+            r = sqrt(x * x + y * y + z * z)
             !
             !-------- unit vector to observer
-            XN = X / R
-            YN = Y / R
-            ZN = Z / R
+            xn = x / r
+            yn = y / r
+            zn = z / r
             !
             !-------- time derivative of vector from blade element to observer
-            XT = -VEL
-            YT = VEL * XX * COST
-            ZT = VEL * XX * SINT
-            RT = (X * XT + Y * YT + Z * ZT) / R
+            xt = -vel
+            yt = vel * xx * cost
+            zt = vel * xx * sint
+            rt = (x * xt + y * yt + z * zt) / r
             !
             !-------- 2nd time derivative of vector from blade element to observer
-            XTT = 0.
-            YTT = -VEL * XX * SINT * OMEGA
-            ZTT = VEL * XX * COST * OMEGA
-            RTT = (X * XTT + Y * YTT + Z * ZTT) / R&
-                    + (XT * XT + YT * YT + ZT * ZT) / R&
-                    - RT * RT / R
+            xtt = 0.
+            ytt = -vel * xx * sint * omega
+            ztt = vel * xx * cost * omega
+            rtt = (x * xtt + y * ytt + z * ztt) / r&
+                    + (xt * xt + yt * yt + zt * zt) / r&
+                    - rt * rt / r
             !
             !-------- Mach number components of blade element relative to still air
-            MAX = MACH
-            MAY = -MACH * XX * COST
-            MAZ = -MACH * XX * SINT
+            max = mach
+            may = -mach * xx * cost
+            maz = -mach * xx * sint
             !
             !-------- time derivatives of Mach number components
-            MAXT = 0.
-            MAYT = MACH * XX * SINT * OMEGA
-            MAZT = -MACH * XX * COST * OMEGA
+            maxt = 0.
+            mayt = mach * xx * sint * omega
+            mazt = -mach * xx * cost * omega
             !
             !-------- 2nd time derivatives of Mach number components
-            MAXTT = 0.
-            MAYTT = MACH * XX * COST * OMEGA**2
-            MAZTT = MACH * XX * SINT * OMEGA**2
+            maxtt = 0.
+            maytt = mach * xx * cost * omega**2
+            maztt = mach * xx * sint * omega**2
             !
             !-------- components of lift force on air by blade element
-            FX = -RHOVR * GAM(I) * XX * DXI(I) * VR
-            FY = -RHOVR * GAM(I) * COST * DXI(I) * VR
-            FZ = -RHOVR * GAM(I) * SINT * DXI(I) * VR
+            fx = -rhovr * gam(i) * xx * dxi(i) * vr
+            fy = -rhovr * gam(i) * cost * dxi(i) * vr
+            fz = -rhovr * gam(i) * sint * dxi(i) * vr
             !
             !-------- time derivative of lift force
-            FXT = 0.
-            FYT = RHOVR * GAM(I) * SINT * DXI(I) * VR * OMEGA
-            FZT = -RHOVR * GAM(I) * COST * DXI(I) * VR * OMEGA
+            fxt = 0.
+            fyt = rhovr * gam(i) * sint * dxi(i) * vr * omega
+            fzt = -rhovr * gam(i) * cost * dxi(i) * vr * omega
             !
             !-------- Mach number component along blade element --> observer direction
-            MR = (X * MAX + Y * MAY + Z * MAZ) / R
+            mr = (x * max + y * may + z * maz) / r
             !
-            IF(MR >= 1.0) THEN
-                WRITE(*, 5500) MR, XI(I), (TH * 180.0 / PI)
-                5500      FORMAT(/' WARNING.  Relative approach Mach number =', F6.3, &
-                        '  at r/R =', F6.3, '    theta =', F6.1, ' deg.')
-                MR = 0.995
-            ENDIF
+            if(mr >= 1.0) then
+                write(*, 5500) mr, xi(i), (th * 180.0 / pi)
+                5500      format(/' warning.  Relative approach Mach number =', f6.3, &
+                        '  at r/r =', f6.3, '    theta =', f6.1, ' deg.')
+                mr = 0.995
+            endif
             !
-            MRI = 1.0 / (1.0 - MR)
+            mri = 1.0 / (1.0 - mr)
             !
             !-------- assorted time derivatives
-            MRT = (XT * MAX + YT * MAY + ZT * MAZ) / R&
-                    + (X * MAXT + Y * MAYT + Z * MAZT) / R&
-                    - RT * MR / R
-            MRIT = MRI**2 * MRT
+            mrt = (xt * max + yt * may + zt * maz) / r&
+                    + (x * maxt + y * mayt + z * mazt) / r&
+                    - rt * mr / r
+            mrit = mri**2 * mrt
             !
-            MRTT = (XTT * MAX + YTT * MAY + ZTT * MAZ) / R&
-                    + 2.0 * (XT * MAXT + YT * MAYT + ZT * MAZT) / R&
-                    + (X * MAXTT + Y * MAYTT + Z * MAZTT) / R&
-                    - 2.0 * RT * MRT / R - RTT * MR / R
-            MRITT = 2.0 * MRI * MRIT * MRT + MRI**2 * MRTT
+            mrtt = (xtt * max + ytt * may + ztt * maz) / r&
+                    + 2.0 * (xt * maxt + yt * mayt + zt * mazt) / r&
+                    + (x * maxtt + y * maytt + z * maztt) / r&
+                    - 2.0 * rt * mrt / r - rtt * mr / r
+            mritt = 2.0 * mri * mrit * mrt + mri**2 * mrtt
             !
             !-------- various dot products
-            RDOTF = XN * FX + YN * FY + ZN * FZ
-            RDOTFT = XN * FXT + YN * FYT + ZN * FZT
-            RDOTMT = XN * MAXT + YN * MAYT + ZN * MAZT
+            rdotf = xn * fx + yn * fy + zn * fz
+            rdotft = xn * fxt + yn * fyt + zn * fzt
+            rdotmt = xn * maxt + yn * mayt + zn * mazt
             !
-            MDOTM = MAX * MAX + MAY * MAY + MAZ * MAZ
-            FDOTM = FX * MAX + FY * MAY + FZ * MAZ
+            mdotm = max * max + may * may + maz * maz
+            fdotm = fx * max + fy * may + fz * maz
             !
             !-------- set far-field and near-field pressures due to lift
-            PLFF = (RDOTFT / VSO + RDOTF * MRI * RDOTMT / VSO) * MRI**2 / R
-            PLNF = (RDOTF * (1.0 - MDOTM) * MRI - FDOTM) * MRI**2 / R**2
+            plff = (rdotft / vso + rdotf * mri * rdotmt / vso) * mri**2 / r
+            plnf = (rdotf * (1.0 - mdotm) * mri - fdotm) * mri**2 / r**2
             !
             !-------- set unit pressure due to thickness
-            MOR = MRI / R
-            MORT = MRIT / R - RT * MOR / R
-            MORTT = MRITT / R - RTT * MOR / R - 2.0 * RT * MORT / R
-            PTU = MRI * (MRIT * MORT + MRI * MORTT)
+            mor = mri / r
+            mort = mrit / r - rt * mor / r
+            mortt = mritt / r - rtt * mor / r - 2.0 * rt * mort / r
+            ptu = mri * (mrit * mort + mri * mortt)
             !
             !-------- set pressure due to thickness
-            PT = PTU * RHO * AOC(I) * CH(I)**2 * DXI(I) * RAD**3
+            pt = ptu * rho * aoc(i) * ch(i)**2 * dxi(i) * rad**3
             !
             !-------- set entire pressure due to blade element at retarded time
-            PEL(IT, I, 1) = PLFF / (4.0 * PI)
-            PEL(IT, I, 2) = PLNF / (4.0 * PI)
-            PEL(IT, I, 3) = PT / (4.0 * PI)
+            pel(it, i, 1) = plff / (4.0 * pi)
+            pel(it, i, 2) = plnf / (4.0 * pi)
+            pel(it, i, 3) = pt / (4.0 * pi)
             !
             !-------- set observer time at which he will see the pressure signal
             !         (subtract off average delay time to make observer time near zero)
-            TOB = TAU + R / VSO
-            TEL(IT, I) = TOB - TDELAY
+            tob = tau + r / vso
+            tel(it, i) = tob - tdelay
             !
         end do
     end do
     !
     !
     !---- make sure pressure is exactly periodic
-    DO I = 1, II
-        PEL(NT, I, 1) = PEL(0, I, 1)
-        PEL(NT, I, 2) = PEL(0, I, 2)
-        PEL(NT, I, 3) = PEL(0, I, 3)
-    ENDDO
+    do i = 1, ii
+        pel(nt, i, 1) = pel(0, i, 1)
+        pel(nt, i, 2) = pel(0, i, 2)
+        pel(nt, i, 3) = pel(0, i, 3)
+    enddo
     !
     !
     !---- full-rotation time
-    ROTIME = 2.0 * PI / OMEGA
+    rotime = 2.0 * pi / omega
     !
     !---- blade-passing time
-    BPTIME = ROTIME / FLOAT(NBLDS)
+    bptime = rotime / float(nblds)
     !
     !---- set time array over one blade-passing time
     !###
-    !c      DO IT=1, NT
-    !c        TIME(IT) = BPTIME * FLOAT(IT)/FLOAT(NT)
-    !c      ENDDO
+    !c      do it=1, nt
+    !c        time(it) = bptime * float(it)/float(nt)
+    !c      enddo
 
-    I = II
-    TMID = TEL(NT / 2, I)
-    DO IT = 0, NT
-        TIME(IT) = TMID + (TEL(IT, I) - TMID) / FLOAT(NBLDS)
-    ENDDO
+    i = ii
+    tmid = tel(nt / 2, i)
+    do it = 0, nt
+        time(it) = tmid + (tel(it, i) - tmid) / float(nblds)
+    enddo
     !
     !---- go over pressure components
-    do L = 1, 3
+    do l = 1, 3
         !------ periodic-spline p(t) for each blade element
-        DO I = 1, II
-            CALL PSPLIN(PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
-        ENDDO
+        do i = 1, ii
+            call psplin(pel(0, i, l), pel_t(0, i), tel(0, i), nt + 1)
+        enddo
         !
         !------ set total acoustic p(t) by adding up all blade elements from all blades
-        do IT = 1, NT
-            PSUM = 0.
+        do it = 1, nt
+            psum = 0.
             !
             !-------- go over all radial stations
-            do I = 1, II
-                TEL0 = TEL(0, I)
-                TELN = TEL(NT, I)
+            do i = 1, ii
+                tel0 = tel(0, i)
+                teln = tel(nt, i)
                 !
                 !---------- go over all blades at this radial station
-                DO IB = 1, NBLDS
+                do ib = 1, nblds
                     !------------ time at which current blade passes the current blade 1 angle
-                    TELB = TIME(IT) + BPTIME * FLOAT(IB - 1)
+                    telb = time(it) + bptime * float(ib - 1)
                     !
                     !------------ remove whole multiples of blade period to get into spline range
-                    TOFF = TEL0 + AMOD((TELB - TEL0), (TELN - TEL0))
-                    IF(TOFF < TEL0) TOFF = TOFF + (TELN - TEL0)
+                    toff = tel0 + amod((telb - tel0), (teln - tel0))
+                    if(toff < tel0) toff = toff + (teln - tel0)
                     !
-                    IF(TOFF < TEL0 .OR. TOFF > TELN) THEN
-                        WRITE(*, *) '? PTRACE: Time out of spline range.'
-                        WRITE(*, *) 't   t0   tN', TOFF, TEL0, TELN
-                    ENDIF
+                    if(toff < tel0 .or. toff > teln) then
+                        write(*, *) '? ptrace: Time out of spline range.'
+                        write(*, *) 't   t0   tn', toff, tel0, teln
+                    endif
                     !
-                    ! TODO: test this
-                    ! PSUM = PSUM + SEVAL_OLD(TOFF, PEL(0, I, L), PEL_T(0, I), TEL(0, I), NT + 1)
-                    PSUM = PSUM + seval(TOFF, PEL(0:NT, I, L), PEL_T(0:NT, I), TEL(0:NT, I))
-                ENDDO
+                    ! todo: test this
+                    ! psum = psum + seval_old(toff, pel(0, i, l), pel_t(0, i), tel(0, i), nt + 1)
+                    psum = psum + seval(toff, pel(0:nt, i, l), pel_t(0:nt, i), tel(0:nt, i))
+                enddo
             end do
             !
             !-------- set total pressure signal at current observer time
-            PRES(IT, L) = PSUM
+            pres(it, l) = psum
             !
         end do
         !
         !------ make sure pressure is exactly periodic
-        PRES(0, L) = PRES(NT, L)
+        pres(0, l) = pres(nt, l)
     end do
     !
-    TIME0 = TIME(0)
-    DO IT = 0, NT
-        TIME(IT) = TIME(IT) - TIME0
-    ENDDO
+    time0 = time(0)
+    do it = 0, nt
+        time(it) = time(it) - time0
+    enddo
     !
     !---- subtract off average pressure
-    DO L = 1, 3
-        PINT = 0.
-        DO IT = 1, NT
-            PINT = PINT + (PRES(IT, L) + PRES(IT - 1, L)) * (TIME(IT) - TIME(IT - 1))
-        ENDDO
-        PAVG = PINT * 0.5 / (TIME(NT) - TIME(0))
+    do l = 1, 3
+        pint = 0.
+        do it = 1, nt
+            pint = pint + (pres(it, l) + pres(it - 1, l)) * (time(it) - time(it - 1))
+        enddo
+        pavg = pint * 0.5 / (time(nt) - time(0))
         !
-        DO IT = 0, NT
-            PRES(IT, L) = PRES(IT, L) - PAVG
-        ENDDO
-    ENDDO
+        do it = 0, nt
+            pres(it, l) = pres(it, l) - pavg
+        enddo
+    enddo
     !
-    RETURN
-END
+    return
+end
 
 
-SUBROUTINE SFT(Y, T, N, FAMPL, PHASE, NF)
-    DIMENSION Y(N), T(N)
-    DIMENSION FAMPL(NF), PHASE(NF)
+subroutine sft(y, t, n, fampl, phase, nf)
+    dimension y(n), t(n)
+    dimension fampl(nf), phase(nf)
     !---------------------------------------------------
     !     Calculates Slow Fourier Transform of periodic
-    !     input function Y(T) with period T(N+1)-T(1).
-    !     Hence, Y(1) and Y(N+1) should be equal.
-    !     C(K) is the complex amplitude of the K'th
+    !     input function y(t) with period t(n+1)-t(1).
+    !     Hence, y(1) and y(n+1) should be equal.
+    !     c(k) is the complex amplitude of the k'th
     !     multiple of the fundamental harmonic.
-    !     The first NF harmonics are calculated.
+    !     The first nf harmonics are calculated.
     !---------------------------------------------------
-    DIMENSION SINT(361), COST(361)
+    dimension sint(361), cost(361)
     !
-    IF(N + 1 > 361) STOP 'SFT: Array overflow'
+    if(n + 1 > 361) stop 'sft: Array overflow'
     !
-    PI = 4.0 * ATAN(1.0)
+    pi = 4.0 * atan(1.0)
     !
-    OMEGA = 2.0 * PI / (T(N + 1) - T(1))
+    omega = 2.0 * pi / (t(n + 1) - t(1))
     !
-    do K = 1, NF
-        RK = FLOAT(K)
+    do k = 1, nf
+        rk = float(k)
         !
-        do I = 1, N
-            TK = OMEGA * RK * T(I)
-            SINT(I) = SIN(TK)
-            COST(I) = COS(TK)
+        do i = 1, n
+            tk = omega * rk * t(i)
+            sint(i) = sin(tk)
+            cost(i) = cos(tk)
         end do
-        SINT(N + 1) = SINT(1)
-        COST(N + 1) = COST(1)
+        sint(n + 1) = sint(1)
+        cost(n + 1) = cost(1)
         !
-        SSUM = 0.
-        CSUM = 0.
-        do IO = 1, N
-            IP = IO + 1
-            DT = T(IP) - T(IO)
-            SSUM = SSUM + 0.5 * (SINT(IO) * Y(IO) + SINT(IP) * Y(IP)) * DT
-            CSUM = CSUM + 0.5 * (COST(IO) * Y(IO) + COST(IP) * Y(IP)) * DT
+        ssum = 0.
+        csum = 0.
+        do io = 1, n
+            ip = io + 1
+            dt = t(ip) - t(io)
+            ssum = ssum + 0.5 * (sint(io) * y(io) + sint(ip) * y(ip)) * dt
+            csum = csum + 0.5 * (cost(io) * y(io) + cost(ip) * y(ip)) * dt
         end do
         !
-        FAMPL(K) = SQRT(SSUM**2 + CSUM**2) * OMEGA / PI
-        PHASE(K) = ATAN2(SSUM, CSUM)
+        fampl(k) = sqrt(ssum**2 + csum**2) * omega / pi
+        phase(k) = atan2(ssum, csum)
     end do
     !
-    RETURN
-END
-! SFT
+    return
+end
+! sft
 
 
-SUBROUTINE PSPLIN(X, XP, S, II)
+subroutine psplin(x, xp, s, ii)
     !
-    DIMENSION X(II), XP(II), S(II)
-    DIMENSION A(480), B(480), C(480)
+    dimension x(ii), xp(ii), s(ii)
+    dimension a(480), b(480), c(480)
     !
-    IF(II > 480)     STOP 'PSPLIN: Array overflow'
-    IF(X(II) /= X(1)) STOP 'PSPLIN: Data not periodic'
+    if(ii > 480)     stop 'psplin: Array overflow'
+    if(x(ii) /= x(1)) stop 'psplin: Data not periodic'
     !
-    do I = 1, II - 1
+    do i = 1, ii - 1
         !
         !------ Periodic point
-        IF(I == 1) THEN
-            DSMI = 1.0 / (S(II) - S(II - 1))
-            DXM = X(II) - X(II - 1)
-            DSPI = 1.0 / (S(I + 1) - S(I))
-            DXP = X(I + 1) - X(I)
+        if(i == 1) then
+            dsmi = 1.0 / (s(ii) - s(ii - 1))
+            dxm = x(ii) - x(ii - 1)
+            dspi = 1.0 / (s(i + 1) - s(i))
+            dxp = x(i + 1) - x(i)
             !
             !------ Interior points
-        ELSE
-            DSMI = 1.0 / (S(I) - S(I - 1))
-            DXM = X(I) - X(I - 1)
-            DSPI = 1.0 / (S(I + 1) - S(I))
-            DXP = X(I + 1) - X(I)
-        ENDIF
+        else
+            dsmi = 1.0 / (s(i) - s(i - 1))
+            dxm = x(i) - x(i - 1)
+            dspi = 1.0 / (s(i + 1) - s(i))
+            dxp = x(i + 1) - x(i)
+        endif
         !
-        B(I) = DSMI
-        A(I) = 2.0 * (DSMI + DSPI)
-        C(I) = DSPI
-        XP(I) = 3.0 * (DXP * DSPI**2 + DXM * DSMI**2)
+        b(i) = dsmi
+        a(i) = 2.0 * (dsmi + dspi)
+        c(i) = dspi
+        xp(i) = 3.0 * (dxp * dspi**2 + dxm * dsmi**2)
         !
     end do
     !
-    CALL PTRISO(A, B, C, XP, II - 1)
+    call ptriso(a, b, c, xp, ii - 1)
     !
-    XP(II) = XP(1)
+    xp(ii) = xp(1)
     !
-    RETURN
-END
+    return
+end
 
 
-SUBROUTINE PTRISO(A, B, C, D, KK)
+subroutine ptriso(a, b, c, d, kk)
     !
-    DIMENSION A(KK), B(KK), C(KK), D(KK)
+    dimension a(kk), b(kk), c(kk), d(kk)
     !
-    do K = 2, KK
-        KM = K - 1
-        AINV = 1.0 / A(KM)
-        C(KM) = C(KM) * AINV
-        D(KM) = D(KM) * AINV
-        B(KM) = B(KM) * AINV
-        A(K) = A(K) - B(K) * C(KM)
-        D(K) = D(K) - B(K) * D(KM)
-        IF(K < KK) THEN
-            B(K) = - B(K) * B(KM)
-        ELSE
-            A(K) = A(K) - B(K) * B(KM)
-        ENDIF
+    do k = 2, kk
+        km = k - 1
+        ainv = 1.0 / a(km)
+        c(km) = c(km) * ainv
+        d(km) = d(km) * ainv
+        b(km) = b(km) * ainv
+        a(k) = a(k) - b(k) * c(km)
+        d(k) = d(k) - b(k) * d(km)
+        if(k < kk) then
+            b(k) = - b(k) * b(km)
+        else
+            a(k) = a(k) - b(k) * b(km)
+        endif
     end do
     !
-    C(KK) = C(KK) / A(KK)
-    D(KK) = D(KK) / A(KK)
+    c(kk) = c(kk) / a(kk)
+    d(kk) = d(kk) / a(kk)
     !
-    do K = KK, 2, -1
-        KM = K - 1
-        D(KM) = D(KM) - C(KM) * D(K) - B(KM) * D(KK)
-        C(KM) = - C(KM) * C(K) - B(KM) * C(KK)
+    do k = kk, 2, -1
+        km = k - 1
+        d(km) = d(km) - c(km) * d(k) - b(km) * d(kk)
+        c(km) = - c(km) * c(k) - b(km) * c(kk)
     end do
     !
-    D(1) = D(1) / (1.0 + C(1))
+    d(1) = d(1) / (1.0 + c(1))
     !
-    do K = 2, KK
-        D(K) = D(K) - C(K) * D(1)
+    do k = 2, kk
+        d(k) = d(k) - c(k) * d(1)
     end do
     !
-    RETURN
-END
+    return
+end
 
 
-SUBROUTINE DBFOOT(NBLDS, II, XI, DXI, AOC, CH, GAM, &
-        ADV, RAD, VEL, VSO, RHO, &
-        GALT, DCLIMB, UNITL, NT, &
-        NXDIM, NYDIM, NX, NY, X, Y, D)
+subroutine dbfoot(nblds, ii, xi, dxi, aoc, ch, gam, &
+        adv, rad, vel, vso, rho, &
+        galt, dclimb, unitl, nt, &
+        nxdim, nydim, nx, ny, x, y, d)
     !--------------------------------------------------------
-    !     Calculates dB noise levels on a ground plane grid.
+    !     Calculates db noise levels on a ground plane grid.
     !
     !     Input:
-    !        NBLDS   number of blades
-    !        II      number of radial stations
-    !        XI(.)   r/R radial coordinate array
-    !        CH(.)   c/R chord distribution
-    !        AOC(.)  airfoil area/chord**2 distribution
-    !        GAM(.)  Gamma/VR circulation distribution
-    !        ADV     advance ratio  V/wR
-    !        RAD     tip radius R
-    !        VEL     freestream speed V
-    !        VSO     freestream speed of sound
-    !        RHO     freestream density
-    !        GALT    aircraft altitude above ground plane
-    !        DCLIMB  aircraft climb angle (deg)
-    !        UNITL   length unit of GALT,X,Y, in meters
-    !        NT      number of circumferential prop positions to be sampled
+    !        nblds   number of blades
+    !        ii      number of radial stations
+    !        xi(.)   r/r radial coordinate array
+    !        ch(.)   c/r chord distribution
+    !        aoc(.)  airfoil area/chord**2 distribution
+    !        gam(.)  Gamma/vr circulation distribution
+    !        adv     advance ratio  v/wr
+    !        rad     tip radius r
+    !        vel     freestream speed v
+    !        vso     freestream speed of sound
+    !        rho     freestream density
+    !        galt    aircraft altitude above ground plane
+    !        dclimb  aircraft climb angle (deg)
+    !        unitl   length unit of galt,x,y, in meters
+    !        nt      number of circumferential prop positions to be sampled
     !
-    !        NXDIM,NYDIM   grid array dimensions
-    !        NX,NY         grid size
-    !        X(..)         ground-plane grid where dB is to be calculated
-    !        Y(..)          "
+    !        nxdim,nydim   grid array dimensions
+    !        nx,ny         grid size
+    !        x(..)         ground-plane grid where db is to be calculated
+    !        y(..)          "
     !
     !     Output:
-    !        D(..)         dB sound level at ground plane
+    !        d(..)         db sound level at ground plane
     !
     !--------------------------------------------------------
-    DIMENSION AOC(II), XI(II), DXI(II), CH(II), GAM(II)
+    dimension aoc(ii), xi(ii), dxi(ii), ch(ii), gam(ii)
     !
-    DIMENSION D(NXDIM, NYDIM)
-    DIMENSION X(NXDIM, NYDIM)
-    DIMENSION Y(NXDIM, NYDIM)
+    dimension d(nxdim, nydim)
+    dimension x(nxdim, nydim)
+    dimension y(nxdim, nydim)
     !
     !---- local arrays for calculating p(t) trace
-    PARAMETER (NTX = 180)
-    DIMENSION PCOMP(0:NTX, 3), PRES(0:NTX), TIME(0:NTX)
+    parameter (ntx = 180)
+    dimension pcomp(0:ntx, 3), pres(0:ntx), time(0:ntx)
     !
     !---- degrees-to-radians conversion factor
-    DTR = ATAN(1.0) / 45.0
+    dtr = atan(1.0) / 45.0
     !
-    COSC = COS(DCLIMB * DTR)
-    SINC = SIN(DCLIMB * DTR)
+    cosc = cos(dclimb * dtr)
+    sinc = sin(dclimb * dtr)
     !
     !---- find j index of y=0 line
-    DELY = ABS(Y(1, NY) - Y(1, 1))
-    DO J0 = 1, NY
-        IF(Y(1, J0) > -0.0001 * DELY) GO TO 5
-    ENDDO
-    J0 = 1
-    5    CONTINUE
+    dely = abs(y(1, ny) - y(1, 1))
+    do j0 = 1, ny
+        if(y(1, j0) > -0.0001 * dely) go to 5
+    enddo
+    j0 = 1
+    5    continue
     !
-    do I = 1, NX
-        WRITE(*, 1300) I, NX
-        1300   FORMAT(5X, I3, ' /', I3)
+    do i = 1, nx
+        write(*, 1300) i, nx
+        1300   format(5x, i3, ' /', i3)
         !
-        do J = J0, NY
+        do j = j0, ny
             !-------- set observer position assuming airplane is level
-            XG = X(I, J) / UNITL
-            YG = Y(I, J) / UNITL
-            ZG = -GALT / UNITL
+            xg = x(i, j) / unitl
+            yg = y(i, j) / unitl
+            zg = -galt / unitl
             !
             !-------- rotate point through climb angle about y axis
-            XOBS = COSC * XG + SINC * ZG
-            YOBS = YG
-            ZOBS = -SINC * XG + COSC * ZG
+            xobs = cosc * xg + sinc * zg
+            yobs = yg
+            zobs = -sinc * xg + cosc * zg
             !
             !-------- calculate p(t) pressure signature
-            CALL PTRACE(XOBS, YOBS, ZOBS, &
-                    NBLDS, II, XI, DXI, AOC, CH, GAM, &
-                    ADV, RAD, VEL, VSO, RHO, &
-                    NTX, NT, PCOMP, TIME)
-            DO IT = 0, NT
-                PRES(IT) = PCOMP(IT, 1) + PCOMP(IT, 2) + PCOMP(IT, 3)
-            ENDDO
+            call ptrace(xobs, yobs, zobs, &
+                    nblds, ii, xi, dxi, aoc, ch, gam, &
+                    adv, rad, vel, vso, rho, &
+                    ntx, nt, pcomp, time)
+            do it = 0, nt
+                pres(it) = pcomp(it, 1) + pcomp(it, 2) + pcomp(it, 3)
+            enddo
             !
-            !-------- set rms pressure signature and corresponding dB level
-            PRMS = 0.
-            DO IT = 1, NT
-                DELT = TIME(IT) - TIME(IT - 1)
-                PAVG = (PRES(IT) + PRES(IT - 1)) * 0.5
-                PRMS = PRMS + PAVG**2 * DELT
-            ENDDO
-            PRMS = SQRT(PRMS / (TIME(NT) - TIME(0)))
+            !-------- set rms pressure signature and corresponding db level
+            prms = 0.
+            do it = 1, nt
+                delt = time(it) - time(it - 1)
+                pavg = (pres(it) + pres(it - 1)) * 0.5
+                prms = prms + pavg**2 * delt
+            enddo
+            prms = sqrt(prms / (time(nt) - time(0)))
             !
-            D(I, J) = 20.0 * ALOG10(PRMS / 20.0E-6)
+            d(i, j) = 20.0 * alog10(prms / 20.0e-6)
         end do
         !
         !------ set values for negative y by symmetry
-        DO J = 1, J0 - 1
-            JPOS = 2 * J0 - J - 1 + MOD(NY, 2)
-            D(I, J) = D(I, JPOS)
-        ENDDO
+        do j = 1, j0 - 1
+            jpos = 2 * j0 - j - 1 + mod(ny, 2)
+            d(i, j) = d(i, jpos)
+        enddo
         !
     end do
     !
-    RETURN
-END
+    return
+end

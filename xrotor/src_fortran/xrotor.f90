@@ -1,40 +1,41 @@
 !***********************************************************************
 !    Module:  xrotor.f
 ! 
-!    Copyright (C) 2011 Mark Drela 
+!    Copyright (c) 2011 Mark Drela 
 ! 
 !    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
+!    it under the terms of the gnu General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
 !    (at your option) any later version.
 !
 !    This program is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+!    but without any warranty; without even the implied warranty of
+!    merchantability or fitness for a particular purpose.  See the
+!    gnu General Public License for more details.
 !
-!    You should have received a copy of the GNU General Public License
+!    You should have received a copy of the gnu General Public License
 !    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
 !***********************************************************************
 !
-PROGRAM XROTOR
-   CALL ROTOR()
-END
+program xrotor
+   call rotor
+end
 
-SUBROUTINE ROTOR    !
+subroutine rotor()    !
 
-    !--- module statement for Windoze DVFortran
-    !cc   USE DFLIB
+    !--- module statement for Windoze dvFortran
+    !cc   use dflib
     !
-    USE common
-    IMPLICIT REAL (M)
-    CHARACTER*7 COMAND
-    CHARACTER*128 COMARG
+    use mod_common
+    implicit real (m)
+    type(Common) :: ctxt
+    character*7 comand
+    character*128 comarg
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR
+    dimension iinput(20)
+    dimension rinput(20)
+    logical error
     !
     !====================================================
     !
@@ -48,724 +49,732 @@ SUBROUTINE ROTOR    !
     !
     !====================================================
     !
-    VERSION = 7.55
+    ctxt = Common()
+
+    ctxt%version = 7.55
     !
     !---- logical unit numbers
-    LUREAD = 5    ! terminal read
-    LUWRIT = 6    ! terminal write
-    LUTEMP = 3    ! general-use disk I/O unit  (usually available)
-    LUSAVE = 4    ! save file                  (usually open)
+    ctxt%luread = 5    ! terminal read
+    ctxt%luwrit = 6    ! terminal write
+    ctxt%lutemp = 3    ! general-use disk i/o unit  (usually available)
+    ctxt%lusave = 4    ! save file                  (usually open)
     !
     !
-    WRITE(*, 1000) VERSION
+    write(*, 1000) ctxt%version
     !
-    CALL INIT
+    call init(ctxt)
     !
-    FNAME = ' '
+    ctxt%fname = ' '
     !--- Get command line args (if present)
-    NARG = IARGC()
+    narg = iargc()
     !
-    IF(NARG > 0) CALL GETARG(1, FNAME)
-    IF(FNAME(1:1) /= ' ') CALL LOAD(FNAME)
+    if(narg > 0) call getarg(1, ctxt%fname)
+    if(ctxt%fname(1:1) /= ' ') call load(ctxt, ctxt%fname)
     !
-    FNAME = ' '
-    IF(NARG > 1) CALL GETARG(2, FNAME)
-    IF(FNAME(1:1) /= ' ') THEN
-        NCASE = 0
-        OPEN(LUTEMP, FILE = FNAME, STATUS = 'OLD', ERR = 2)
-        CALL GETCAS(LUTEMP, NPARX, NCASE, CASPAR)
-        CLOSE(LUTEMP)
-        IF(NCASE > 0) THEN
-            KF = INDEX(FNAME, ' ') - 1
-            WRITE(*, *) 'Operating cases read from file  ', &
-                    FNAME(1:KF), ' ...'
-            CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-        ENDIF
-        2      CONTINUE
-    ENDIF
+    ctxt%fname = ' '
+    if(narg > 1) call getarg(2, ctxt%fname)
+    if(ctxt%fname(1:1) /= ' ') then
+        ctxt%ncase = 0
+        open(ctxt%lutemp, file = ctxt%fname, status = 'old', err = 2)
+        call getcas(ctxt%lutemp, nparx, ctxt%ncase, ctxt%caspar)
+        close(ctxt%lutemp)
+        if(ctxt%ncase > 0) then
+            kf = index(ctxt%fname, ' ') - 1
+            write(*, *) 'Operating cases read from file  ', &
+                    ctxt%fname(1:kf), ' ...'
+            call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+        endif
+        2      continue
+    endif
     !
-    WRITE(*, 1100)
+    write(*, 1100)
     !
-    900  CONTINUE
-    CALL ASKC(' XROTOR^', COMAND, COMARG)
+    900  continue
+    call askc(' xrotor^', comand, comarg)
     !
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
+    do i = 1, 20
+        iinput(i) = 0
+        rinput(i) = 0.0
+    enddo
+    ninput = 0
+    call getint(comarg, iinput, ninput, error)
+    ninput = 0
+    call getflt(comarg, rinput, ninput, error)
     !
-    GREEK = .TRUE.
-    IF(COMAND == '    ') GO TO 900
-    IF(COMAND == '?   ') WRITE(*, 1100)
-    IF(COMAND == '?   ') GO TO 900
-    IF(COMAND == 'QUIT') THEN
-        STOP
-    ENDIF
+    ctxt%greek = .true.
+    if(comand == '    ') go to 900
+    if(comand == '?   ') write(*, 1100)
+    if(comand == '?   ') go to 900
+    if(comand == 'quit') then
+        stop
+    endif
     !
-    IF(COMAND == 'OPER') CALL OPER
-    IF(COMAND == 'BEND') CALL BEND
-    IF(COMAND == 'SAVE') CALL SAVE(COMARG)
-    IF(COMAND == 'LOAD') CALL LOAD(COMARG)
-    IF(COMAND == 'NOIS') CALL NOISE
-    IF(COMAND == 'DISP') GO TO 100
-    IF(GREEK) WRITE(*, 1050) COMAND
-    GO TO 900
+    if(comand == 'oper') call oper(ctxt)
+    if(comand == 'bend') call bend(ctxt)
+    if(comand == 'save') call save(ctxt, comarg)
+    if(comand == 'load') call load(ctxt, comarg)
+    if(comand == 'nois') call noise(ctxt)
+    if(comand == 'disp') go to 100
+    if(ctxt%greek) write(*, 1050) comand
+    go to 900
     !
     !---------------------------------------------------------------------
-    100 CALL OUTPUT(LUWRIT)
-    GO TO 900
+    100 call output(ctxt, ctxt%luwrit)
+    go to 900
     !
     !.....................................................................
     !
-    1000 FORMAT(/' ========================='&
-            /'    XROTOR Version', F5.2&
+    1000 format(/' ========================='&
+            /'    xrotor Version', f5.2&
             /' =========================')
-    1050 FORMAT(1X, A4, ' command not recognized.  Type a "?" for list')
-    1100 FORMAT(&
-            /'   QUIT   Exit program'&
-            /'  .OPER   Calculate off-design operating points'&
-            /'  .BEND   Calculate structural loads and deflections'&
-            /'  .NOIS   Calculate and plot acoustic signature'&
-            /'   SAVE f Save rotor to restart file'&
-            /'   LOAD f Read rotor from restart file'&
-            /'   DISP   Display current design point')
-END
-! ROTOR
+    1050 format(1x, a4, ' command not recognized.  Type a "?" for list')
+    1100 format(&
+            /'   quit   Exit program'&
+            /'  .oper   Calculate off-design operating points'&
+            /'  .bend   Calculate structural loads and deflections'&
+            /'  .nois   Calculate and plot acoustic signature'&
+            /'   save f Save rotor to restart file'&
+            /'   load f Read rotor from restart file'&
+            /'   disp   Display current design point')
+end
+! rotor
 
 
-SUBROUTINE INIT
-    USE common
-    IMPLICIT REAL (M)
+subroutine init(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !--------------------------------------
     !     Initializes everything
     !--------------------------------------
     !
-    GREEK = .FALSE.
+    ctxt%greek = .false.
     !
     !
-    !---- XROTOR defaults
-    URDUCT = 1.0
+    !---- xrotor defaults
+    ctxt%urduct = 1.0
     !
-    CALL SETDEF
+    call setdef(ctxt)
     !
-    IF(DUCT) THEN
-        WRITE(*, *) 'Aprop/Aexit initialized to 1.0'
-        URDUCT = 1.0
-    ENDIF
+    if(ctxt%duct) then
+        write(*, *) 'Aprop/Aexit initialized to 1.0'
+        ctxt%urduct = 1.0
+    endif
     !
-    XINF = 3.0        ! r/R at which BC at infinity is applied
-    NN = 32           ! number of perturbation potential harmonics
-    IINF = II + II / 2  ! number of discrete potential harmonic stations
-    CONV = .FALSE.   ! operating point solution existence flag
-    LSTRUC = .FALSE.  ! indicates if structural properties are available
+    ctxt%xinf = 3.0        ! r/r at which bc at infinity is applied
+    ctxt%nn = 32           ! number of perturbation potential harmonics
+    ctxt%iinf = ctxt%ii + ctxt%ii / 2  ! number of discrete potential harmonic stations
+    ctxt%conv = .false.   ! operating point solution existence flag
+    ctxt%lstruc = .false.  ! indicates if structural properties are available
     !
-    NAME = ' '
-    SAVFIL = ' '
+    ctxt%name = ' '
+    ctxt%savfil = ' '
     !
     !---- acceleration due to gravity for scaling centrifugal blade tension (m/s^2)
-    GEE = 9.81
+    ctxt%gee = 9.81
     !
-    !---- ADW factor (multiplies TINV/PINV in ADW calculation)
-    ADWFCTR = 1.0
+    !---- adw factor (multiplies tinv/pinv in adw calculation)
+    ctxt%adwfctr = 1.0
     !
-    IF(II > IX) STOP 'Array overflow.  IX too small'
-    IF(IINF > JX) STOP 'Array overflow.  JX too small'
+    if(ctxt%ii > ix) stop 'array overflow.  ix too small'
+    if(ctxt%iinf > jx) stop 'array overflow.  jx too small'
     !
     !---- actual-rotor radius is always 1 (non-dimensionalized with itself)
-    XITIP = 1.0
+    ctxt%xitip = 1.0
     !
     !---- default nacelle, wake perturbation velocities (non-existent)
-    DO I = 1, II
-        UBODY(I) = 0.
-    END DO
+    do i = 1, ctxt%ii
+        ctxt%ubody(i) = 0.
+    end do
     !
     !---- no slipstream velocity profiles
-    NADD = 0
+    ctxt%nadd = 0
     !
     !---- number of defined cases
-    NCASE = 0
-    KCASE = 0
+    ctxt%ncase = 0
+    ctxt%kcase = 0
     !
     !---- max number of iterations for design, analysis
-    NITERD = 40
-    NITERA = 40
+    ctxt%niterd = 40
+    ctxt%nitera = 40
     !
     !---- do not initialize rotor at each design cycle
-    LDESINI = .FALSE.
+    ctxt%ldesini = .false.
     !
     !---- do initialize rotor at each design cycle
-    LOPRINI = .TRUE.
+    ctxt%loprini = .true.
     !
     !---- no engine load line to start
-    LPWRVAR = .FALSE.
-    NPWRVAR = 0
+    ctxt%lpwrvar = .false.
+    ctxt%npwrvar = 0
     !
     !---- no rotor yet
-    LROTOR = .FALSE.
-    DO I = 1, IX
-        IAERO(I) = 0
-    END DO
+    ctxt%lrotor = .false.
+    do i = 1, ix
+        ctxt%iaero(i) = 0
+    end do
     !
-    RETURN
-END
-! INIT
+    return
+end
+! init
 
 
 
-SUBROUTINE SETDEF
-    USE common
-    IMPLICIT REAL (M)
+subroutine setdef(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !
     !---- hard-wired start-up defaults
-    !ccIHI
-    RAKE = 0.0
+    !ccihi
+    ctxt%rake = 0.0
     !
-    VEL = 1.0
-    ALT = 0.0
-    CALL ATMO(ALT, VSO, RHO, RMU) ! sea level atmosphere parameters
-    !CC      RHO =  1.226      ! fluid density         kg/m**3
-    !CC      RMU =  1.78E-05   ! dynamic viscosity     kg/m-s
-    !CC      VSO =  340.0      ! speed of sound        m/s
+    ctxt%vel = 1.0
+    ctxt%alt = 0.0
+    call atmo(ctxt%alt, ctxt%vso, ctxt%rho, ctxt%rmu) ! sea level atmosphere parameters
+    !cc      rho =  1.226      ! fluid density         kg/m**3
+    !cc      rmu =  1.78e-05   ! dynamic viscosity     kg/m-s
+    !cc      vso =  340.0      ! speed of sound        m/s
     !
     !--- Default aero properties for section #1
-    A0 = 0.           ! zero lift angle of attack   radians
-    DCLDA = 6.28     ! lift curve slope            /radian
-    CLMAX = 1.5     ! stall Cl
-    CLMIN = -0.5     ! negative stall Cl
-    DCL_STALL = 0.1 ! CL increment from incipient to total stall
-    DCLDA_STALL = 0.1 ! stalled lift curve slope    /radian
-    CMCON = -0.1      ! section Cm  (for pitch-axis moments)
-    CDMIN = 0.013    ! minimum Cd
-    CLDMIN = 0.5     ! Cl at minimum Cd
-    DCDCL2 = 0.004   ! d(Cd)/d(Cl**2)
-    REREF = 200000.  ! Reynolds Number at which Cd values apply
-    REXP = -0.4      ! Exponent for Re scaling of Cd:  Cd ~ Re**exponent
-    MCRIT = 0.8      ! Critical Mach number
+    a0 = 0.           ! zero lift angle of attack   radians
+    dclda = 6.28     ! lift curve slope            /radian
+    clmax = 1.5     ! ctxt%stall ctxt%cl
+    clmin = -0.5     ! negative ctxt%stall ctxt%cl
+    dcl_stall = 0.1 ! ctxt%cl increment from incipient to total ctxt%stall
+    dclda_stall = 0.1 ! stalled lift curve slope    /radian
+    cmcon = -0.1      ! section ctxt%cm  (for pitch-axis moments)
+    cdmin = 0.013    ! minimum ctxt%cd
+    cldmin = 0.5     ! ctxt%cl at minimum ctxt%cd
+    dcdcl2 = 0.004   ! d(ctxt%cd)/d(ctxt%cl**2)
+    reref = 200000.  ! reynolds number at which ctxt%cd values apply
+    rexp = -0.4      ! exponent for ctxt%re scaling of ctxt%cd:  ctxt%cd ~ ctxt%re**exponent
+    mcrit = 0.8      ! Critical Mach number
     !--- Install data into aero section #1
-    NAERO = 1
-    XISECT = 0.0
-    CALL PUTAERO(NAERO, XISECT, A0, CLMAX, CLMIN, &
-            DCLDA, DCLDA_STALL, DCL_STALL, &
-            CDMIN, CLDMIN, DCDCL2, CMCON, MCRIT, REREF, REXP)
-    DO I = 1, IX
-        IAERO(I) = 1
-    END DO
+    ctxt%naero = 1
+    xisect = 0.0
+    call putaero(ctxt, ctxt%naero, xisect, a0, clmax, clmin, &
+            dclda, dclda_stall, dcl_stall, &
+            cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+    do i = 1, ix
+        ctxt%iaero(i) = 1
+    end do
     !
-    XPITCH = 0.3     ! x/c location of pitch axis
+    ctxt%xpitch = 0.3     ! x/c location of pitch axis
     !
-    II = 30         ! number of radial stations
-    INCR = 2       ! radial station increment for terminal output
-    IXSPAC = 2       ! r/R spacing flag
+    ctxt%ii = 30         ! number of radial stations
+    ctxt%incr = 2       ! radial station increment for terminal output
+    ctxt%ixspac = 2       ! r/r spacing flag
     !
-    VRTX = .FALSE.  ! Vortex Wake (T)        / Graded Momentum(F) flag
-    FAST = .FALSE.  ! Graded Momentum(T)     / Potential Formulation(F) flag
-    FREE = .TRUE.   ! Self-deforming wake(T) / rigid wake(F) flag
-    DUCT = .FALSE.  ! Ducted (T)             / Free-tip (F)  flag
+    ctxt%vrtx = .false.  ! vortex wake (ctxt%t)        / graded momentum(f) flag
+    ctxt%fast = .false.  ! graded momentum(ctxt%t)     / potential formulation(f) flag
+    ctxt%free = .true.   ! self-deforming wake(ctxt%t) / rigid wake(f) flag
+    ctxt%duct = .false.  ! ducted (ctxt%t)             / ctxt%free-tip (f)  flag
     !
-    TERSE = .FALSE.  ! terse-output flag
+    ctxt%terse = .false.  ! ctxt%terse-output flag
     !
-    LVNORM = .TRUE.  ! flight speed used for normalization
+    ctxt%lvnorm = .true.  ! flight speed used for normalization
     !
-    RETURN
-END
-! SETDEF
+    return
+end
+! setdef
 
 
-SUBROUTINE ATMO(ALSPEC, VSOALT, RHOALT, RMUALT)
+subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
     !---------------------------------------------------------
-    !     Returns speed of sound (VSO) in m/s, density (RHO)
-    !     in kg/m^3, and dynamic viscosity (RMU) in kg/m-s
-    !     of standard atmosphere at specified altitude ALSPEC
-    !     (in kilometers).  If ALSPEC=-1, water properties
+    !     Returns speed of sound (vso) in m/s, density (rho)
+    !     in kg/m^3, and dynamic viscosity (rmu) in kg/m-s
+    !     of standard atmosphere at specified altitude alspec
+    !     (in kilometers).  If alspec=-1, water properties
     !     at 15 Celsius are returned.
     !
-    !     Reference:  "U.S. Standard Atmosphere", NOAA.
+    !     Reference:  "u.s. Standard Atmosphere", noaa.
     !---------------------------------------------------------
-    LOGICAL FIRST
+    logical first
     !
-    PARAMETER (N = 44)
-    REAL ALT(N), VSO(N), RHO(N), RMU(N)
+    parameter (n = 44)
+    real alt(n), vso(n), rho(n), rmu(n)
     !
-    DATA FIRST / .TRUE. /
-    DATA ALT&
+    data first / .true. /
+    data alt&
             / 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, &
             10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, &
             20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, &
             30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, &
             40.0, 45.0, 60.0, 75.0 /
-    DATA VSO&
+    data vso&
             / 340.0, 336.0, 332.0, 329.0, 325.0, 320.0, 316.0, 312.0, 308.0, 304.0, &
             299.0, 295.0, 295.0, 295.0, 295.0, 295.0, 295.0, 295.0, 295.0, 295.0, &
             295.0, 295.8, 296.4, 297.1, 297.8, 298.5, 299.1, 299.8, 300.5, 301.1, &
             301.8, 302.5, 303.1, 305.0, 306.8, 308.7, 310.5, 312.3, 314.0, 316.0, &
             318.0, 355.0, 372.0, 325.0 /
-    DATA RHO&
+    data rho&
             / 1.226, 1.112, 1.007, 0.909, 0.820, 0.737, 0.660, 0.589, 0.526, 0.467, &
             0.413, 0.364, 0.311, 0.265, 0.227, 0.194, 0.163, 0.141, 0.121, 0.103, &
             .0880, .0749, .0637, .0543, .0463, .0395, .0338, .0288, .0246, .0210, &
             .0180, .0154, .0132, .0113, .0096, .0082, .0070, .0060, .0052, .0044, &
-            0.004, 0.002, 3.9E-4, 8.0E-5 /
-    DATA RMU&
+            0.004, 0.002, 3.9e-4, 8.0e-5 /
+    data rmu&
             / 1.780, 1.749, 1.717, 1.684, 1.652, 1.619, 1.586, 1.552, 1.517, 1.482, &
             1.447, 1.418, 1.418, 1.418, 1.418, 1.418, 1.418, 1.418, 1.418, 1.418, &
             1.418, 1.427, 1.433, 1.438, 1.444, 1.449, 1.454, 1.460, 1.465, 1.471, &
             1.476, 1.481, 1.487, 1.502, 1.512, 1.532, 1.546, 1.561, 1.580, 1.600, &
             1.700, 1.912, 2.047, 1.667 /
     !
-    !---- special case: Water at STP
-    IF(ALSPEC == -1.0) THEN
-        VSOALT = 1500.
-        RHOALT = 1000.
-        RMUALT = 1.15E-3
-        WRITE(*, *) '                              o        '
-        WRITE(*, *) 'ATMO: You are underwater at 15  Celsius'
-        RETURN
-    ENDIF
+    !---- special case: Water at stp
+    if(alspec == -1.0) then
+        vsoalt = 1500.
+        rhoalt = 1000.
+        rmualt = 1.15e-3
+        write(*, *) '                              o        '
+        write(*, *) 'atmo: You are underwater at 15  Celsius'
+        return
+    endif
     !
     !---- linearly interpolate quantities from tabulated values
-    do I = 2, N
-        IF(ALSPEC > ALT(I)) GO TO 10
+    do i = 2, n
+        if(alspec > alt(i)) go to 10
         !
-        DALT = ALT(I) - ALT(I - 1)
-        DVSO = VSO(I) - VSO(I - 1)
-        DRHO = RHO(I) - RHO(I - 1)
-        DRMU = RMU(I) - RMU(I - 1)
+        dalt = alt(i) - alt(i - 1)
+        dvso = vso(i) - vso(i - 1)
+        drho = rho(i) - rho(i - 1)
+        drmu = rmu(i) - rmu(i - 1)
         !
-        ALFRAC = (ALSPEC - ALT(I - 1)) / DALT
+        alfrac = (alspec - alt(i - 1)) / dalt
         !
-        VSOALT = VSO(I - 1) + DVSO * ALFRAC
-        RHOALT = RHO(I - 1) + DRHO * ALFRAC
-        RMUALT = RMU(I - 1) + DRMU * ALFRAC
-        RMUALT = RMUALT * 1.0E-5
+        vsoalt = vso(i - 1) + dvso * alfrac
+        rhoalt = rho(i - 1) + drho * alfrac
+        rmualt = rmu(i - 1) + drmu * alfrac
+        rmualt = rmualt * 1.0e-5
         !
-        RETURN
+        return
     10 end do
     !
     !
-    IF(ALSPEC > ALT(N)) THEN
-        WRITE(*, *) ' '
-        WRITE(*, *) 'ATMO: You''re in low earth orbit.  Good luck.'
-        VSOALT = VSO(N)
-        RHOALT = RHO(N)
-        RMUALT = RMU(N) * 1.0E-5
-        RETURN
-    ENDIF
+    if(alspec > alt(n)) then
+        write(*, *) ' '
+        write(*, *) 'atmo: You''re in low earth orbit.  Good luck.'
+        vsoalt = vso(n)
+        rhoalt = rho(n)
+        rmualt = rmu(n) * 1.0e-5
+        return
+    endif
     !
-    !      IF(FIRST) THEN
-    !       do I=1, N
-    !         RHO(I) = ALOG(RHO(I))
+    !      if(first) then
+    !       do i=1, n
+    !         rho(i) = alog(rho(i))
     ! end do
-    !       CALL SPLINE(VSO,VSOH,ALT,N)
-    !       CALL SPLIND(RHO,RHOH,ALT,N,999.0,0.0)
-    !       CALL SPLINE(RMU,RMUH,ALT,N)
-    !       FIRST = .FALSE.
-    !      ENDIF
-    !C
-    !C---- interpolate quantities from splines
-    !      VSOALT = SEVAL(ALSPEC,VSO,VSOH,ALT,N)
-    !      RHOALT = SEVAL(ALSPEC,RHO,RHOH,ALT,N)
-    !      RMUALT = SEVAL(ALSPEC,RMU,RMUH,ALT,N) * 1.0E-5
-    !      RHOALT = EXP(RHOALT)
-    !C
-    RETURN
-END
-! ATMO
+    !       call spline(vso,vsoh,alt,n)
+    !       call splind(rho,rhoh,alt,n,999.0,0.0)
+    !       call spline(rmu,rmuh,alt,n)
+    !       first = .false.
+    !      endif
+    !c
+    !c---- interpolate quantities from splines
+    !      vsoalt = seval(alspec,vso,vsoh,alt,n)
+    !      rhoalt = seval(alspec,rho,rhoh,alt,n)
+    !      rmualt = seval(alspec,rmu,rmuh,alt,n) * 1.0e-5
+    !      rhoalt = exp(rhoalt)
+    !c
+    return
+end
+! atmo
 
 
-SUBROUTINE FLOSHO(LU, VSO, RHO, RMU)
-    DATA R, GAM / 287.0, 1.4 /
-    RNU = RMU / RHO
-    P = RHO * VSO**2 / GAM
-    T = P / (RHO * R)
-    WRITE(LU, 5000) VSO, RHO, RMU, RNU, P, T
-    5000 FORMAT(/' Speed of sound (m/s):', F10.3&
-            /' Density   (kg/m^3)  :', F10.5&
-            /' Viscosity (kg/m-s)  :', E11.4&
-            /' Kin. Visc. (m^2/s)  :', E11.4&
-            //' Air pressure (Pa)   :', G13.5&
-            /' Air temperature (K) :', G12.4)
-    RETURN
-END
-! FLOSHO
+subroutine flosho(lu, vso, rho, rmu)
+    data r, gam / 287.0, 1.4 /
+    rnu = rmu / rho
+    p = rho * vso**2 / gam
+    t = p / (rho * r)
+    write(lu, 5000) vso, rho, rmu, rnu, p, t
+    5000 format(/' Speed of sound (m/s):', f10.3&
+            /' Density   (kg/m^3)  :', f10.5&
+            /' Viscosity (kg/m-s)  :', e11.4&
+            /' Kin. Visc. (m^2/s)  :', e11.4&
+            //' Air pressure (Pa)   :', g13.5&
+            /' Air temperature (k) :', g12.4)
+    return
+end
+! flosho
 
 
-SUBROUTINE REINIT
-    USE common
-    IMPLICIT REAL (M)
-    LOGICAL YES
+subroutine reinit(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    logical yes
     !-----------------------------------------------
     !     Re-initializes advance ratio and gammas
     !-----------------------------------------------
     !
     !---- estimate reasonable advance ratio to start iterative routines
-    IS = II / 2 + 1
-    !---HHY had to set A0 to 0.0 as A0 is now section property
-    A0 = 0.0
-    ANG = BETA(IS) - A0
+    is = ctxt%ii / 2 + 1
+    !---hhy had to set a0 to 0.0 as a0 is now section property
+    a0 = 0.0
+    ang = ctxt%beta(is) - a0
     !
-    RPM = VEL / (RAD * ADV * PI / 30.)
+    rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
     !
-    ADV0 = XI(IS) * SIN(ANG) / COS(ANG)
-    RPM0 = VEL / (RAD * ADV0 * PI / 30.)
+    adv0 = ctxt%xi(is) * sin(ang) / cos(ang)
+    rpm0 = ctxt%vel / (ctxt%rad * adv0 * pi / 30.)
 
-    !      WRITE(*,*) 'Current    RPM ',RPM
-    !      WRITE(*,*) 'Initialize RPM ',RPM0
-    CALL ASKR('Enter initialization RPM?^', RPM)
+    !      write(*,*) 'Current    rpm ',rpm
+    !      write(*,*) 'Initialize rpm ',rpm0
+    call askr('Enter initialization rpm?^', rpm)
 
-    ADV = VEL / (RPM * RAD * PI / 30.)
-    ADV = MAX(0.1, ADV)
-    ADW = ADV
+    ctxt%adv = ctxt%vel / (rpm * ctxt%rad * pi / 30.)
+    ctxt%adv = max(0.1, ctxt%adv)
+    ctxt%adw = ctxt%adv
     !
     !---- Set the blade angle back to reference angle
-    CALL ASKL('Restore blade angles to original?^', YES)
-    IF(YES) THEN
-        DO I = 1, II
-            BETA0(I) = BETA(I)
-        END DO
-    ENDIF
+    call askl('Restore blade angles to original?^', yes)
+    if(yes) then
+        do i = 1, ctxt%ii
+            ctxt%beta0(i) = ctxt%beta(i)
+        end do
+    endif
     !---- calculate current operating point
-    CALL APER(4, 2, .TRUE.)
-    IF(CONV) CALL OUTPUT(LUWRIT)
+    call aper(ctxt, 4, 2, .true.)
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
     !
-    RETURN
-END
-! REINIT
+    return
+end
+! reinit
 
-SUBROUTINE SETX
-    USE common
-    IMPLICIT REAL (M)
+subroutine setx(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !
     !-------------------------------------------------------
-    !     Fills stretched radial coordinate array X (and XV)
+    !     Fills stretched radial coordinate array x (and xv)
     !-------------------------------------------------------
     !
-    DT = 0.5 * PI / FLOAT(II)
-    XM = XI0
-    XV(1) = XI0
-    do I = 1, II
-        T(I) = DT * (FLOAT(I) - 0.5)
-        TP = DT * FLOAT(I)
+    ctxt%dt = 0.5 * pi / float(ctxt%ii)
+    xm = ctxt%xi0
+    ctxt%xv(1) = ctxt%xi0
+    do i = 1, ctxt%ii
+        ctxt%t(i) = ctxt%dt * (float(i) - 0.5)
+        tp = ctxt%dt * float(i)
         !
-        IF(IXSPAC == 2) THEN
+        if(ctxt%ixspac == 2) then
             !------- Usual sine stretching, adjusted for nonzero root radius
-            XI(I) = SQRT(XITIP * SIN(T(I))**2 + (XI0 * COS(T(I)))**2)
-            XP = SQRT(XITIP * SIN(TP)**2 + (XI0 * COS(TP))**2)
-        ELSE
-            !------- Cosine stretching for more root resolution (also in TINVRT)
-            XI(I) = 0.5 * (1.0 - COS(2.0 * T(I))) * (XITIP - XI0) + XI0
-            XP = 0.5 * (1.0 - COS(2.0 * TP)) * (XITIP - XI0) + XI0
-        ENDIF
+            ctxt%xi(i) = sqrt(ctxt%xitip * sin(ctxt%t(i))**2 + (ctxt%xi0 * cos(ctxt%t(i)))**2)
+            xp = sqrt(ctxt%xitip * sin(tp)**2 + (ctxt%xi0 * cos(tp))**2)
+        else
+            !------- Cosine stretching for more root resolution (also in tinvrt)
+            ctxt%xi(i) = 0.5 * (1.0 - cos(2.0 * ctxt%t(i))) * (ctxt%xitip - ctxt%xi0) + ctxt%xi0
+            xp = 0.5 * (1.0 - cos(2.0 * tp)) * (ctxt%xitip - ctxt%xi0) + ctxt%xi0
+        endif
         !
-        XI(I) = (XP + XM) * 0.5
-        DXI(I) = XP - XM
+        ctxt%xi(i) = (xp + xm) * 0.5
+        ctxt%dxi(i) = xp - xm
         !
-        XM = XP
-        XV(I + 1) = XP
+        xm = xp
+        ctxt%xv(i + 1) = xp
     end do
-    XV(II + 1) = XITIP
+    ctxt%xv(ctxt%ii + 1) = ctxt%xitip
     !
-    RETURN
-END
-! SETX
+    return
+end
+! setx
 
 
 
-SUBROUTINE OPFILE(LU, FNAME)
-    CHARACTER*(*) FNAME
+subroutine opfile(lu, fname)
+    character*(*) fname
     !
-    CHARACTER*4 COMAND
-    CHARACTER*128 COMARG, TMP
-    CHARACTER*1 ANS, DUMMY
+    character*4 comand
+    character*128 comarg, tmp
+    character*1 ans, dummy
     !
     !---- get filename if it hasn't been already specified
-    IF(FNAME(1:1) == ' ') CALL ASKS('Enter output filename^', FNAME)
+    if(fname(1:1) == ' ') call asks('Enter output filename^', fname)
     !
     !---- try to open file
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 50)
+    open(lu, file = fname, status = 'old', err = 50)
     !
     !---- file exists... ask how to proceed
-    NF = INDEX(FNAME, ' ') - 1
-    TMP = 'File  ' // FNAME(1:NF) // &
+    nf = index(fname, ' ') - 1
+    tmp = 'File  ' // fname(1:nf) // &
             '  exists.  Overwrite / Append / New file ?^'
-    CALL ASKC(TMP, COMAND, COMARG)
-    ANS = COMAND(1:1)
+    call askc(tmp, comand, comarg)
+    ans = comand(1:1)
     !
     !---- ask again if reply is invalid
-    IF(INDEX('OoAaNn', ANS) == 0) THEN
-        CALL ASKC(' O / A / N  ?^', COMAND, COMARG)
-        ANS = COMAND(1:1)
+    if(index('OoAaNn', ans) == 0) then
+        call askc(' o / a / n  ?^', comand, comarg)
+        ans = comand(1:1)
         !
-        IF(INDEX('OoAaNn', ANS) == 0) THEN
+        if(index('OoAaNn', ans) == 0) then
             !------- Still bad reply. Give up asking and just return
-            WRITE(*, *) 'No action taken'
-            RETURN
-        ENDIF
-    ENDIF
+            write(*, *) 'No action taken'
+            return
+        endif
+    endif
     !
     !---- at this point, file is open and reply is valid
-    IF    (INDEX('Oo', ANS) /= 0) THEN
+    if    (index('Oo', ans) /= 0) then
         !------ go to beginning of file to overwrite
-        REWIND(LU)
-        GO TO 60
-    ELSEIF(INDEX('Aa', ANS) /= 0) THEN
+        rewind(lu)
+        go to 60
+    elseif(index('Aa', ans) /= 0) then
         !------ go to end of file to append
-        DO K = 1, 12345678
-            READ(LU, 1000, END = 60) DUMMY
-            1000     FORMAT(A)
-        ENDDO
-    ELSE
+        do k = 1, 12345678
+            read(lu, 1000, end = 60) dummy
+            1000     format(a)
+        enddo
+    else
         !------ new file... get filename from command argument, or ask if not supplied
-        FNAME = COMARG
-        IF(FNAME(1:1) == ' ') CALL ASKS('Enter output filename^', FNAME)
-    ENDIF
+        fname = comarg
+        if(fname(1:1) == ' ') call asks('Enter output filename^', fname)
+    endif
     !
-    !---- at this point, file FNAME is new or is to be overwritten
-    50   OPEN(LU, FILE = FNAME, STATUS = 'UNKNOWN', ERR = 90)
-    REWIND(LU)
+    !---- at this point, file fname is new or is to be overwritten
+    50   open(lu, file = fname, status = 'unknown', err = 90)
+    rewind(lu)
     !
-    60   RETURN
+    60   return
     !
-    90   WRITE(*, *) 'Bad filename.'
-    RETURN
-END
-! OPFILE
+    90   write(*, *) 'Bad filename.'
+    return
+end
+! opfile
 
 
-SUBROUTINE OUTPUT(LU)
-    USE common
+subroutine output(ctxt, lu)
+    use mod_common
     use mod_spline
-    IMPLICIT REAL (M)
-    LOGICAL LHELI
-    CHARACTER*1 SCHAR
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    logical lheli
+    character*1 schar
     !---------------------------------------------
-    !     Dumps operating state output to unit LU
+    !     Dumps operating state output to unit lu
     !---------------------------------------------
     !
-    IADD = 1
-    IF(LU == LUWRIT) IADD = INCR
+    iadd = 1
+    if(lu == ctxt%luwrit) iadd = ctxt%incr
     !
-    WRITE (LU, 1000)
-    IF(.NOT.CONV) WRITE(LU, 2000)
+    write (lu, 1000)
+    if(.not.ctxt%conv) write(lu, 2000)
     !
-    LHELI = .FALSE.
+    lheli = .false.
     !
     !---- dimensional thrust, power, torque, rpm
-    TDIM = TTOT * RHO * VEL**2 * RAD**2
-    QDIM = QTOT * RHO * VEL**2 * RAD**3
-    PDIM = PTOT * RHO * VEL**3 * RAD**2
+    tdim = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+    qdim = ctxt%qtot * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
+    pdim = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
     !
-    TVDIM = TVIS * RHO * VEL**2 * RAD**2
-    PVDIM = PVIS * RHO * VEL**3 * RAD**2
+    tvdim = ctxt%tvis * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+    pvdim = ctxt%pvis * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
     !
-    EFFTOT = TTOT / PTOT
-    RPM = VEL / (RAD * ADV * PI / 30.)
-    DIA = 2.0 * RAD
+    efftot = ctxt%ttot / ctxt%ptot
+    rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
+    dia = 2.0 * ctxt%rad
     !
     !---- Nacelle (or body) thrust is difference between thrust on
     !     equivalent prop and real prop
-    TNACEL = (TWAK - TINV) * RHO * VEL**2 * RAD**2
+    tnacel = (ctxt%twak - ctxt%tinv) * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
     !
     !---- blade solidity
-    W1(1:II) = spline(XI(1:II), CH(1:II))
-    CH34 = SEVAL(0.75, CH, W1, XI)
-    SIGMA = FLOAT(NBLDS) * CH34 / PI
+    ctxt%w1(1:ctxt%ii) = spline(ctxt%xi(1:ctxt%ii), ctxt%ch(1:ctxt%ii))
+    ch34 = seval(0.75, ctxt%ch, ctxt%w1, ctxt%xi)
+    sigma = float(ctxt%nblds) * ch34 / pi
     !
     !---- standard coefficients based on forward speed
-    TC = TDIM / (0.5 * RHO * VEL**2 * PI * RAD**2)
-    PC = PDIM / (0.5 * RHO * VEL**3 * PI * RAD**2)
+    tc = tdim / (0.5 * ctxt%rho * ctxt%vel**2 * pi * ctxt%rad**2)
+    pc = pdim / (0.5 * ctxt%rho * ctxt%vel**3 * pi * ctxt%rad**2)
     !
     !---- standard coefficients based on rotational speed
-    EN = RPM / 60.0
-    CT = TDIM / (RHO * EN**2 * DIA**4)
-    CP = PDIM / (RHO * EN**3 * DIA**5)
+    en = rpm / 60.0
+    ct = tdim / (ctxt%rho * en**2 * dia**4)
+    cp = pdim / (ctxt%rho * en**3 * dia**5)
     !
     !---- induced efficiency (including nacelle thrust effect)
-    EFFIND = TWAK / PWAK
+    effind = ctxt%twak / ctxt%pwak
     !
     !---- ideal (actuator disk) efficiency
-    TCLIM = MAX(-1.0, TC)
-    EIDEAL = 2.0 / (1.0 + SQRT(TCLIM + 1.0))
+    tclim = max(-1.0, tc)
+    eideal = 2.0 / (1.0 + sqrt(tclim + 1.0))
     !
     !---- define low advance ratio (helicopter?) related data
-    IF(ADV < 0.1) THEN
-        W1(1:II) = spline(XI(1:II), CH(1:II))
-        CTH = CT / 7.7516
-        CPH = CP / 24.352
-        CTOS = CTH / SIGMA
-        FOM = 0.7979 * ABS(CT)**1.5 / CP
-        LHELI = .TRUE.
-    ENDIF
+    if(ctxt%adv < 0.1) then
+        ctxt%w1(1:ctxt%ii) = spline(ctxt%xi(1:ctxt%ii), ctxt%ch(1:ctxt%ii))
+        cth = ct / 7.7516
+        cph = cp / 24.352
+        ctos = cth / sigma
+        fom = 0.7979 * abs(ct)**1.5 / cp
+        lheli = .true.
+    endif
     !
     !
-    IF(DUCT) THEN
-        IF(IWTYP == 1) WRITE(LU, 1001) NAME
-        IF(IWTYP == 2) WRITE(LU, 1002) NAME
-        IF(IWTYP == 3) WRITE(LU, 1001) NAME
-    ELSE
-        IF(IWTYP == 1) WRITE(LU, 1011) NAME
-        IF(IWTYP == 2) WRITE(LU, 1012) NAME
-        IF(IWTYP == 3) WRITE(LU, 1013) NAME
-    ENDIF
-    IF(NADD > 1) THEN
-        WRITE(LU, 1021) ADW
-    ELSE IF(DUCT) THEN
-        WRITE(LU, 1022) URDUCT, ADW
-    ELSE
-        WRITE(LU, 1023) ADW
-    ENDIF
-    IF(ADW < 0.5 * ADV) WRITE(LU, 1024)
-    WRITE(LU, 1010) NBLDS, RAD, ADV, &
-            TDIM, PDIM, QDIM, &
-            EFFTOT, VEL, RPM, &
-            EFFIND, EIDEAL, TC, &
-            TNACEL, XI0 * RAD, XW0 * RAD, &
-            TVDIM, PVDIM, &
-            RHO, VSO, RMU
+    if(ctxt%duct) then
+        if(ctxt%iwtyp == 1) write(lu, 1001) ctxt%name
+        if(ctxt%iwtyp == 2) write(lu, 1002) ctxt%name
+        if(ctxt%iwtyp == 3) write(lu, 1001) ctxt%name
+    else
+        if(ctxt%iwtyp == 1) write(lu, 1011) ctxt%name
+        if(ctxt%iwtyp == 2) write(lu, 1012) ctxt%name
+        if(ctxt%iwtyp == 3) write(lu, 1013) ctxt%name
+    endif
+    if(ctxt%nadd > 1) then
+        write(lu, 1021) ctxt%adw
+    else if(ctxt%duct) then
+        write(lu, 1022) ctxt%urduct, ctxt%adw
+    else
+        write(lu, 1023) ctxt%adw
+    endif
+    if(ctxt%adw < 0.5 * ctxt%adv) write(lu, 1024)
+    write(lu, 1010) ctxt%nblds, ctxt%rad, ctxt%adv, &
+            tdim, pdim, qdim, &
+            efftot, ctxt%vel, rpm, &
+            effind, eideal, tc, &
+            tnacel, ctxt%xi0 * ctxt%rad, ctxt%xw0 * ctxt%rad, &
+            tvdim, pvdim, &
+            ctxt%rho, ctxt%vso, ctxt%rmu
     !
     !---- low advance ratio (helicopter?) data
-    IF(LHELI) THEN
-        WRITE(LU, 1116) SIGMA, CTOS, FOM
-    ELSE
-        WRITE(LU, 1117) SIGMA
-    ENDIF
+    if(lheli) then
+        write(lu, 1116) sigma, ctos, fom
+    else
+        write(lu, 1117) sigma
+    endif
     !
     !---- coefficients based on rotational speed
-    WRITE(LU, 1015) CT, CP, ADV * PI
+    write(lu, 1015) ct, cp, ctxt%adv * pi
     !---- coefficients based on forward speed
-    WRITE(LU, 1016) TC, PC, ADV
+    write(lu, 1016) tc, pc, ctxt%adv
 
-    !c      write(LU,1017) PVIS * ADV**3 * 2.0/PI,
-    !c     &               PWAK * ADV**3 * 2.0/PI
+    !c      write(lu,1017) pvis * adv**3 * 2.0/pi,
+    !c     &               pwak * adv**3 * 2.0/pi
 
     !
-    IF(TERSE) RETURN
+    if(ctxt%terse) return
     !
-    !----- find maximum RE on blade
-    REMAX = 0.0
-    DO I = 1, II
-        REMAX = MAX(RE(I), REMAX)
-    END DO
-    REEXP = 1.0
-    IF(REMAX >= 1.0E6) THEN
-        REEXP = 6.0
-    ELSEIF(REMAX >= 1.0E3) THEN
-        REEXP = 3.0
-    ENDIF
+    !----- find maximum re on blade
+    remax = 0.0
+    do i = 1, ctxt%ii
+        remax = max(ctxt%re(i), remax)
+    end do
+    reexp = 1.0
+    if(remax >= 1.0e6) then
+        reexp = 6.0
+    elseif(remax >= 1.0e3) then
+        reexp = 3.0
+    endif
     !
-    IF(REEXP == 1.0) THEN
-        WRITE(LU, 1020)
-    ELSE
-        WRITE(LU, 1120) IFIX(REEXP)
-    ENDIF
+    if(reexp == 1.0) then
+        write(lu, 1020)
+    else
+        write(lu, 1120) ifix(reexp)
+    endif
     !
-    do I = 1, II, IADD
+    do i = 1, ctxt%ii, iadd
         !
         !------ use equivalent prop to define local efficiency
-        CALL UVADD(XI(I), WA, WT)
-        VW = VWAK(I)
-        VAW = VW * XW(I) / ADW
+        call uvadd(ctxt, ctxt%xi(i), wa, wt)
+        vw = ctxt%vwak(i)
+        vaw = vw * ctxt%xw(i) / ctxt%adw
         !------ Freestream velocity component on equiv prop
-        UTOTW = URDUCT
-        CW = XI(I) / ADV - WT - VW
-        SW = UTOTW + WA + VAW
-        EFFI = (CW / SW) * ADV / XW(I)
+        utotw = ctxt%urduct
+        cw = ctxt%xi(i) / ctxt%adv - wt - vw
+        sw = utotw + wa + vaw
+        effi = (cw / sw) * ctxt%adv / ctxt%xw(i)
         !
         !------ use real prop to define Mach number
-        CALL CSCALC(I, UTOT, WA, WT, &
-                VT, VT_ADW, &
-                VA, VA_ADW, &
-                VD, VD_ADW, &
-                CI, CI_ADV, CI_VT, &
-                SI, SI_VA, &
-                W, W_ADV, W_VT, W_VA, &
-                PHI, P_ADV, P_VT, P_VA)
+        call cscalc(ctxt, i, utot, wa, wt, &
+                vt, vt_adw, &
+                va, va_adw, &
+                vd, vd_adw, &
+                ci, ci_adv, ci_vt, &
+                si, si_va, &
+                w, w_adv, w_vt, w_va, &
+                phi, p_adv, p_vt, p_va)
         !
-        MACH = W * VEL / VSO
+        mach = w * ctxt%vel / ctxt%vso
         !
-        BDEG = BETA(I) * 180. / PI
-        XRE = RE(I) / (10.0**REEXP)
+        bdeg = ctxt%beta(i) * 180. / pi
+        xre = ctxt%re(i) / (10.0**reexp)
         !
-        SCHAR = ' '
-        IF(STALL(I)) SCHAR = 's'
+        schar = ' '
+        if(ctxt%stall(i)) schar = 's'
         !
-        WRITE(LU, 1030)&
-                I, XI(I), CH(I), BDEG, CL(I), SCHAR, CD(I), XRE, MACH, &
-                EFFI, EFFP(I), UBODY(I)
+        write(lu, 1030)&
+                i, ctxt%xi(i), ctxt%ch(i), bdeg, ctxt%cl(i), schar, ctxt%cd(i), xre, mach, &
+                effi, ctxt%effp(i), ctxt%ubody(i)
         !c     &    ,rad*ch(i)*sin(beta(i))*39.36
     end do
-    !c      WRITE(LU,1000)
-    !c      WRITE(LU,*   ) ' '
+    !c      write(lu,1000)
+    !c      write(lu,*   ) ' '
     !
-    RETURN
+    return
     !....................................................................
     !
-    1000 FORMAT(/1X, 75('='))
-    1001 FORMAT(' Ducted Graded Mom. Formulation Solution:  ', A32)
-    1002 FORMAT(' Ducted Potential Formulation Solution:  ', A32)
-    1011 FORMAT(' Free Tip Graded Mom. Formulation Solution:  ', A32)
-    1012 FORMAT(' Free Tip Potential Formulation Solution:  ', A32)
-    1013 FORMAT(' Free Tip Vortex Wake Formulation Solution:  ', A32)
-    1021 FORMAT(' (External slipstream present)', 19X, &
-            'Wake adv. ratio:', F11.5)
-    1022 FORMAT(' Vdisk/Vslip:', F11.5, 25X, &
-            'Wake adv. ratio:', F11.5)
-    1023 FORMAT(50X, 'Wake adv. ratio:', F11.5)
-    1024 FORMAT(' Reverse far-slipstream velocity implied.', &
+    1000 format(/1x, 75('='))
+    1001 format(' Ducted Graded Mom. Formulation Solution:  ', a32)
+    1002 format(' Ducted Potential Formulation Solution:  ', a32)
+    1011 format(' Free Tip Graded Mom. Formulation Solution:  ', a32)
+    1012 format(' Free Tip Potential Formulation Solution:  ', a32)
+    1013 format(' Free Tip Vortex Wake Formulation Solution:  ', a32)
+    1021 format(' (External slipstream present)', 19x, &
+            'Wake adv. ratio:', f11.5)
+    1022 format(' Vdisk/Vslip:', f11.5, 25x, &
+            'Wake adv. ratio:', f11.5)
+    1023 format(50x, 'Wake adv. ratio:', f11.5)
+    1024 format(' Reverse far-slipstream velocity implied.', &
             ' Interpret results carefully !')
-    1010 FORMAT(' no. blades :', I3, 12X, 'radius(m)  :', F9.4, 5X, &
-            'adv. ratio: ', F11.5, &
-            /' thrust(N)  :', G11.3, 4X, 'power(W)   :', G11.3, 3X, &
-            'torque(N-m):', G11.3, &
-            /' Efficiency :', F8.4, 7X, 'speed(m/s) :', F9.3, 5X, &
-            'rpm        :', F11.3, &
-            /' Eff induced:', F8.4, 7X, 'Eff ideal  :', F9.4, 5X, &
-            'Tcoef      :', F11.4, &
-            /' Tnacel(N)  :', F11.4, 4X, 'hub rad.(m):', F9.4, 5X, &
-            'disp. rad. :', F10.4, &
-            /' Tvisc(N)   :', F11.4, 4X, 'Pvisc(W)   :', G11.3, &
-            /' rho(kg/m3) :', F10.5, 5X, 'Vsound(m/s):', F9.3, 5X, &
-            'mu(kg/m-s) :', E11.4&
-            /1X, 75('-'))
-    1015 FORMAT(12X, '    Ct:', F11.5, '     Cp:', F11.5, '    J:', F11.5)
-    1016 FORMAT(12X, '    Tc:', F11.5, '     Pc:', F11.5, '  adv:', F11.5)
-    1116 FORMAT('Helicopter: ', &
-            ' Sigma:', F11.5, '  CTh/s:', F11.5, '  FOM:', F11.5)
-    1117 FORMAT(' Sigma:', F11.5)
-    1017 FORMAT(' Cpv:', F11.5, '    Cpi:', F11.5)
-    1020 FORMAT(/'  i  r/R    c/R  beta(deg)', &
-            '   CL      Cd    RE    Mach   effi  effp  na.u/U')
-    1120 FORMAT(/'  i  r/R   c/R  beta(deg)', &
-            '  CL     Cd    REx10^', I1, ' Mach   effi  effp  na.u/U')
-    1030 FORMAT(1X, I2, F6.3, F7.4, F7.2, F7.3, 1X, A1, F7.4, 1X, &
-            F6.2, 1X, F6.3, 1X, F6.3, F6.3, F8.3, f10.6)
-    2000 FORMAT(/19X, '********** NOT CONVERGED **********'/)
-END
-! OUTPUT
+    1010 format(' no. blades :', i3, 12x, 'radius(m)  :', f9.4, 5x, &
+            'adv. ratio: ', f11.5, &
+            /' thrust(n)  :', g11.3, 4x, 'power(w)   :', g11.3, 3x, &
+            'torque(n-m):', g11.3, &
+            /' Efficiency :', f8.4, 7x, 'speed(m/s) :', f9.3, 5x, &
+            'rpm        :', f11.3, &
+            /' Eff induced:', f8.4, 7x, 'Eff ideal  :', f9.4, 5x, &
+            'Tcoef      :', f11.4, &
+            /' Tnacel(n)  :', f11.4, 4x, 'hub rad.(m):', f9.4, 5x, &
+            'disp. rad. :', f10.4, &
+            /' Tvisc(n)   :', f11.4, 4x, 'Pvisc(w)   :', g11.3, &
+            /' rho(kg/m3) :', f10.5, 5x, 'Vsound(m/s):', f9.3, 5x, &
+            'mu(kg/m-s) :', e11.4&
+            /1x, 75('-'))
+    1015 format(12x, '    Ct:', f11.5, '     Cp:', f11.5, '    j:', f11.5)
+    1016 format(12x, '    Tc:', f11.5, '     Pc:', f11.5, '  adv:', f11.5)
+    1116 format('Helicopter: ', &
+            ' Sigma:', f11.5, '  cTh/s:', f11.5, '  fom:', f11.5)
+    1117 format(' Sigma:', f11.5)
+    1017 format(' Cpv:', f11.5, '    Cpi:', f11.5)
+    1020 format(/'  i  r/r    c/r  beta(deg)', &
+            '   cl      Cd    re    Mach   effi  effp  na.u/u')
+    1120 format(/'  i  r/r   c/r  beta(deg)', &
+            '  cl     Cd    rEx10^', i1, ' Mach   effi  effp  na.u/u')
+    1030 format(1x, i2, f6.3, f7.4, f7.2, f7.3, 1x, a1, f7.4, 1x, &
+            f6.2, 1x, f6.3, 1x, f6.3, f6.3, f8.3, f10.6)
+    2000 format(/19x, '********** not converged **********'/)
+end
+! output
 
 
-SUBROUTINE UVADD(XIW, WA, WT)
-    USE common
+subroutine uvadd(ctxt, xiw, wa, wt)
+    use mod_common
     use mod_spline
 
-    IMPLICIT REAL (M)
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !
-    WA = 0.0
-    WT = 0.0
+    wa = 0.0
+    wt = 0.0
     !
-    IF(NADD <= 1) RETURN
+    if(ctxt%nadd <= 1) return
     !
-    RDIM = XIW * RAD
-    IF(RDIM >= RADD(1) .AND. RDIM <= RADD(NADD)) THEN
-        WA = SEVAL(RDIM, UADD, UADDR, RADD) / VEL
-        WT = SEVAL(RDIM, VADD, VADDR, RADD) / VEL
-    ENDIF
+    rdim = xiw * ctxt%rad
+    if(rdim >= ctxt%radd(1) .and. rdim <= ctxt%radd(ctxt%nadd)) then
+        wa = seval(rdim, ctxt%uadd, ctxt%uaddr, ctxt%radd) / ctxt%vel
+        wt = seval(rdim, ctxt%vadd, ctxt%vaddr, ctxt%radd) / ctxt%vel
+    endif
     !
-    RETURN
-END
+    return
+end
 
 
 

@@ -1,387 +1,390 @@
 !***********************************************************************
 !    Module:  xio.f
 ! 
-!    Copyright (C) 2011 Mark Drela 
+!    Copyright (c) 2011 Mark Drela 
 ! 
 !    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
+!    it under the terms of the gnu General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
 !    (at your option) any later version.
 !
 !    This program is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+!    but without any warranty; without even the implied warranty of
+!    merchantability or fitness for a particular purpose.  See the
+!    gnu General Public License for more details.
 !
-!    You should have received a copy of the GNU General Public License
+!    You should have received a copy of the gnu General Public License
 !    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
 !***********************************************************************
 
-SUBROUTINE SAVE(FNAME1)
-    USE common
-    IMPLICIT REAL(M)
-    CHARACTER*(*) FNAME1
+subroutine save(ctxt, fname1)
+    use mod_common
+    implicit real(m)
+    type(Common), intent(inout) :: ctxt
+    character*(*) fname1
     !--------------------------------------------------------------------------
-    !     Save rotor and operating state in new XROTOR_Version 6.9 format
+    !     Save rotor and operating state in new xrotor_Version 6.9 format
     !     This format saves additional parameters including the aero data
     !     sections.
     !--------------------------------------------------------------------------
-    LOGICAL LVDUCT
+    logical lvduct
     !
-    CHARACTER*1 ANS
+    character*1 ans
     !
-    GREEK = .FALSE.
-    !c      IF(.NOT.CONV) THEN
-    !c       WRITE(*,1050)
-    !c       RETURN
-    !c      ENDIF
+    ctxt%greek = .false.
+    !c      if(.not.conv) then
+    !c       write(*,1050)
+    !c       return
+    !c      endif
     !
-    LVDUCT = ABS(ADW - ADV * URDUCT) >= 5.E-5
-    LU = LUTEMP
-    FNAME = FNAME1
+    lvduct = abs(ctxt%adw - ctxt%adv * ctxt%urduct) >= 5.e-5
+    lu = ctxt%lutemp
+    ctxt%fname = fname1
     !
-    IF(FNAME(1:1) == ' ') CALL ASKS('Enter filename^', FNAME)
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 5)
-    WRITE(*, *)
-    WRITE(*, *) 'Output file exists.  Overwrite?  Y'
-    READ (*, 1000) ANS
-    IF(INDEX('Nn', ANS) == 0) GO TO 6
+    if(ctxt%fname(1:1) == ' ') call asks('enter filename^', ctxt%fname)
+    open(lu, file = ctxt%fname, status = 'old', err = 5)
+    write(*, *)
+    write(*, *) 'Output file exists.  Overwrite?  y'
+    read (*, 1000) ans
+    if(index('nn', ans) == 0) go to 6
     !
-    CLOSE(LU)
-    WRITE(*, *) 'Current rotor not saved.'
-    RETURN
+    close(lu)
+    write(*, *) 'Current rotor not saved.'
+    return
     !
-    5    OPEN(LU, FILE = FNAME, STATUS = 'NEW', ERR = 90)
-    6    REWIND(LU)
+    5    open(lu, file = ctxt%fname, status = 'new', err = 90)
+    6    rewind(lu)
     !
     !
     !--- Version header and case name
-    IF(NAME == ' ') NAME = 'Saved blade'
-    WRITE(LU, 1100) VERSION, NAME
+    if(ctxt%name == ' ') ctxt%name = 'saved blade'
+    write(lu, 1100) ctxt%version, ctxt%name
     !--- Altitude and atmospheric data
-    WRITE(LU, 1102)
-    WRITE(LU, 1200) RHO, VSO, RMU, ALT
+    write(lu, 1102)
+    write(lu, 1200) ctxt%rho, ctxt%vso, ctxt%rmu, ctxt%alt
     !--- Radius, velocity, advance ratio and blade rake angle
-    WRITE(LU, 1103)
-    WRITE(LU, 1200) RAD, VEL, ADV, RAKE
+    write(lu, 1103)
+    write(lu, 1200) ctxt%rad, ctxt%vel, ctxt%adv, ctxt%rake
     !
-    WRITE(LU, 1104)
-    WRITE(LU, 1200) XI0, XW0
+    write(lu, 1104)
+    write(lu, 1200) ctxt%xi0, ctxt%xw0
     !--- Save aero data for defined aero sections
-    WRITE(LU, 1105) NAERO
-    MCRIT = 0.8
-    DO N = 1, NAERO
-        CALL GETAERO(N, XISECT, A0, CLMAX, CLMIN, &
-                DCLDA, DCLDA_STALL, DCL_STALL, &
-                CDMIN, CLDMIN, DCDCL2, CMCON, MCRIT, REREF, REXP)
-        WRITE(LU, 1106)
-        WRITE(LU, 1200) XISECT
-        A0DEG = A0 * 180.0 / PI
-        WRITE(LU, 1107)
-        WRITE(LU, 1200) A0DEG, DCLDA, CLMAX, CLMIN
-        WRITE(LU, 1108)
-        WRITE(LU, 1200) DCLDA_STALL, DCL_STALL, CMCON, MCRIT
-        WRITE(LU, 1109)
-        WRITE(LU, 1200) CDMIN, CLDMIN, DCDCL2
-        WRITE(LU, 1110)
-        WRITE(LU, 1200) REREF, REXP
-    END DO
+    write(lu, 1105) ctxt%naero
+    mcrit = 0.8
+    do n = 1, ctxt%naero
+        call getaero(ctxt, n, xisect, a0, clmax, clmin, &
+                dclda, dclda_stall, dcl_stall, &
+                cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+        write(lu, 1106)
+        write(lu, 1200) xisect
+        a0deg = a0 * 180.0 / pi
+        write(lu, 1107)
+        write(lu, 1200) a0deg, dclda, clmax, clmin
+        write(lu, 1108)
+        write(lu, 1200) dclda_stall, dcl_stall, cmcon, mcrit
+        write(lu, 1109)
+        write(lu, 1200) cdmin, cldmin, dcdcl2
+        write(lu, 1110)
+        write(lu, 1200) reref, rexp
+    end do
     !
     !--- Save logical flags for duct and windmill
-    WRITE(LU, 1111) LVDUCT, DUCT, WIND
+    write(lu, 1111) lvduct, ctxt%duct, ctxt%wind
     !
     !--- #radial stations and #blades
-    WRITE(LU, 1112) II, NBLDS
+    write(lu, 1112) ctxt%ii, ctxt%nblds
     !--- Save blade definition with chord,twist and body velocity
-    DO I = 1, II
-        BETA0DEG = BETA0(I) * 180.0 / PI
-        WRITE(LU, 1200) XI(I), CH(I), BETA0DEG, UBODY(I)
-    END DO
+    do i = 1, ctxt%ii
+        beta0deg = ctxt%beta0(i) * 180.0 / pi
+        write(lu, 1200) ctxt%xi(i), ctxt%ch(i), beta0deg, ctxt%ubody(i)
+    end do
     !--- Duct velocity
-    WRITE(LU, 1113)
-    WRITE(LU, 1200) URDUCT
+    write(lu, 1113)
+    write(lu, 1200) ctxt%urduct
     !--- Save added velocity components
-    IF(NADD > 1) THEN
-        WRITE(LU, 1114) NADD
-        DO I = 1, NADD
-            WRITE(LU, 1200) RADD(I), UADD(I), VADD(I)
-        END DO
-        WRITE(*, *) 'External slipstream included in save file'
-    ENDIF
+    if(ctxt%nadd > 1) then
+        write(lu, 1114) ctxt%nadd
+        do i = 1, ctxt%nadd
+            write(lu, 1200) ctxt%radd(i), ctxt%uadd(i), ctxt%vadd(i)
+        end do
+        write(*, *) 'External slipstream included in save file'
+    endif
     !
-    CLOSE(LU)
-    RETURN
+    close(lu)
+    return
     !
-    90   WRITE(*, *) 'Bad filename.'
-    WRITE(*, *) 'Current rotor not saved.'
-    RETURN
+    90   write(*, *) 'Bad filename.'
+    write(*, *) 'Current rotor not saved.'
+    return
     !
     !...................................................................
-    1000 FORMAT(A)
-    1050 FORMAT(/' *** Converged operating solution does not exist ***')
-    1100 FORMAT('XROTOR VERSION: ', F5.2/A)
-    1102 FORMAT('!         Rho          Vso          Rmu           Alt')
-    1103 FORMAT('!         Rad          Vel          Adv          Rake')
-    1104 FORMAT('!         XI0          XIW')
-    1105 FORMAT('!  Naero'/1(1X, I5))
-    1106 FORMAT('!   Xisection')
-    1107 FORMAT('!       A0deg        dCLdA        CLmax         CLmin')
-    1108 FORMAT('!  dCLdAstall     dCLstall      Cmconst         Mcrit')
-    1109 FORMAT('!       CDmin      CLCDmin     dCDdCL^2')
-    1110 FORMAT('!       REref        REexp')
-    1111 FORMAT('!LVDuct  LDuct   LWind'/3(1X, L2, 5X))
-    1112 FORMAT('!   II Nblds'/2(1X, I5), &
-            /'!         r/R          C/R     Beta0deg         Ubody')
-    1113 FORMAT('!      URDuct')
-    1114 FORMAT('!Nadd'/1(1X, I5), &
+    1000 format(a)
+    1050 format(/' *** Converged operating solution does not exist ***')
+    1100 format('xrotor version: ', f5.2/a)
+    1102 format('!         Rho          Vso          Rmu           Alt')
+    1103 format('!         Rad          Vel          Adv          Rake')
+    1104 format('!         xi0          xiw')
+    1105 format('!  Naero'/1(1x, i5))
+    1106 format('!   Xisection')
+    1107 format('!       a0deg        dcLda        cLmax         cLmin')
+    1108 format('!  dcLdAstall     dcLstall      Cmconst         Mcrit')
+    1109 format('!       cDmin      clcDmin     dcDdcl^2')
+    1110 format('!       rEref        rEexp')
+    1111 format('!lvDuct  lDuct   lWind'/3(1x, l2, 5x))
+    1112 format('!   ii Nblds'/2(1x, i5), &
+            /'!         r/r          c/r     Beta0deg         Ubody')
+    1113 format('!      urDuct')
+    1114 format('!Nadd'/1(1x, i5), &
             /'!        Radd         Uadd         Vadd')
-    1200 FORMAT(5(1X, G12.5))
+    1200 format(5(1x, g12.5))
     !
     !x123456789012x123456789012x123456789012x123456789012x123456789012
     !!         Rho          Vso          Rmu           Alt')
     !
-END
-! SAV
+end
+! sav
 
-SUBROUTINE LOAD(FNAME1)
+subroutine load(ctxt, fname1)
     !------------------------------------------------------------------------
-    !     Reads in previously saved rotor in new XROTOR_Version >= 6.9 format
+    !     Reads in previously saved rotor in new xrotor_Version >= 6.9 format
     !     This format saves more information and can have optional comment
     !     lines beginning with a ! character.
     !------------------------------------------------------------------------
-    USE common
-    IMPLICIT REAL (M)
-    CHARACTER*(*) FNAME1
-    CHARACTER*128 LINE
-    GREEK = .FALSE.
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    character*(*) fname1
+    character*128 line
+    ctxt%greek = .false.
     !
-    LU = LUTEMP
+    lu = ctxt%lutemp
     !
-    FNAME = FNAME1
-    IF(FNAME(1:1) == ' ') CALL ASKS('Enter filename^', FNAME)
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 200)
+    ctxt%fname = fname1
+    if(ctxt%fname(1:1) == ' ') call asks('enter filename^', ctxt%fname)
+    open(lu, file = ctxt%fname, status = 'old', err = 200)
     !
-    !--- Check for new format/old format XROTOR file
-    CALL RDLINE(LU, LINE)
-    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 210
-    READ(LINE(17:22), *) FILEVERS
-    WRITE(*, 1005) FILEVERS
+    !--- Check for new format/old format xrotor file
+    call rdline(lu, line)
+    if(line == 'end' .or. line == 'err') go to 210
+    read(line(17:22), *) filevers
+    write(*, 1005) filevers
     !
     !
     !--- Case title
-    CALL RDLINE(LU, LINE)
-    NAME = LINE
+    call rdline(lu, line)
+    ctxt%name = line
     !
-    CALL RDLINE(LU, LINE)
-    READ(LINE, *, ERR = 210) RHO, VSO, RMU, ALT
-    CALL RDLINE(LU, LINE)
-    READ(LINE, *, ERR = 210) RAD, VEL, ADV, RAKE
-    CALL RDLINE(LU, LINE)
-    READ(LINE, *, ERR = 210) XI0, XW0
-    CALL RDLINE(LU, LINE)
+    call rdline(lu, line)
+    read(line, *, err = 210) ctxt%rho, ctxt%vso, ctxt%rmu, ctxt%alt
+    call rdline(lu, line)
+    read(line, *, err = 210) ctxt%rad, ctxt%vel, ctxt%adv, ctxt%rake
+    call rdline(lu, line)
+    read(line, *, err = 210) ctxt%xi0, ctxt%xw0
+    call rdline(lu, line)
     !
     !--- Read aero section definitions
-    READ(LINE, *, ERR = 210) NAERO
-    DO N = 1, NAERO
-        CALL RDLINE(LU, LINE)
-        READ(LINE, *, ERR = 210) XISECT
-        CALL RDLINE(LU, LINE)
-        READ(LINE, *, ERR = 210) A0DEG, DCLDA, CLMAX, CLMIN
-        CALL RDLINE(LU, LINE)
-        READ(LINE, *, ERR = 210) DCLDA_STALL, DCL_STALL, CMCON, MCRIT
-        CALL RDLINE(LU, LINE)
-        READ(LINE, *, ERR = 210) CDMIN, CLDMIN, DCDCL2
-        CALL RDLINE(LU, LINE)
-        READ(LINE, *, ERR = 210) REREF, REXP
+    read(line, *, err = 210) ctxt%naero
+    do n = 1, ctxt%naero
+        call rdline(lu, line)
+        read(line, *, err = 210) xisect
+        call rdline(lu, line)
+        read(line, *, err = 210) a0deg, dclda, clmax, clmin
+        call rdline(lu, line)
+        read(line, *, err = 210) dclda_stall, dcl_stall, cmcon, mcrit
+        call rdline(lu, line)
+        read(line, *, err = 210) cdmin, cldmin, dcdcl2
+        call rdline(lu, line)
+        read(line, *, err = 210) reref, rexp
         !
-        A0 = A0DEG * PI / 180.0
-        CALL PUTAERO(N, XISECT, A0, CLMAX, CLMIN, &
-                DCLDA, DCLDA_STALL, DCL_STALL, &
-                CDMIN, CLDMIN, DCDCL2, CMCON, MCRIT, REREF, REXP)
-    END DO
+        a0 = a0deg * pi / 180.0
+        call putaero(ctxt, n, xisect, a0, clmax, clmin, &
+                dclda, dclda_stall, dcl_stall, &
+                cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+    end do
     !
     !--- Read flags for wake, duct and windmill modes
-    CALL RDLINE(LU, LINE)
-    READ(LINE, *, ERR = 210) FREE, DUCT, WIND
+    call rdline(lu, line)
+    read(line, *, err = 210) ctxt%free, ctxt%duct, ctxt%wind
     !
-    WRITE(*, *)
-    IF(FREE) WRITE(*, *) 'Self-deforming wake option set'
-    IF(.NOT.FREE) WRITE(*, *) 'Rigid wake option set'
-    IF(DUCT) WRITE(*, *) 'Duct option set'
-    IF(.NOT.DUCT) WRITE(*, *) 'Free-tip option set'
-    IF(WIND) WRITE(*, *) 'Windmill plotting mode set'
-    IF(.NOT.WIND) WRITE(*, *) 'Propeller plotting mode set'
+    write(*, *)
+    if(ctxt%free) write(*, *) 'self-deforming wake option set'
+    if(.not.ctxt%free) write(*, *) 'rigid wake option set'
+    if(ctxt%duct) write(*, *) 'duct option set'
+    if(.not.ctxt%duct) write(*, *) 'free-tip option set'
+    if(ctxt%wind) write(*, *) 'windmill plotting mode set'
+    if(.not.ctxt%wind) write(*, *) 'propeller plotting mode set'
     !
-    WRITE(*, *) ' '
-    CALL RDLINE(LU, LINE)
-    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 210
-    READ(LINE, *, ERR = 210) IIX, NBLDS
-    DO I = 1, IIX
-        CALL RDLINE(LU, LINE)
-        READ(LINE, *, ERR = 210) XI(I), CH(I), BETADEG, UBODY(I)
-        BETA(I) = BETADEG * PI / 180.0
-        BETA0(I) = BETA(I)
+    write(*, *) ' '
+    call rdline(lu, line)
+    if(line == 'end' .or. line == 'err') go to 210
+    read(line, *, err = 210) iix, ctxt%nblds
+    do i = 1, iix
+        call rdline(lu, line)
+        read(line, *, err = 210) ctxt%xi(i), ctxt%ch(i), betadeg, ctxt%ubody(i)
+        ctxt%beta(i) = betadeg * pi / 180.0
+        ctxt%beta0(i) = ctxt%beta(i)
         !c        write(*,*) 'load i,ch,beta ',i,ch(i),beta(i)
-    END DO
+    end do
     !
     !--- Optional duct velocity
-    URDUCT = 1.0
-    CALL RDLINE(LU, LINE)
-    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 19
-    READ(LINE, *, END = 19) URDUCT
+    ctxt%urduct = 1.0
+    call rdline(lu, line)
+    if(line == 'end' .or. line == 'err') go to 19
+    read(line, *, end = 19) ctxt%urduct
     !
     !---- Optional slipstream velocities
-    19   NADD = 0
-    CALL RDLINE(LU, LINE)
-    IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 21
-    READ(LINE, *, END = 21) NADD
-    IF(NADD > IX) THEN
-        NADD = IX
-        WRITE(*, *) 'Warning, slipstream data terminated at ', IX
-    ENDIF
-    DO I = 1, NADD
-        CALL RDLINE(LU, LINE)
-        IF(LINE == 'END' .OR. LINE == 'ERR') GO TO 20
-        READ(LINE, *, ERR = 20, END = 20) RADD(I), UADD(I), VADD(I)
-    END DO
-    IF(I < NADD) THEN
-        NADD = I - 1
-        WRITE(*, *) 'Warning, slipstream data terminated at ', NADD
-    ENDIF
-    GO TO 21
+    19   ctxt%nadd = 0
+    call rdline(lu, line)
+    if(line == 'end' .or. line == 'err') go to 21
+    read(line, *, end = 21) ctxt%nadd
+    if(ctxt%nadd > ix) then
+        ctxt%nadd = ix
+        write(*, *) 'Warning, slipstream data terminated at ', ix
+    endif
+    do i = 1, ctxt%nadd
+        call rdline(lu, line)
+        if(line == 'end' .or. line == 'err') go to 20
+        read(line, *, err = 20, end = 20) ctxt%radd(i), ctxt%uadd(i), ctxt%vadd(i)
+    end do
+    if(i < ctxt%nadd) then
+        ctxt%nadd = i - 1
+        write(*, *) 'warning, slipstream data terminated at ', ctxt%nadd
+    endif
+    go to 21
     !
-    20   IF(I > 2) THEN
-        NADD = I - 1
-    ENDIF
+    20   if(i > 2) then
+        ctxt%nadd = i - 1
+    endif
     !
-    21   CLOSE(LU)
-    IF(NADD > 1) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'Slipstream profiles read with #points ', NADD
-    ENDIF
+    21   close(lu)
+    if(ctxt%nadd > 1) then
+        write(*, *)
+        write(*, *) 'slipstream profiles read with #points ', ctxt%nadd
+    endif
     !
-    CONV = .FALSE.
+    ctxt%conv = .false.
     !
     !--- Check for number of analysis stations to use
-    IF(IIX /= II) THEN
-        22     WRITE(*, 23) IIX, II, II
-        READ(*, 24) LINE
-        IF(LINE /= ' ') THEN
-            READ(LINE, *, ERR = 22) II
-        ENDIF
-        23     FORMAT(/'Read  # input stations = ', I3, &
-                /'Using # blade stations = ', I3, &
-                /'Enter # stations or <cr> for ', I3, ' ', $)
-        24     FORMAT(A)
-    ENDIF
+    if(iix /= ctxt%ii) then
+        22     write(*, 23) iix, ctxt%ii, ctxt%ii
+        read(*, 24) line
+        if(line /= ' ') then
+            read(line, *, err = 22) ctxt%ii
+        endif
+        23     format(/'Read  # input stations = ', i3, &
+                /'Using # blade stations = ', i3, &
+                /'Enter # stations or <cr> for ', i3, ' ', $)
+        24     format(a)
+    endif
     !
-    CALL INITCASE(IIX, .TRUE.)
+    call initcase(ctxt, iix, .true.)
     !---- rotor now exists
-    LROTOR = .TRUE.
-    RETURN
+    ctxt%lrotor = .true.
+    return
     !
-    200 WRITE(*, 1010) FNAME(1:32)
-    RETURN
+    200 write(*, 1010) ctxt%fname(1:32)
+    return
     !
-    210 WRITE(*, 1020) FNAME(1:32)
-    CLOSE(LU)
-    CONV = .FALSE.
-    RETURN
+    210 write(*, 1020) ctxt%fname(1:32)
+    close(lu)
+    ctxt%conv = .false.
+    return
     !..............................
-    1000 FORMAT(A)
-    1005 FORMAT(' Reading file from XROTOR Version ', F5.2)
-    1010 FORMAT(' File  ', A, ' not found'/)
-    1020 FORMAT(' File  ', A, ' has incompatible format'/&
+    1000 format(a)
+    1005 format(' Reading file from xrotor Version ', f5.2)
+    1010 format(' File  ', a, ' not found'/)
+    1020 format(' File  ', a, ' has incompatible format'/&
             ' Loading not completed'/)
     !
-END
+end
 
-SUBROUTINE INITCASE(IIX, LOSOLVE)
-    USE common
+subroutine initcase(ctxt, iix, losolve)
+    use mod_common
     use mod_spline
-    IMPLICIT REAL (M)
-    LOGICAL LOSOLVE
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    logical losolve
     !---- spline blade geometry to "old" radial locations
-    DO I = 1, IIX
-        W1(I) = XI(I)
-        W2(I) = CH(I)
-        W4(I) = BETA(I)
-        W6(I) = UBODY(I)
-    ENDDO
-    W3(1:IIX) = spline(W1(1:IIX), W2(1:IIX))
-    W5(1:IIX) = spline(W1(1:IIX), W4(1:IIX))
-    W7(1:IIX) = spline(W1(1:IIX), W6(1:IIX))
+    do i = 1, iix
+        ctxt%w1(i) = ctxt%xi(i)
+        ctxt%w2(i) = ctxt%ch(i)
+        ctxt%w4(i) = ctxt%beta(i)
+        ctxt%w6(i) = ctxt%ubody(i)
+    enddo
+    ctxt%w3(1:iix) = spline(ctxt%w1(1:iix), ctxt%w2(1:iix))
+    ctxt%w5(1:iix) = spline(ctxt%w1(1:iix), ctxt%w4(1:iix))
+    ctxt%w7(1:iix) = spline(ctxt%w1(1:iix), ctxt%w6(1:iix))
     !
     !---- set radial stations for built-in distribution scheme
-    CALL SETX
-    CALL XWINIT
+    call setx(ctxt)
+    call xwinit(ctxt)
     !
     !---- interpolate read-in geometry to generated radial stations
-    DO I = 1, II
-        CH(I) = SEVAL(XI(I), W2(1:IIX), W3(1:IIX), W1(1:IIX))
-        BETA(I) = SEVAL(XI(I), W4(1:IIX), W5(1:IIX), W1(1:IIX))
-        UBODY(I) = SEVAL(XI(I), W6(1:IIX), W7(1:IIX), W1(1:IIX))
-        BETA0(I) = BETA(I)
+    do i = 1, ctxt%ii
+        ctxt%ch(i) = seval(ctxt%xi(i), ctxt%w2(1:iix), ctxt%w3(1:iix), ctxt%w1(1:iix))
+        ctxt%beta(i) = seval(ctxt%xi(i), ctxt%w4(1:iix), ctxt%w5(1:iix), ctxt%w1(1:iix))
+        ctxt%ubody(i) = seval(ctxt%xi(i), ctxt%w6(1:iix), ctxt%w7(1:iix), ctxt%w1(1:iix))
+        ctxt%beta0(i) = ctxt%beta(i)
         !c        write(*,*) 'load trp i,ch,beta ',i,ch(i),beta(i)
-    ENDDO
-    IINF = II + II / 2
+    enddo
+    ctxt%iinf = ctxt%ii + ctxt%ii / 2
     !
-    CALL SETIAERO
+    call setiaero(ctxt)
     !---- calculate current operating point
-    IF(LOSOLVE) THEN
-        CALL APER(4, 2, .TRUE.)
-        IF(CONV) THEN
-            CALL OUTPUT(LUWRIT)
-        END IF
-    END IF
+    if(losolve) then
+        call aper(ctxt, 4, 2, .true.)
+        if(ctxt%conv) then
+            call output(ctxt, ctxt%luwrit)
+        end if
+    end if
     !
-    !---- define design quantities for design of MIL prop with same parameters
-    RADDES = RAD
-    VELDES = VEL
-    ADVDES = 0.
-    RPMDES = VEL / (RAD * ADV) * 30.0 / PI
-    R0DES = XI0 * RAD
-    RWDES = XW0 * RAD
-    TDDES = TTOT * RHO * VEL**2 * RAD**2
-    PDDES = PTOT * RHO * VEL**3 * RAD**2
-    DEST = .FALSE.
-    DESP = .TRUE.
-    DO I = 1, II
-        CLDES(I) = CL(I)
-    ENDDO
-    CLDES0 = 0.
-END
-! LOAD
+    !---- define design quantities for design of mil prop with same parameters
+    ctxt%raddes = ctxt%rad
+    ctxt%veldes = ctxt%vel
+    ctxt%advdes = 0.
+    ctxt%rpmdes = ctxt%vel / (ctxt%rad * ctxt%adv) * 30.0 / pi
+    ctxt%r0des = ctxt%xi0 * ctxt%rad
+    ctxt%rwdes = ctxt%xw0 * ctxt%rad
+    ctxt%tddes = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+    ctxt%pddes = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
+    ctxt%dest = .false.
+    ctxt%desp = .true.
+    do i = 1, ctxt%ii
+        ctxt%cldes(i) = ctxt%cl(i)
+    enddo
+    ctxt%cldes0 = 0.
+end
+! load
 
 
 
-SUBROUTINE RDLINE(LUN, LINE)
+subroutine rdline(lun, line)
     !...Purpose  Read a non-comment line from the input file
-    !...Input    Data read from unit LUN
-    !...Output   LINE  Character string with input line
-    !                  LINE is set to 'END' for end or errors
+    !...Input    Data read from unit lun
+    !...Output   line  Character string with input line
+    !                  line is set to 'end' for end or errors
     !
-    CHARACTER*(*) LINE
+    character*(*) line
     !
-    1000 FORMAT(A)
-    20 READ (LUN, 1000, END = 80, ERR = 90) LINE
+    1000 format(a)
+    20 read (lun, 1000, end = 80, err = 90) line
     !
     !---- skip comment line
-    IF(INDEX('!#', LINE(1:1)) /= 0) GO TO 20
+    if(index('!#', line(1:1)) /= 0) go to 20
     !
     !---- skip blank line
-    IF(LINE == ' ') GO TO 20
+    if(line == ' ') go to 20
     !
     !---- normal return after significant line
-    RETURN
+    return
     !
-    80 LINE = 'END '
-    RETURN
+    80 line = 'end '
+    return
     !
-    90 LINE = 'ERR '
-    RETURN
-END
+    90 line = 'err '
+    return
+end
 
 
 

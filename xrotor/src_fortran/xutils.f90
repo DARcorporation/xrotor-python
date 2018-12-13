@@ -1,100 +1,100 @@
 !***********************************************************************
 !    Module:  xutils.f
 ! 
-!    Copyright (C) 2011 Mark Drela 
+!    Copyright (c) 2011 Mark Drela 
 ! 
 !    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
+!    it under the terms of the gnu General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
 !    (at your option) any later version.
 !
 !    This program is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+!    but without any warranty; without even the implied warranty of
+!    merchantability or fitness for a particular purpose.  See the
+!    gnu General Public License for more details.
 !
-!    You should have received a copy of the GNU General Public License
+!    You should have received a copy of the gnu General Public License
 !    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
 !***********************************************************************
 
-SUBROUTINE GAUSS(NSIZ, NN, Z, R, NRHS)
+subroutine gauss(nsiz, nn, z, r, nrhs)
     !     *******************************************************
     !     *                                                     *
-    !     *   Solves general NxN system in N unknowns           *
-    !     *    with arbitrary number (NRHS) of righthand sides. *
+    !     *   Solves general Nxn system in n unknowns           *
+    !     *    with arbitrary number (nrhs) of righthand sides. *
     !     *   Assumes system is invertible...                   *
     !     *    ...if it isn't, a divide by zero will result.    *
     !     *                                                     *
-    !     *   Z is the coefficient matrix...                    *
+    !     *   z is the coefficient matrix...                    *
     !     *     ...destroyed during solution process.           *
-    !     *   R is the righthand side(s)...                     *
+    !     *   r is the righthand side(s)...                     *
     !     *     ...replaced by the solution vector(s).          *
     !     *                                                     *
     !     *                              Mark Drela  1984       *
     !     *******************************************************
     !
-    DIMENSION Z(NSIZ, NSIZ), R(NSIZ, NRHS)
+    dimension z(nsiz, nsiz), r(nsiz, nrhs)
     !
-    do NP = 1, NN - 1
-        NP1 = NP + 1
+    do np = 1, nn - 1
+        np1 = np + 1
         !
-        !------ find max pivot index NX
-        NX = NP
-        do N = NP1, NN
-            IF(ABS(Z(N, NP)) - ABS(Z(NX, NP))) 11, 11, 111
-            111      NX = N
+        !------ find max pivot index nx
+        nx = np
+        do n = np1, nn
+            if(abs(z(n, np)) - abs(z(nx, np))) 11, 11, 111
+            111      nx = n
         11 end do
         !
-        PIVOT = 1.0 / Z(NX, NP)
+        pivot = 1.0 / z(nx, np)
         !
         !------ switch pivots
-        Z(NX, NP) = Z(NP, NP)
+        z(nx, np) = z(np, np)
         !
         !------ switch rows & normalize pivot row
-        do L = NP1, NN
-            TEMP = Z(NX, L) * PIVOT
-            Z(NX, L) = Z(NP, L)
-            Z(NP, L) = TEMP
+        do l = np1, nn
+            temp = z(nx, l) * pivot
+            z(nx, l) = z(np, l)
+            z(np, l) = temp
         end do
         !
-        do L = 1, NRHS
-            TEMP = R(NX, L) * PIVOT
-            R(NX, L) = R(NP, L)
-            R(NP, L) = TEMP
+        do l = 1, nrhs
+            temp = r(nx, l) * pivot
+            r(nx, l) = r(np, l)
+            r(np, l) = temp
         end do
         !
         !------ forward eliminate everything
-        do K = NP1, NN
-            ZTMP = Z(K, NP)
+        do k = np1, nn
+            ztmp = z(k, np)
             !
-            !          IF(ZTMP == 0.0) GO TO 15
+            !          if(ztmp == 0.0) go to 15
             !
-            do L = NP1, NN
-                Z(K, L) = Z(K, L) - ZTMP * Z(NP, L)
+            do l = np1, nn
+                z(k, l) = z(k, l) - ztmp * z(np, l)
             end do
-            do L = 1, NRHS
-                R(K, L) = R(K, L) - ZTMP * R(NP, L)
+            do l = 1, nrhs
+                r(k, l) = r(k, l) - ztmp * r(np, l)
             end do
         end do
         !
     end do
     !
     !---- solve for last row
-    do L = 1, NRHS
-        R(NN, L) = R(NN, L) / Z(NN, NN)
+    do l = 1, nrhs
+        r(nn, l) = r(nn, l) / z(nn, nn)
     end do
     !
     !---- back substitute everything
-    do NP = NN - 1, 1, -1
-        NP1 = NP + 1
-        do L = 1, NRHS
-            do K = NP1, NN
-                R(NP, L) = R(NP, L) - Z(NP, K) * R(K, L)
+    do np = nn - 1, 1, -1
+        np1 = np + 1
+        do l = 1, nrhs
+            do k = np1, nn
+                r(np, l) = r(np, l) - z(np, k) * r(k, l)
             end do
         end do
     end do
     !
-    RETURN
-END
-! GAUSS
+    return
+end
+! gauss

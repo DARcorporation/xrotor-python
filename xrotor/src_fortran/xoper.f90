@@ -1,1277 +1,1280 @@
 !***********************************************************************
 !    Module:  xoper.f
 ! 
-!    Copyright (C) 2011 Mark Drela 
+!    Copyright (c) 2011 Mark Drela 
 ! 
 !    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
+!    it under the terms of the gnu General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
 !    (at your option) any later version.
 !
 !    This program is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+!    but without any warranty; without even the implied warranty of
+!    merchantability or fitness for a particular purpose.  See the
+!    gnu General Public License for more details.
 !
-!    You should have received a copy of the GNU General Public License
+!    You should have received a copy of the gnu General Public License
 !    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
 !***********************************************************************
 
-SUBROUTINE OPER
-    USE common
+subroutine oper(ctxt)
+    use mod_common
     use mod_spline
-    IMPLICIT REAL (M)
-    CHARACTER*4 COMAND, ANS
-    CHARACTER*132 COMARG, ANSARG
-    CHARACTER*1 CHKEY
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    character*4 comand, ans
+    character*132 comarg, ansarg
+    character*1 chkey
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR
+    dimension iinput(20)
+    dimension rinput(20)
+    logical error
     !
     !---------------------------------------------
     !     Run rotor at arbitrary operating points
     !---------------------------------------------
-    PLFAC1 = 0.7
-    PLFAC2 = 0.8
-    PLFACD = 0.6
-    XORG = 0.15
-    YORG = 0.10
+    plfac1 = 0.7
+    plfac2 = 0.8
+    plfacd = 0.6
+    xorg = 0.15
+    yorg = 0.10
     !
-    GREEK = .FALSE.
+    ctxt%greek = .false.
     !
-    900  CONTINUE
-    CALL ASKC('.OPER^', COMAND, COMARG)
+    900  continue
+    call askc('.oper^', comand, comarg)
     !
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
+    do i = 1, 20
+        iinput(i) = 0
+        rinput(i) = 0.0
+    enddo
+    ninput = 0
+    call getint(comarg, iinput, ninput, error)
+    ninput = 0
+    call getflt(comarg, rinput, ninput, error)
     !
-    IF(COMAND == '    ') THEN
-        RETURN
-    ENDIF
-    IF(COMAND == '?   ') WRITE(*, 1100)
-    IF(COMAND == '?   ') GO TO 900
-    IF(COMAND == 'FORM') GO TO 2
-    IF(COMAND == 'TERS') GO TO 4
-    IF(COMAND == 'DISP') GO TO 10
-    IF(COMAND == 'NAME') GO TO 15
-    IF(COMAND == 'WRIT') GO TO 20
-    IF(COMAND == 'DUCT') GO TO 22
-    IF(COMAND == 'VRAT') GO TO 24
-    IF(COMAND == 'ATMO') GO TO 35
-    IF(COMAND == 'VELO') GO TO 38
-    IF(COMAND == 'ANGL') GO TO 40
-    IF(COMAND == 'ADVA') GO TO 42
-    IF(COMAND == 'RPM ') GO TO 45
-    IF(COMAND == 'THRU') GO TO 50
-    IF(COMAND == 'TORQ') GO TO 60
-    IF(COMAND == 'POWE') GO TO 70
-    IF(COMAND == 'ASEQ') GO TO 81
-    IF(COMAND == 'RSEQ') GO TO 82
-    IF(COMAND == 'BSEQ') GO TO 83
-    IF(COMAND == 'VSEQ') GO TO 84
-    IF(COMAND == 'CLRC') GO TO 90
-    IF(COMAND == 'ADDC') GO TO 92
-    IF(COMAND == 'CPUT') GO TO 94
-    IF(COMAND == 'CGET') GO TO 96
-    IF(COMAND == 'CASE') GO TO 97
-    IF(COMAND == 'LIST') GO TO 98
+    if(comand == '    ') then
+        return
+    endif
+    if(comand == '?   ') write(*, 1100)
+    if(comand == '?   ') go to 900
+    if(comand == 'form') go to 2
+    if(comand == 'ters') go to 4
+    if(comand == 'disp') go to 10
+    if(comand == 'name') go to 15
+    if(comand == 'writ') go to 20
+    if(comand == 'duct') go to 22
+    if(comand == 'vrat') go to 24
+    if(comand == 'atmo') go to 35
+    if(comand == 'velo') go to 38
+    if(comand == 'angl') go to 40
+    if(comand == 'adva') go to 42
+    if(comand == 'rpm ') go to 45
+    if(comand == 'thru') go to 50
+    if(comand == 'torq') go to 60
+    if(comand == 'powe') go to 70
+    if(comand == 'aseq') go to 81
+    if(comand == 'rseq') go to 82
+    if(comand == 'bseq') go to 83
+    if(comand == 'vseq') go to 84
+    if(comand == 'clrc') go to 90
+    if(comand == 'addc') go to 92
+    if(comand == 'cput') go to 94
+    if(comand == 'cget') go to 96
+    if(comand == 'case') go to 97
+    if(comand == 'list') go to 98
     !
-    IF(COMAND == 'N')    GO TO 72
-    IF(COMAND == 'ITER') GO TO 75
-    IF(COMAND == 'INIT') GO TO 76
-    IF(COMAND == 'REIN') GO TO 78
+    if(comand == 'n')    go to 72
+    if(comand == 'iter') go to 75
+    if(comand == 'init') go to 76
+    if(comand == 'rein') go to 78
     !
-    !--- Hack to check ADW equation sensitivity, get rid of this later... HHY
-    IF(COMAND == 'ADW') THEN
-        WRITE(*, *) 'Current ADW factor =', ADWFCTR
-        CALL ASKR('Enter new ADW factor^', ADWFCTR)
-        GO TO 900
-    ENDIF
+    !--- Hack to check adw equation sensitivity, get rid of this later... hhy
+    if(comand == 'adw') then
+        write(*, *) 'current ctxt%adw factor =', ctxt%adwfctr
+        call askr('enter new ctxt%adw factor^', ctxt%adwfctr)
+        go to 900
+    endif
     !
-    WRITE(*, 1050) COMAND
-    GO TO 900
+    write(*, 1050) comand
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Select options for slipstream and velocity calculation
-    2    CONTINUE
-    WRITE(*, 3)
-    CALL ASKC('.FORM^', COMAND, COMARG)
+    2    continue
+    write(*, 3)
+    call askc('.form^', comand, comarg)
     !
-    IF(COMAND == 'GRAD') THEN
-        VRTX = .FALSE.
-        FAST = .TRUE.
-    ELSEIF(COMAND == 'POT') THEN
-        VRTX = .FALSE.
-        FAST = .FALSE.
-    ELSEIF(COMAND == 'VRTX') THEN
-        VRTX = .TRUE.
-    ELSEIF(COMAND == 'WAKE') THEN
-        FREE = .NOT.FREE
-    ELSEIF(COMAND == ' ') THEN
-        GO TO 900
-    ENDIF
+    if(comand == 'grad') then
+        ctxt%vrtx = .false.
+        ctxt%fast = .true.
+    elseif(comand == 'pot') then
+        ctxt%vrtx = .false.
+        ctxt%fast = .false.
+    elseif(comand == 'vrtx') then
+        ctxt%vrtx = .true.
+    elseif(comand == 'wake') then
+        ctxt%free = .not.ctxt%free
+    elseif(comand == ' ') then
+        go to 900
+    endif
     !
-    IF(VRTX) THEN
-        WRITE(*, *)'Discrete Vortex Formulation selected'
-    ELSE
-        IF(FAST) THEN
-            WRITE(*, *) 'Graded Momentum Formulation selected'
-        ELSE
-            WRITE(*, *)'Potential Formulation selected'
-        ENDIF
-    ENDIF
+    if(ctxt%vrtx) then
+        write(*, *)'Discrete Vortex Formulation selected'
+    else
+        if(ctxt%fast) then
+            write(*, *) 'Graded Momentum Formulation selected'
+        else
+            write(*, *)'Potential Formulation selected'
+        endif
+    endif
     !
-    IF(FREE) THEN
-        WRITE(*, *)'Self-deforming wake selected'
-    ELSE
-        WRITE(*, *)'Rigid wake selected'
-    ENDIF
-    GO TO 2
+    if(ctxt%free) then
+        write(*, *)'Self-deforming wake selected'
+    else
+        write(*, *)'Rigid wake selected'
+    endif
+    go to 2
     !
-    3    FORMAT(&
+    3    format(&
             /' Select options for calculation of slipstream velocities'&
-            /'   GRAD     use Graded Momentum       Formulation '&
-            /'   POT      use Potential (Goldstein) Formulation '&
-            /'   VRTX     use discrete Vortex Wake  Formulation '&
-            /'   WAKE     Toggle between rigid and self-deforming wake')
+            /'   grad     use Graded Momentum       Formulation '&
+            /'   pot      use Potential (Goldstein) Formulation '&
+            /'   vrtx     use discrete Vortex Wake  Formulation '&
+            /'   wake     Toggle between rigid and self-deforming wake')
     !
     !
     !---------------------------------------------------------------------
     !--- Output data on blade stations with each case (verbose)
-    4 TERSE = .NOT.TERSE
-    IF(TERSE)      WRITE(*, *)'Terse output selected'
-    IF(.NOT.TERSE) WRITE(*, *)'Verbose output selected'
-    GO TO 900
+    4 ctxt%terse = .not.ctxt%terse
+    if(ctxt%terse)      write(*, *)'terse output selected'
+    if(.not.ctxt%terse) write(*, *)'verbose output selected'
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Display current prop operating point data
-    10 CALL OUTPUT(LUWRIT)
-    !cc      CALL CPROJ
-    GO TO 900
+    10 call output(ctxt, ctxt%luwrit)
+    !cc      call cproj
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Change case name
-    15 NAME = COMARG
-    IF(NAME(1:1) == ' ')&
-            CALL ASKS('Enter case name (32 characters max)^', NAME)
-    GO TO 900
+    15 ctxt%name = comarg
+    if(ctxt%name(1:1) == ' ')&
+            call asks('enter case ctxt%name (32 characters max)^', ctxt%name)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Write current prop operating point data to file
-    20 IF(COMARG(1:1) /= ' ') SAVFIL = COMARG
-    CALL OPFILE(LUSAVE, SAVFIL)
-    CALL OUTPUT(LUSAVE)
-    CLOSE(LUSAVE)
-    GO TO 900
+    20 if(comarg(1:1) /= ' ') ctxt%savfil = comarg
+    call opfile(ctxt%lusave, ctxt%savfil)
+    call output(ctxt, ctxt%lusave)
+    close(ctxt%lusave)
+    go to 900
     !
     !--------------------------------------------------------------
-    22   DUCT = .NOT.DUCT
-    IF(DUCT) THEN
-        WRITE(*, *) 'Duct option selected'
-        IF(NINPUT >= 1) THEN
-            URDUCT = RINPUT(1)
-        ELSE
-            CALL ASKR('Enter Aexit/Aprop for duct^', URDUCT)
-        ENDIF
-    ELSE
-        WRITE(*, *) 'Free-tip option selected'
-        URDUCT = 1.0
-    ENDIF
-    GO TO 900
+    22   ctxt%duct = .not.ctxt%duct
+    if(ctxt%duct) then
+        write(*, *) 'duct option selected'
+        if(ninput >= 1) then
+            ctxt%urduct = rinput(1)
+        else
+            call askr('enter aexit/aprop for ctxt%duct^', ctxt%urduct)
+        endif
+    else
+        write(*, *) 'free-tip option selected'
+        ctxt%urduct = 1.0
+    endif
+    go to 900
     !
     !--------------------------------------------------------------
-    24   IF(DUCT) THEN
-        IF(NINPUT >= 1) THEN
-            URDUCT = RINPUT(1)
-        ELSE
-            CALL ASKR('Enter Aexit/Aprop for duct^', URDUCT)
-        ENDIF
-    ELSE
-        WRITE(*, *) '*** Select duct option first'
-    ENDIF
-    GO TO 900
+    24   if(ctxt%duct) then
+        if(ninput >= 1) then
+            ctxt%urduct = rinput(1)
+        else
+            call askr('enter aexit/aprop for ctxt%duct^', ctxt%urduct)
+        endif
+    else
+        write(*, *) '*** select ctxt%duct option first'
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Change altitude
-    35 IF(NINPUT >= 1) THEN
-        ALT = RINPUT(1)
-    ELSE
-        CALL ASKR('flight altitude (km)^', ALT)
-    ENDIF
-    CALL ATMO(ALT, VSO, RHO, RMU)
-    CALL FLOSHO(LUWRIT, VSO, RHO, RMU)
-    GO TO 900
+    35 if(ninput >= 1) then
+        ctxt%alt = rinput(1)
+    else
+        call askr('flight altitude (km)^', ctxt%alt)
+    endif
+    call atmo(ctxt%alt, ctxt%vso, ctxt%rho, ctxt%rmu)
+    call flosho(ctxt%luwrit, ctxt%vso, ctxt%rho, ctxt%rmu)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Change flight velocity
-    38 VELOLD = VEL
-    IF(NINPUT >= 1) THEN
-        VEL = RINPUT(1)
-    ELSE
-        CALL ASKR('flight speed (m/s)^', VEL)
-    ENDIF
-    !--- Change CT,CQ,CP to give same thrust,torque,power
-    THR = TTOT * (RHO * VELOLD**2 * RAD**2)
-    TTOT = THR / (RHO * VEL**2 * RAD**2)
-    TRQ = QTOT * (RHO * VELOLD**2 * RAD**3)
-    QTOT = TRQ / (RHO * VEL**2 * RAD**3)
-    PWR = PTOT * (RHO * VELOLD**3 * RAD**2)
-    PTOT = PWR / (RHO * VEL**3 * RAD**2)
-    CONV = .FALSE.
-    GO TO 900
+    38 velold = ctxt%vel
+    if(ninput >= 1) then
+        ctxt%vel = rinput(1)
+    else
+        call askr('flight speed (m/s)^', ctxt%vel)
+    endif
+    !--- Change ct,cq,cp to give same thrust,torque,power
+    thr = ctxt%ttot * (ctxt%rho * velold**2 * ctxt%rad**2)
+    ctxt%ttot = thr / (ctxt%rho * ctxt%vel**2 * ctxt%rad**2)
+    trq = ctxt%qtot * (ctxt%rho * velold**2 * ctxt%rad**3)
+    ctxt%qtot = trq / (ctxt%rho * ctxt%vel**2 * ctxt%rad**3)
+    pwr = ctxt%ptot * (ctxt%rho * velold**3 * ctxt%rad**2)
+    ctxt%ptot = pwr / (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+    ctxt%conv = .false.
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Change blade pitch
-    40 IF(NINPUT >= 1) THEN
-        DELB = RINPUT(1)
-    ELSE
-        CALL ASKR('angle change (deg)^', DELB)
-    ENDIF
-    DO I = 1, II
-        BETA(I) = BETA(I) + DELB * PI / 180.
-        BETA0(I) = BETA0(I) + DELB * PI / 180.
-    ENDDO
-    CONV = .FALSE.
-    GO TO 900
+    40 if(ninput >= 1) then
+        delb = rinput(1)
+    else
+        call askr('angle change (deg)^', delb)
+    endif
+    do i = 1, ctxt%ii
+        ctxt%beta(i) = ctxt%beta(i) + delb * pi / 180.
+        ctxt%beta0(i) = ctxt%beta0(i) + delb * pi / 180.
+    enddo
+    ctxt%conv = .false.
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Specify advance ratio and solve
-    42 IF(NINPUT >= 1) THEN
-        ADV = RINPUT(1)
-    ELSE
-        CALL ASKR('advance ratio     ^', ADV)
-    ENDIF
-    CONV = .FALSE.
-    CALL APER(4, 2, LOPRINI)
+    42 if(ninput >= 1) then
+        ctxt%adv = rinput(1)
+    else
+        call askr('advance ratio     ^', ctxt%adv)
+    endif
+    ctxt%conv = .false.
+    call aper(ctxt, 4, 2, ctxt%loprini)
     !
-    IF(CONV) CALL OUTPUT(LUWRIT)
-    GO TO 900
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
+    go to 900
     !
     !---------------------------------------------------------------------
-    !--- Specify RPM and solve
-    45 IF(NINPUT >= 1) THEN
-        RPM = RINPUT(1)
-    ELSE
-        RPM = VEL / (RAD * ADV * PI / 30.)
-        CALL ASKR('rpm               ^', RPM)
-    ENDIF
-    ADV = VEL / (RAD * RPM * PI / 30.)
-    CONV = .FALSE.
-    CALL APER(4, 2, LOPRINI)
+    !--- Specify rpm and solve
+    45 if(ninput >= 1) then
+        rpm = rinput(1)
+    else
+        rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
+        call askr('rpm               ^', rpm)
+    endif
+    ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.)
+    ctxt%conv = .false.
+    call aper(ctxt, 4, 2, ctxt%loprini)
     !
-    IF(CONV) CALL OUTPUT(LUWRIT)
-    GO TO 900
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Specify thrust and solve
-    50 IF(NINPUT >= 1) THEN
-        TSPEC = RINPUT(1)
-    ELSE
-        TSPEC = TTOT * (RHO * VEL**2 * RAD**2)
-        CALL ASKR('thrust (N)        ^', TSPEC)
-    ENDIF
-    RPM = VEL / (RAD * ADV * PI / 30.0)
-    WRITE(*, 1530) RPM
-    51 CALL ASKC('fix Pitch / fix Rpm ( P/R )?^', &
-            ANS, ANSARG)
-    IF(ANS /= 'R' .AND. ANS /= 'P') GO TO 51
+    50 if(ninput >= 1) then
+        ctxt%tspec = rinput(1)
+    else
+        ctxt%tspec = ctxt%ttot * (ctxt%rho * ctxt%vel**2 * ctxt%rad**2)
+        call askr('thrust (n)        ^', ctxt%tspec)
+    endif
+    rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.0)
+    write(*, 1530) rpm
+    51 call askc('fix Pitch / fix Rpm ( p/r )?^', &
+            ans, ansarg)
+    if(ans /= 'r' .and. ans /= 'p') go to 51
     !
-    CONV = .FALSE.
-    BSAV = BETA(II)
-    IF(ANS == 'P') CALL APER(1, 2, LOPRINI)
-    IF(ANS == 'R') THEN
-        CALL ASKR('rpm:^', RPM)
-        ADV = VEL / (RAD * RPM * PI / 30.0)
-        CALL APER(1, 1, LOPRINI)
-    ENDIF
+    ctxt%conv = .false.
+    bsav = ctxt%beta(ctxt%ii)
+    if(ans == 'p') call aper(ctxt, 1, 2, ctxt%loprini)
+    if(ans == 'r') then
+        call askr('rpm:^', rpm)
+        ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.0)
+        call aper(ctxt, 1, 1, ctxt%loprini)
+    endif
     !
-    IF(CONV) CALL OUTPUT(LUWRIT)
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
     !---- Check for valid blade angle change
-    IF(ANS /= 'P') THEN
-        IF(CONV) THEN
+    if(ans /= 'p') then
+        if(ctxt%conv) then
             !----- convergence was achieved: show blade angle change incurred
-            WRITE(*, 1550) DBETA * 180.0 / PI
-        ELSE
+            write(*, 1550) ctxt%dbeta * 180.0 / pi
+        else
             !----- convergence failed: restore clobbered blade angles
-            DO I = 1, II
-                BETA(I) = BETA(I) - DBETA
-                BETA0(I) = BETA0(I) - DBETA
-            ENDDO
-        ENDIF
-    ENDIF
-    GO TO 900
+            do i = 1, ctxt%ii
+                ctxt%beta(i) = ctxt%beta(i) - ctxt%dbeta
+                ctxt%beta0(i) = ctxt%beta0(i) - ctxt%dbeta
+            enddo
+        endif
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Specify torque and solve
-    60 IF(NINPUT >= 1) THEN
-        QSPEC = RINPUT(1)
-    ELSE
-        QSPEC = QTOT * (RHO * VEL**2 * RAD**3)
-        CALL ASKR('torque (N-m)      ^', QSPEC)
-    ENDIF
-    RPM = VEL / (RAD * ADV * PI / 30.0)
-    WRITE(*, 1530) RPM
-    61 CALL ASKC('fix Pitch / fix Rpm ( P/R )?^', &
-            ANS, ANSARG)
-    IF(ANS /= 'R' .AND. ANS /= 'P') GO TO 61
+    60 if(ninput >= 1) then
+        ctxt%qspec = rinput(1)
+    else
+        ctxt%qspec = ctxt%qtot * (ctxt%rho * ctxt%vel**2 * ctxt%rad**3)
+        call askr('torque (n-m)      ^', ctxt%qspec)
+    endif
+    rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.0)
+    write(*, 1530) rpm
+    61 call askc('fix Pitch / fix Rpm ( p/r )?^', &
+            ans, ansarg)
+    if(ans /= 'r' .and. ans /= 'p') go to 61
     !
-    CONV = .FALSE.
-    IF(ANS == 'P') CALL APER(2, 2, LOPRINI)
-    IF(ANS == 'R') THEN
-        CALL ASKR('rpm:^', RPM)
-        ADV = VEL / (RAD * RPM * PI / 30.0)
-        CALL APER(2, 1, LOPRINI)
-    ENDIF
+    ctxt%conv = .false.
+    if(ans == 'p') call aper(ctxt, 2, 2, ctxt%loprini)
+    if(ans == 'r') then
+        call askr('rpm:^', rpm)
+        ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.0)
+        call aper(ctxt, 2, 1, ctxt%loprini)
+    endif
     !
-    IF(CONV) CALL OUTPUT(LUWRIT)
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
     !---- Check for valid blade angle change
-    IF(ANS /= 'P') THEN
-        IF(CONV) THEN
+    if(ans /= 'p') then
+        if(ctxt%conv) then
             !----- convergence was achieved: show blade angle change incurred
-            WRITE(*, 1550) DBETA * 180.0 / PI
-        ELSE
+            write(*, 1550) ctxt%dbeta * 180.0 / pi
+        else
             !----- convergence failed: restore clobbered blade angles
-            DO I = 1, II
-                BETA(I) = BETA(I) - DBETA
-                BETA0(I) = BETA0(I) - DBETA
-            ENDDO
-        ENDIF
-    ENDIF
-    GO TO 900
+            do i = 1, ctxt%ii
+                ctxt%beta(i) = ctxt%beta(i) - ctxt%dbeta
+                ctxt%beta0(i) = ctxt%beta0(i) - ctxt%dbeta
+            enddo
+        endif
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Specify power and solve
-    70 IF(NINPUT >= 1) THEN
-        PSPEC = RINPUT(1)
-    ELSE
-        PSPEC = PTOT * (RHO * VEL**3 * RAD**2)
-        CALL ASKR('Power (W)         ^', PSPEC)
-    ENDIF
-    RPM = VEL / (RAD * ADV * PI / 30.0)
-    WRITE(*, 1530) RPM
-    71 CALL ASKC('fix pitch / fix rpm ( P/R )?^', &
-            ANS, ANSARG)
-    IF(ANS /= 'R' .AND. ANS /= 'P') GO TO 71
+    70 if(ninput >= 1) then
+        ctxt%pspec = rinput(1)
+    else
+        ctxt%pspec = ctxt%ptot * (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+        call askr('power (w)         ^', ctxt%pspec)
+    endif
+    rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.0)
+    write(*, 1530) rpm
+    71 call askc('fix pitch / fix rpm ( p/r )?^', &
+            ans, ansarg)
+    if(ans /= 'r' .and. ans /= 'p') go to 71
     !
-    CONV = .FALSE.
-    IF(ANS == 'P') CALL APER(3, 2, LOPRINI)
-    IF(ANS == 'R') THEN
-        CALL ASKR('rpm:^', RPM)
-        ADV = VEL / (RAD * RPM * PI / 30.0)
-        CALL APER(3, 1, LOPRINI)
-    ENDIF
+    ctxt%conv = .false.
+    if(ans == 'p') call aper(ctxt, 3, 2, ctxt%loprini)
+    if(ans == 'r') then
+        call askr('rpm:^', rpm)
+        ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.0)
+        call aper(ctxt, 3, 1, ctxt%loprini)
+    endif
     !
-    IF(CONV) CALL OUTPUT(LUWRIT)
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
     !---- Check for valid blade angle change
-    IF(ANS /= 'P') THEN
-        IF(CONV) THEN
+    if(ans /= 'p') then
+        if(ctxt%conv) then
             !----- convergence was achieved: show blade angle change incurred
-            WRITE(*, 1550) DBETA * 180.0 / PI
-        ELSE
+            write(*, 1550) ctxt%dbeta * 180.0 / pi
+        else
             !----- convergence failed: restore clobbered blade angles
-            DO I = 1, II
-                BETA(I) = BETA(I) - DBETA
-                BETA0(I) = BETA0(I) - DBETA
-            ENDDO
-        ENDIF
-    ENDIF
-    GO TO 900
+            do i = 1, ctxt%ii
+                ctxt%beta(i) = ctxt%beta(i) - ctxt%dbeta
+                ctxt%beta0(i) = ctxt%beta0(i) - ctxt%dbeta
+            enddo
+        endif
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Change number of radial points for blade stations
-    72   CONTINUE
-    IF(LROTOR) THEN
-        IISAV = II
-        DO I = 1, IISAV
-            W1(I) = XI(I)
-            W2(I) = CH(I)
-            W4(I) = BETA(I)
-            W6(I) = UBODY(I)
-            W8(I) = CLDES(I)
-        ENDDO
-        W3(1:II) = spline(W1(1:II), W2(1:II))
-        W5(1:II) = spline(W1(1:II), W4(1:II))
-        W7(1:II) = spline(W1(1:II), W6(1:II))
-        W9(1:II) = spline(W1(1:II), W8(1:II))
-    ENDIF
+    72   continue
+    if(ctxt%lrotor) then
+        iisav = ctxt%ii
+        do i = 1, iisav
+            ctxt%w1(i) = ctxt%xi(i)
+            ctxt%w2(i) = ctxt%ch(i)
+            ctxt%w4(i) = ctxt%beta(i)
+            ctxt%w6(i) = ctxt%ubody(i)
+            ctxt%w8(i) = ctxt%cldes(i)
+        enddo
+        ctxt%w3(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt%w2(1:ctxt%ii))
+        ctxt%w5(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt%w4(1:ctxt%ii))
+        ctxt%w7(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt%w6(1:ctxt%ii))
+        ctxt%w9(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt%w8(1:ctxt%ii))
+    endif
     !
-    73   CALL ASKI('Enter new number of radial points^', II)
-    IF(II > IX) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'Maximum number is', IX
-        GO TO 73
-    ENDIF
+    73   call aski('enter new number of radial points^', ctxt%ii)
+    if(ctxt%ii > ix) then
+        write(*, *)
+        write(*, *) 'Maximum number is', ix
+        go to 73
+    endif
     !
-    IINF = II + II / 2
-    CALL SETX
-    IF(LROTOR) THEN
-        DO I = 1, II
-            CH(I) = SEVAL(XI(I), W2, W3, W1)
-            BETA(I) = SEVAL(XI(I), W4, W5, W1)
-            UBODY(I) = SEVAL(XI(I), W6, W7, W1)
-            CLDES(I) = SEVAL(XI(I), W8, W9, W1)
-            BETA0(I) = BETA(I)
-        ENDDO
-    ENDIF
-    GO TO 900
+    ctxt%iinf = ctxt%ii + ctxt%ii / 2
+    call setx(ctxt)
+    if(ctxt%lrotor) then
+        do i = 1, ctxt%ii
+            ctxt%ch(i) = seval(ctxt%xi(i), ctxt%w2, ctxt%w3, ctxt%w1)
+            ctxt%beta(i) = seval(ctxt%xi(i), ctxt%w4, ctxt%w5, ctxt%w1)
+            ctxt%ubody(i) = seval(ctxt%xi(i), ctxt%w6, ctxt%w7, ctxt%w1)
+            ctxt%cldes(i) = seval(ctxt%xi(i), ctxt%w8, ctxt%w9, ctxt%w1)
+            ctxt%beta0(i) = ctxt%beta(i)
+        enddo
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Set max number or iterations for nonlinear solution
-    75   IF(NINPUT >= 1) THEN
-        NITERA = IINPUT(1)
-    ELSE
-        CALL ASKI('Max number of iterations^', NITERA)
-    ENDIF
-    GO TO 900
+    75   if(ninput >= 1) then
+        ctxt%nitera = iinput(1)
+    else
+        call aski('max number of iterations^', ctxt%nitera)
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Toggle initialization flag
-    76   LOPRINI = .NOT.LOPRINI
-    IF(LOPRINI) THEN
-        WRITE(*, *) 'Analysis case will be initialized'
-    ELSE
-        WRITE(*, *) 'Analysis case will not be initialized'
-    ENDIF
-    GO TO 900
+    76   ctxt%loprini = .not.ctxt%loprini
+    if(ctxt%loprini) then
+        write(*, *) 'Analysis case will be initialized'
+    else
+        write(*, *) 'Analysis case will not be initialized'
+    endif
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Reinitialize operating point
-    78   CALL REINIT
-    GO TO 900
+    78   call reinit(ctxt)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Read or use engine rpm/power line file
-    79   IF(LPWRVAR .AND. NPWRVAR > 0) THEN
-        WRITE(*, *) ' '
-        WRITE(*, *) 'Current RPM/Power Engine Line'
-        DO L = 1, NPWRVAR
-            WRITE(*, *) L, RPMVAR(L), PWRVAR(L)
-        END DO
-        WRITE(*, *) ' '
-    ENDIF
+    79   if(ctxt%lpwrvar .and. ctxt%npwrvar > 0) then
+        write(*, *) ' '
+        write(*, *) 'Current rpm/Power Engine Line'
+        do l = 1, ctxt%npwrvar
+            write(*, *) l, ctxt%rpmvar(l), ctxt%pwrvar(l)
+        end do
+        write(*, *) ' '
+    endif
     !
-    LU = 12
-    FNAME = COMARG
-    IF(FNAME(1:1) == ' ') THEN
-        CALL ASKS('Enter power/rpm filename^', FNAME)
-    ENDIF
-    IF(FNAME(1:1) /= ' ') THEN
-        OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 795)
-        CALL GETPVAR(LU, IX, NPWRVAR, RPMVAR, PWRVAR)
-        WRITE(*, *) ' '
-        WRITE(*, *) 'RPM/Power Engine Line'
-        DO L = 1, NPWRVAR
-            WRITE(*, *) L, RPMVAR(L), PWRVAR(L)
-            PWRVAR(L) = PWRVAR(L)
-        END DO
-        WRITE(*, *) ' '
-        xpwrvar = splina(RPMVAR, PWRVAR)
-        CLOSE(LU)
-        LPWRVAR = .TRUE.
-    ENDIF
+    lu = 12
+    ctxt%fname = comarg
+    if(ctxt%fname(1:1) == ' ') then
+        call asks('enter power/rpm filename^', ctxt%fname)
+    endif
+    if(ctxt%fname(1:1) /= ' ') then
+        open(lu, file = ctxt%fname, status = 'old', err = 795)
+        call getpvar(lu, ix, ctxt%npwrvar, ctxt%rpmvar, ctxt%pwrvar)
+        write(*, *) ' '
+        write(*, *) 'rpm/Power Engine Line'
+        do l = 1, ctxt%npwrvar
+            write(*, *) l, ctxt%rpmvar(l), ctxt%pwrvar(l)
+            ctxt%pwrvar(l) = ctxt%pwrvar(l)
+        end do
+        write(*, *) ' '
+        ctxt%xpwrvar = splina(ctxt%rpmvar, ctxt%pwrvar)
+        close(lu)
+        ctxt%lpwrvar = .true.
+    endif
     !
     !
     !--- Use the engine rpm/power to define operating point
-    IF(LPWRVAR) THEN
-        791  CALL ASKC('fix Pitch / fix Rpm / fix Velocity ( P/R/V )?^', &
-                ANS, ANSARG)
-        IF(ANS == ' ') GO TO 900
-        IF(ANS /= 'R' .AND. ANS /= 'P' .AND. ANS /= 'V') GO TO 791
+    if(ctxt%lpwrvar) then
+        791  call askc('fix Pitch / fix Rpm / fix Velocity ( p/r/v )?^', &
+                ans, ansarg)
+        if(ans == ' ') go to 900
+        if(ans /= 'r' .and. ans /= 'p' .and. ans /= 'v') go to 791
         !
-        CONV = .FALSE.
-        IF(ANS == 'P') CALL APER(5, 2, LOPRINI)
-        IF(ANS == 'R') THEN
-            CALL ASKR('rpm:^', RPM)
-            ADV = VEL / (RAD * RPM * PI / 30.0)
-            CALL APER(5, 1, LOPRINI)
-        ENDIF
-        IF(ANS == 'V') THEN
-            CALL ASKR('vel:^', VEL)
-            ADV = VEL / (RAD * RPM * PI / 30.0)
-            CALL APER(5, 2, LOPRINI)
-        ENDIF
+        ctxt%conv = .false.
+        if(ans == 'p') call aper(ctxt, 5, 2, ctxt%loprini)
+        if(ans == 'r') then
+            call askr('rpm:^', rpm)
+            ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.0)
+            call aper(ctxt, 5, 1, ctxt%loprini)
+        endif
+        if(ans == 'v') then
+            call askr('vel:^', ctxt%vel)
+            ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.0)
+            call aper(ctxt, 5, 2, ctxt%loprini)
+        endif
         !
-        IF(CONV) CALL OUTPUT(LUWRIT)
+        if(ctxt%conv) call output(ctxt, ctxt%luwrit)
         !---- Was the pitch changed?
-        IF(ANS == 'R') THEN
-            IF(CONV) THEN
+        if(ans == 'r') then
+            if(ctxt%conv) then
                 !----- convergence was achieved: show blade angle change incurred
-                WRITE(*, 1550) DBETA * 180.0 / PI
-            ELSE
+                write(*, 1550) ctxt%dbeta * 180.0 / pi
+            else
                 !----- convergence failed: restore clobbered blade angles
-                DO I = 1, II
-                    BETA(I) = BETA(I) - DBETA
-                    BETA0(I) = BETA0(I) - DBETA
-                ENDDO
-            ENDIF
-        ENDIF
-        GO TO 900
-    ENDIF
+                do i = 1, ctxt%ii
+                    ctxt%beta(i) = ctxt%beta(i) - ctxt%dbeta
+                    ctxt%beta0(i) = ctxt%beta0(i) - ctxt%dbeta
+                enddo
+            endif
+        endif
+        go to 900
+    endif
     !
-    795  NF = INDEX(FNAME, ' ') - 1
-    WRITE(*, *) 'OPEN error on file  ', FNAME(1:NF)
-    GO TO 900
+    795  nf = index(ctxt%fname, ' ') - 1
+    write(*, *) 'open error on file  ', ctxt%fname(1:nf)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of advance ratios
-    81   WRITE(*, *) ' '
-    WRITE(*, *) 'Sequence of advance ratios...'
-    CALL SETCAS(1, NINPUT, RINPUT)
-    CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-    GO TO 900
+    81   write(*, *) ' '
+    write(*, *) 'Sequence of advance ratios...'
+    call setcas(ctxt, 1, ninput, rinput)
+    call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+    go to 900
     !
     !---------------------------------------------------------------------
-    !--- Do sequence of RPMs
-    82   WRITE(*, *) ' '
-    WRITE(*, *) 'Sequence of RPMs...'
-    CALL SETCAS(2, NINPUT, RINPUT)
-    CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-    GO TO 900
+    !--- Do sequence of rpMs
+    82   write(*, *) ' '
+    write(*, *) 'Sequence of rpMs...'
+    call setcas(ctxt, 2, ninput, rinput)
+    call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of pitch angles
-    83   WRITE(*, *) ' '
-    WRITE(*, *) 'Sequence of blade angles...'
-    CALL SETCAS(3, NINPUT, RINPUT)
-    CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-    GO TO 900
+    83   write(*, *) ' '
+    write(*, *) 'Sequence of blade angles...'
+    call setcas(ctxt, 3, ninput, rinput)
+    call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of velocities
-    84   WRITE(*, *) ' '
-    WRITE(*, *) 'Sequence of velocity with fixed pitch or RPM...'
-    CALL SETCAS(4, NINPUT, RINPUT)
-    CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-    GO TO 900
+    84   write(*, *) ' '
+    write(*, *) 'Sequence of velocity with fixed pitch or rpm...'
+    call setcas(ctxt, 4, ninput, rinput)
+    call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Save current operating point to case arrays
-    90   NCASE = 0
-    KCASE = 0
-    GO TO 900
+    90   ctxt%ncase = 0
+    ctxt%kcase = 0
+    go to 900
     !
-    92   IF(NCASE >= ICASX) THEN
-        WRITE(*, *) 'Case arrays too small.  Increase ICASX.'
-        GO TO 900
-    ENDIF
+    92   if(ctxt%ncase >= icasx) then
+        write(*, *) 'Case arrays too small.  Increase icasx.'
+        go to 900
+    endif
     !
-    NCASE = NCASE + 1
-    CASPAR(1, NCASE) = ADV
-    CASPAR(2, NCASE) = VEL
-    CASPAR(3, NCASE) = BETA(II)
-    CASPAR(4, NCASE) = ALT
-    CASPAR(5, NCASE) = RHO
-    CASPAR(6, NCASE) = RMU
-    CASPAR(7, NCASE) = VSO
-    CASPAR(8, NCASE) = 999.
-    CASPAR(9, NCASE) = 999.
-    CASPAR(10, NCASE) = 999.
-    CASPAR(11, NCASE) = 999.
-    GO TO 900
+    ctxt%ncase = ctxt%ncase + 1
+    ctxt%caspar(1, ctxt%ncase) = ctxt%adv
+    ctxt%caspar(2, ctxt%ncase) = ctxt%vel
+    ctxt%caspar(3, ctxt%ncase) = ctxt%beta(ctxt%ii)
+    ctxt%caspar(4, ctxt%ncase) = ctxt%alt
+    ctxt%caspar(5, ctxt%ncase) = ctxt%rho
+    ctxt%caspar(6, ctxt%ncase) = ctxt%rmu
+    ctxt%caspar(7, ctxt%ncase) = ctxt%vso
+    ctxt%caspar(8, ctxt%ncase) = 999.
+    ctxt%caspar(9, ctxt%ncase) = 999.
+    ctxt%caspar(10, ctxt%ncase) = 999.
+    ctxt%caspar(11, ctxt%ncase) = 999.
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Write case accumulation arrays to file
-    94   IF(NCASE <= 0) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'No cases saved'
-        GO TO 900
-    ENDIF
+    94   if(ctxt%ncase <= 0) then
+        write(*, *)
+        write(*, *) 'No cases saved'
+        go to 900
+    endif
     !
-    LU = 12
-    FNAME = COMARG
-    IF(FNAME(1:1) == ' ') CALL ASKS('Enter case save filename^', FNAME)
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 945)
-    WRITE(*, *) 'File exists.  Overwrite?  Y'
-    READ (*, 1000) CHKEY
-    IF(INDEX('Nn', CHKEY) /= 0) THEN
-        CLOSE(LU)
-        GO TO 900
-    ELSE
-        REWIND LU
-        GO TO 946
-    ENDIF
+    lu = 12
+    ctxt%fname = comarg
+    if(ctxt%fname(1:1) == ' ') call asks('enter case save filename^', ctxt%fname)
+    open(lu, file = ctxt%fname, status = 'old', err = 945)
+    write(*, *) 'File exists.  Overwrite?  y'
+    read (*, 1000) chkey
+    if(index('nn', chkey) /= 0) then
+        close(lu)
+        go to 900
+    else
+        rewind lu
+        go to 946
+    endif
     !
-    945  OPEN(LU, FILE = FNAME, STATUS = 'UNKNOWN', ERR = 94)
-    946  CALL SHOCAS(LU, NPARX, NCASE, CASPAR, RAD, NAME)
-    CLOSE(LU)
-    GO TO 900
+    945  open(lu, file = ctxt%fname, status = 'unknown', err = 94)
+    946  call shocas(lu, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+    close(lu)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Read case accumulation arrays from saved file
-    96   CONTINUE
-    LU = 12
-    FNAME = COMARG
-    IF(FNAME(1:1) == ' ') CALL ASKS('Enter case save filename^', FNAME)
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 965)
-    CALL GETCAS(LU, NPARX, NCASE, CASPAR)
-    CLOSE(LU)
-    CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-    GO TO 900
+    96   continue
+    lu = 12
+    ctxt%fname = comarg
+    if(ctxt%fname(1:1) == ' ') call asks('enter case save filename^', ctxt%fname)
+    open(lu, file = ctxt%fname, status = 'old', err = 965)
+    call getcas(lu, nparx, ctxt%ncase, ctxt%caspar)
+    close(lu)
+    call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+    go to 900
     !
-    965  NF = INDEX(FNAME, ' ') - 1
-    WRITE(*, *) 'OPEN error on file  ', FNAME(1:NF)
-    GO TO 900
+    965  nf = index(ctxt%fname, ' ') - 1
+    write(*, *) 'open error on file  ', ctxt%fname(1:nf)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- Rerun case operating point
-    97   IF(NCASE <= 0) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'No cases saved'
-        GO TO 900
-    ENDIF
+    97   if(ctxt%ncase <= 0) then
+        write(*, *)
+        write(*, *) 'No cases saved'
+        go to 900
+    endif
     !
-    IF(NINPUT >= 1) THEN
-        ICASE = IINPUT(1)
-    ELSE
-        CALL SHOCAS(LUWRIT, NPARX, NCASE, CASPAR, RAD, NAME)
-        ICASE = 0
-        CALL ASKI('Select case number (0 to cancel)^', ICASE)
-    ENDIF
-    IF(ICASE <= 0) GO TO 900
-    IF(ICASE > NCASE) THEN
-        NINPUT = 0
-        GO TO 97
-    ENDIF
+    if(ninput >= 1) then
+        icase = iinput(1)
+    else
+        call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+        icase = 0
+        call aski('Select case number (0 to cancel)^', icase)
+    endif
+    if(icase <= 0) go to 900
+    if(icase > ctxt%ncase) then
+        ninput = 0
+        go to 97
+    endif
     !
-    ADV = CASPAR(1, ICASE)
-    VEL = CASPAR(2, ICASE)
-    BET = CASPAR(3, ICASE)
-    ALT = CASPAR(4, ICASE)
-    RHO = CASPAR(5, ICASE)
-    RMU = CASPAR(6, ICASE)
-    VSO = CASPAR(7, ICASE)
-    POW = CASPAR(8, ICASE)
-    THR = CASPAR(9, ICASE)
-    TRQ = CASPAR(10, ICASE)
-    EFF = CASPAR(11, ICASE)
+    ctxt%adv = ctxt%caspar(1, icase)
+    ctxt%vel = ctxt%caspar(2, icase)
+    bet = ctxt%caspar(3, icase)
+    ctxt%alt = ctxt%caspar(4, icase)
+    ctxt%rho = ctxt%caspar(5, icase)
+    ctxt%rmu = ctxt%caspar(6, icase)
+    ctxt%vso = ctxt%caspar(7, icase)
+    pow = ctxt%caspar(8, icase)
+    thr = ctxt%caspar(9, icase)
+    trq = ctxt%caspar(10, icase)
+    eff = ctxt%caspar(11, icase)
     !
-    DELB = BET - BETA(II)
-    DO I = 1, II
-        BETA(I) = BETA(I) + DELB
-        BETA0(I) = BETA0(I) + DELB
-    ENDDO
+    delb = bet - ctxt%beta(ctxt%ii)
+    do i = 1, ctxt%ii
+        ctxt%beta(i) = ctxt%beta(i) + delb
+        ctxt%beta0(i) = ctxt%beta0(i) + delb
+    enddo
     !
-    CONV = .FALSE.
-    CALL APER(4, 2, .TRUE.)
+    ctxt%conv = .false.
+    call aper(ctxt, 4, 2, .true.)
     !
-    IF(CONV) THEN
-        CASPAR(8, ICASE) = PTOT * RHO * VEL**3 * RAD**2
-        CASPAR(9, ICASE) = TTOT * RHO * VEL**2 * RAD**2
-        CASPAR(10, ICASE) = QTOT * RHO * VEL**2 * RAD**3
-        CASPAR(11, ICASE) = TTOT / PTOT
-    ENDIF
+    if(ctxt%conv) then
+        ctxt%caspar(8, icase) = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
+        ctxt%caspar(9, icase) = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+        ctxt%caspar(10, icase) = ctxt%qtot * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
+        ctxt%caspar(11, icase) = ctxt%ttot / ctxt%ptot
+    endif
     !
-    IF(CONV) CALL OUTPUT(LUWRIT)
-    GO TO 900
+    if(ctxt%conv) call output(ctxt, ctxt%luwrit)
+    go to 900
     !
     !---------------------------------------------------------------------
     !--- List rotor dimensional data ?
-    98   CONTINUE
-    DO I = 1, II
-        WRITE(*, *) XI(I), NBLDS * GAM(I) * RAD * VEL, VIND(3, I) * VEL, &
-                NBLDS * GAM(I) / (4.0 * PI * VIND(3, I) * XI(I))
-    ENDDO
-    GO TO 900
+    98   continue
+    do i = 1, ctxt%ii
+        write(*, *) ctxt%xi(i), ctxt%nblds * ctxt%gam(i) * ctxt%rad * ctxt%vel, ctxt%vind(3, i) * ctxt%vel, &
+                ctxt%nblds * ctxt%gam(i) / (4.0 * pi * ctxt%vind(3, i) * ctxt%xi(i))
+    enddo
+    go to 900
 
     !.......................................................................
     !
-    1000 FORMAT(A)
-    1050 FORMAT(1X, A4, ' command not recognized.' //&
+    1000 format(a)
+    1050 format(1x, a4, ' command not recognized.' //&
             '  Type "?" for list, <Return> to exit menu.')
-    1100 FORMAT(&
-            /'   ADVA r   Prescribe advance ratio'&
-            /'   RPM  r   Prescribe rpm'&
-            /'   THRU r   Prescribe thrust'&
-            /'   TORQ r   Prescribe torque'&
-            /'   POWE r   Prescribe power'&
-            //'   ASEQ rrr Calculate case sequence of advance ratios'&
-            /'   RSEQ rrr Calculate case sequence of rpms'&
-            /'   BSEQ rrr Calculate case sequence of blade angles'&
-            /'   VSEQ rrr Calculate case sequence of speeds at fixed pitch'&
-            /'   CLRC     Clear case accumulator'&
-            /'   ADDC     Add current point point to case accumulator'&
-            /'   CPUT f   Write current case accumulator to file'&
-            /'   CGET f   Read cases from file'&
-            /'   CASE i   Select case'&
-            //'   ATMO r   Set fluid properties from standard atmosphere'&
-            /'   VELO r   Set or change flight speed'&
-            /'   ANGL r   Change blade pitch angle'&
-            /'   PVAR f   Enter and use engine rpm/power line'&
-            //'   FORM     Select slipstream and velocity formulation'&
-            //'   NAME s   Set or change case name'&
-            /'   WRIT f   Write current operating point to disk file'&
-            /'   DISP     Display current operating state'&
-            /'   INIT     Initialize next analysis case'&
-            /'   REIN     Re-initialize prop to known operating state'&
-            /'   TERS     Toggle between terse and verbose output'&
-            /'   ITER i   Change max number of Newton iterations'&
-            /'   N    i   Change number of radial points')
-    1530 FORMAT(/' Current rpm:', F9.2)
-    1550 FORMAT(' Blade angle changed', F7.3, ' degrees')
+    1100 format(&
+            /'   adva r   Prescribe advance ratio'&
+            /'   rpm  r   Prescribe rpm'&
+            /'   thru r   Prescribe thrust'&
+            /'   torq r   Prescribe torque'&
+            /'   powe r   Prescribe power'&
+            //'   aseq rrr Calculate case sequence of advance ratios'&
+            /'   rseq rrr Calculate case sequence of rpms'&
+            /'   bseq rrr Calculate case sequence of blade angles'&
+            /'   vseq rrr Calculate case sequence of speeds at fixed pitch'&
+            /'   clrc     Clear case accumulator'&
+            /'   addc     Add current point point to case accumulator'&
+            /'   cput f   Write current case accumulator to file'&
+            /'   cget f   Read cases from file'&
+            /'   case i   Select case'&
+            //'   atmo r   Set fluid properties from standard atmosphere'&
+            /'   velo r   Set or change flight speed'&
+            /'   angl r   Change blade pitch angle'&
+            /'   pvar f   Enter and use engine rpm/power line'&
+            //'   form     Select slipstream and velocity formulation'&
+            //'   name s   Set or change case name'&
+            /'   writ f   Write current operating point to disk file'&
+            /'   disp     Display current operating state'&
+            /'   init     Initialize next analysis case'&
+            /'   rein     Re-initialize prop to known operating state'&
+            /'   ters     Toggle between terse and verbose output'&
+            /'   iter i   Change max number of Newton iterations'&
+            /'   n    i   Change number of radial points')
+    1530 format(/' Current rpm:', f9.2)
+    1550 format(' Blade angle changed', f7.3, ' degrees')
     !
-END
-! OPER
+end
+! oper
 
 
 
-SUBROUTINE GETPVAR(LU, NDIM, N, XRPM, XPWR)
-    DIMENSION XPWR(NDIM), XRPM(NDIM)
-    CHARACTER*1 DUMMY
+subroutine getpvar(lu, ndim, n, xrpm, xpwr)
+    dimension xpwr(ndim), xrpm(ndim)
+    character*1 dummy
     !
-    1000 FORMAT(A)
-    READ(LU, 1000) DUMMY
+    1000 format(a)
+    read(lu, 1000) dummy
     !
-    DO I = 1, 12345
-        READ(LU, *, END = 11, ERR = 99) XX, YY
-        XRPM(I) = XX
-        XPWR(I) = YY
-    ENDDO
-    11   CONTINUE
-    N = I - 1
-    RETURN
+    do i = 1, 12345
+        read(lu, *, end = 11, err = 99) xx, yy
+        xrpm(i) = xx
+        xpwr(i) = yy
+    enddo
+    11   continue
+    n = i - 1
+    return
     !
-    99   WRITE(*, *) 'File read error'
-    N = 0
-    RETURN
-END
+    99   write(*, *) 'File read error'
+    n = 0
+    return
+end
 
 
-SUBROUTINE SHOCAS(LU, NDIM, N, PAR, RAD, NAME)
-    DIMENSION PAR(0:NDIM, *)
-    CHARACTER NAME*(*)
+subroutine shocas(lu, ndim, n, par, rad, name)
+    dimension par(0:ndim, *)
+    character name*(*)
     !
-    IF(NDIM < 11) THEN
-        WRITE(*, *) 'Error in SHOCAS: NDIM too small for PAR array'
-        RETURN
-    ENDIF
+    if(ndim < 11) then
+        write(*, *) 'Error in shocas: ndim too small for par array'
+        return
+    endif
     !
-    PI = 4.0 * ATAN(1.0)
+    pi = 4.0 * atan(1.0)
     !
-    WRITE(LU, 900) NAME
-    WRITE(LU, 1000)
-    DO I = 1, N
-        ADV = PAR(1, I)
-        VEL = PAR(2, I)
-        BET = PAR(3, I) * 180.0 / PI
-        ALT = PAR(4, I)
-        RHO = PAR(5, I)
-        RMU = PAR(6, I) * 1.0E5
-        VSO = PAR(7, I)
-        CONVFLG = PAR(8, I)
-        POW = PAR(8, I) * 0.001
-        THR = PAR(9, I)
-        TRQ = PAR(10, I)
-        EFF = PAR(11, I)
-        RPM = VEL / (RAD * ADV) * 30.0 / PI
-        IF(CONVFLG == 999.0) THEN
-            WRITE(LU, 1200) I, ADV, BET, VEL, RPM, RHO, RMU, VSO, ALT
-        ELSE
-            WRITE(LU, 1200) I, ADV, BET, VEL, RPM, RHO, RMU, VSO, ALT, &
-                    POW, THR, TRQ, EFF
-        ENDIF
-    ENDDO
-    RETURN
+    write(lu, 900) name
+    write(lu, 1000)
+    do i = 1, n
+        adv = par(1, i)
+        vel = par(2, i)
+        bet = par(3, i) * 180.0 / pi
+        alt = par(4, i)
+        rho = par(5, i)
+        rmu = par(6, i) * 1.0e5
+        vso = par(7, i)
+        convflg = par(8, i)
+        pow = par(8, i) * 0.001
+        thr = par(9, i)
+        trq = par(10, i)
+        eff = par(11, i)
+        rpm = vel / (rad * adv) * 30.0 / pi
+        if(convflg == 999.0) then
+            write(lu, 1200) i, adv, bet, vel, rpm, rho, rmu, vso, alt
+        else
+            write(lu, 1200) i, adv, bet, vel, rpm, rho, rmu, vso, alt, &
+                    pow, thr, trq, eff
+        endif
+    enddo
+    return
     !
-    900 FORMAT(A)
+    900 format(a)
     !
     !        1         2         3         4         5         6         7         8         9         0         1         2         3         4         5         6         7
     !23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-    !IIXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGG
-    !  n         V/wR         Btip            V          rpm          rho       mu*1e5       Vsound            h        P(kW)         T(N)       Q(N-m)          eff',
+    !iixggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxgggggggggggg
+    !  n         v/wr         Btip            v          rpm          rho       mu*1e5       Vsound            h        p(kw)         t(n)       q(n-m)          eff',
     !
-    1000 FORMAT(&
+    1000 format(&
             '  n'&
-            '         V/wR         Btip            V          rpm'&
+            '         v/wr         Btip            v          rpm'&
             '          rho       mu*1e5       Vsound            h'&
-            '        P(kW)         T(N)       Q(N-m)          eff'&
+            '        p(kw)         t(n)       q(n-m)          eff'&
             /160('-'))
-    1200 FORMAT(I3, 12(1X, G12.5))
+    1200 format(i3, 12(1x, g12.5))
     !
-    ! 1000 FORMAT( '  n   V/wR   Btip      V       rpm ',
+    ! 1000 format( '  n   v/wr   Btip      v       rpm ',
     !     &        '    rho   mu*1e5   Vsound    h  ',
-    !     &        '       P(kW)        T(N)         Q(N-m)      eff',
+    !     &        '       p(kw)        t(n)         q(n-m)      eff',
     !     &       /' --  ------  -----  ------- ------- ',
     !     &        ' -----  -------  -------  ------ ',
     !     &        '  -----------  -----------  -----------  -----')
-    ! 1200 FORMAT(I3,1X,F7.3,1X,F6.2,1X,F7.2,1X,F8.1,1X,F6.3,1X,F8.3,
-    !     &       1X,F8.2,1X,F7.2,2X,G12.5,1X,G12.5,1X,G12.5,1X,F6.3)
+    ! 1200 format(i3,1x,f7.3,1x,f6.2,1x,f7.2,1x,f8.1,1x,f6.3,1x,f8.3,
+    !     &       1x,f8.2,1x,f7.2,2x,g12.5,1x,g12.5,1x,g12.5,1x,f6.3)
     !
     !--- new format (old one ran out of sig. digits, lets remove the 80 column limit!
-    !  n   V/wR   Btip     V       rpm     rho    mu*1e5   Vsound    h        P(kW)        T(N)         Q(N-m)      eff
+    !  n   v/wr   Btip     v       rpm     rho    mu*1e5   Vsound    h        p(kw)        t(n)         q(n-m)      eff
     ! --  ------  -----  ------  -------  -----  -------  -------  -----   -----------  -----------  -----------  -----
     ! 12 x0.2345 x14.25 x123.23 x10000.0 x1.225 x123.123 x1234.12 x123.12 x123456.1234 x123456.1234 x123456.1234 x0.111
     !iii fffffff ffffff fffffff ffffffff ffffff ffffffff ffffffff fffffff gggggggggggg gggggggggggg gggggggggggg ffffff
     !
     !
     !---------------------------------------------------------------------------
-    ! 1000 FORMAT(/'  n   V/wR   Btip     V     rpm',
-    !     &        '      rho     P(kW)    T(N)     Q(N-m)   eff',
+    ! 1000 format(/'  n   v/wr   Btip     v     rpm',
+    !     &        '      rho     p(kw)    t(n)     q(n-m)   eff',
     !     &       /' --  -----  -----  ------  -------',
     !     &        '  -----  --------  -------  -------  -----')
-    ! 1200 FORMAT(I3,1X,F6.3,1X,F6.2,1X,F6.2,1X,F8.1,1X,F6.3,
-    !     &       1X,F9.4,1X,F8.1,1X,F8.1,1X,F6.3)
+    ! 1200 format(i3,1x,f6.3,1x,f6.2,1x,f6.2,1x,f8.1,1x,f6.3,
+    !     &       1x,f9.4,1x,f8.1,1x,f8.1,1x,f6.3)
     !
-    !  n   V/wR   Btip     V     rpm      rho     P(kW)     T(N)     Q(N-m)   eff
+    !  n   v/wr   Btip     v     rpm      rho     p(kw)     t(n)     q(n-m)   eff
     ! --  -----  -----  ------  -------  -----  --------  -------  -------  -----
     ! 12 x0.234 x14.25 x123.23 x10000.0 x1.225 x123.1234 x11000.0 x11125.0 x0.111
     !iii ffffff ffffff fffffff ffffffff ffffff fffffffff ffffffff ffffffff ffffff
     !---------------------------------------------------------------------------
     !
     !---------------------------------------------------------------------------
-    ! 1000 FORMAT(
-    !     & /'  n    V/wR    Btip     V      rpm  ',
+    ! 1000 format(
+    !     & /'  n    v/wr    Btip     v      rpm  ',
     !     &  '    rho     mu*1e5  Vsound     h  '
     !     & /'  --   ------  -----  ------  -------',
     !     &  '  -------  -------  ------   -----')
-    !C          12   0.2345  14.25  123.23  10000.0
-    !C             1.225  115.000  1000.0   25.00
-    ! 1200 FORMAT(
-    !     &   I3, F9.4,    F7.2,   F8.2,     F9.1,
-    !     &       F9.3,    F9.3,     F8.1,  F8.2  )
+    !c          12   0.2345  14.25  123.23  10000.0
+    !c             1.225  115.000  1000.0   25.00
+    ! 1200 format(
+    !     &   i3, f9.4,    f7.2,   f8.2,     f9.1,
+    !     &       f9.3,    f9.3,     f8.1,  f8.2  )
     !---------------------------------------------------------------------------
     !
     !---------------------------------------------------------------------------
-    ! 1000 FORMAT(
-    !     & /'  n    V/wR    Btip     V     rpm  ',
-    !     &  '  rho     P(W)     T(N)     Q(N-m)',
+    ! 1000 format(
+    !     & /'  n    v/wr    Btip     v     rpm  ',
+    !     &  '  rho     p(w)     t(n)     q(n-m)',
     !     & /'  --   ------  -----  ------  ------',
     !     &  '  -----  -------  ------   ------')
     !
-    ! 1200 FORMAT(
-    !     &   I3, F9.4,    F7.2,   F8.2,     F9.1,
-    !     &       F7.4,  F10.2,   F9.3,  F9.3  )
+    ! 1200 format(
+    !     &   i3, f9.4,    f7.2,   f8.2,     f9.1,
+    !     &       f7.4,  f10.2,   f9.3,  f9.3  )
     !---------------------------------------------------------------------------
     !
-END
+end
 
 
-SUBROUTINE GETCAS(LU, NDIM, NCAS, PAR)
-    DIMENSION PAR(0:NDIM, *), A(16)
-    CHARACTER DUMMY*1, LINE*128, CNAME*32
-    LOGICAL ERROR
+subroutine getcas(lu, ndim, ncas, par)
+    dimension par(0:ndim, *), a(16)
+    character dummy*1, line*128, cname*32
+    logical error
     !
-    IF(NDIM < 11) THEN
-        WRITE(*, *) 'Error in GETCAS: NDIM too small for PAR array'
-        RETURN
-    ENDIF
+    if(ndim < 11) then
+        write(*, *) 'Error in getcas: ndim too small for par array'
+        return
+    endif
     !
-    PI = 4.0 * ATAN(1.0)
+    pi = 4.0 * atan(1.0)
     !
-    1000 FORMAT(A)
-    READ(LU, 1000) CNAME
-    !c      WRITE(*,*) 'Case name: ',CNAME
-    READ(LU, 1000) DUMMY
-    READ(LU, 1000) DUMMY
+    1000 format(a)
+    read(lu, 1000) cname
+    !c      write(*,*) 'Case name: ',cname
+    read(lu, 1000) dummy
+    read(lu, 1000) dummy
     !
-    DO I = 1, 12345
-        !cc        READ(LINE,ERR=99) IDUM,ADV,BET,VEL,RPM,RHO,RMU,VSO,ALT,
-        !cc     &                    POW,THR,TRQ,EFF
-        READ(LU, 1000, END = 11) LINE
-        N = 13
-        CALL GETFLT(LINE, A, N, ERROR)
-        IF(ERROR) GO TO 99
-        ADV = A(2)
-        BET = A(3) * PI / 180.0
-        VEL = A(4)
-        RHO = A(6)
-        RMU = A(7) / 1.0E5
-        VSO = A(8)
-        ALT = A(9)
-        POW = 999.0
-        THR = 999.0
-        TRQ = 999.0
-        EFF = 999.0
-        IF(N == 13) THEN
-            POW = A(10) * 1000.0
-            THR = A(11)
-            TRQ = A(12)
-            EFF = A(13)
-        ENDIF
+    do i = 1, 12345
+        !cc        read(line,err=99) idum,adv,bet,vel,rpm,rho,rmu,vso,alt,
+        !cc     &                    pow,thr,trq,eff
+        read(lu, 1000, end = 11) line
+        n = 13
+        call getflt(line, a, n, error)
+        if(error) go to 99
+        adv = a(2)
+        bet = a(3) * pi / 180.0
+        vel = a(4)
+        rho = a(6)
+        rmu = a(7) / 1.0e5
+        vso = a(8)
+        alt = a(9)
+        pow = 999.0
+        thr = 999.0
+        trq = 999.0
+        eff = 999.0
+        if(n == 13) then
+            pow = a(10) * 1000.0
+            thr = a(11)
+            trq = a(12)
+            eff = a(13)
+        endif
         !--- Set parameters for cases
-        PAR(1, I) = ADV
-        PAR(2, I) = VEL
-        PAR(3, I) = BET
-        PAR(4, I) = ALT
-        PAR(5, I) = RHO
-        PAR(6, I) = RMU
-        PAR(7, I) = VSO
-        PAR(8, I) = POW
-        PAR(9, I) = THR
-        PAR(10, I) = TRQ
-        PAR(11, I) = EFF
-    ENDDO
-    11   CONTINUE
-    NCAS = I - 1
-    RETURN
+        par(1, i) = adv
+        par(2, i) = vel
+        par(3, i) = bet
+        par(4, i) = alt
+        par(5, i) = rho
+        par(6, i) = rmu
+        par(7, i) = vso
+        par(8, i) = pow
+        par(9, i) = thr
+        par(10, i) = trq
+        par(11, i) = eff
+    enddo
+    11   continue
+    ncas = i - 1
+    return
     !
-    99   WRITE(*, *) 'File read error'
-    NCAS = 0
-    RETURN
-END
+    99   write(*, *) 'File read error'
+    ncas = 0
+    return
+end
 
 
-SUBROUTINE SETCAS(ITYPE, NINPUT, RINPUT)
-    USE common
-    IMPLICIT REAL (M)
-    DIMENSION RINPUT(*)
+subroutine setcas(ctxt, itype, ninput, rinput)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    dimension rinput(*)
     !---------------------------------------------------
     !     Sets operating parameters over a range
-    !     of parameters of type ITYPE where
-    !       ITYPE    Parameter for range
+    !     of parameters of type itype where
+    !       itype    Parameter for range
     !         1      Advance ratio
-    !         2      RPM
+    !         2      rpm
     !         3      Blade angle
     !         4      Velocity with fixed pitch
-    !xxxx     5      Velocity with fixed RPM
+    !xxxx     5      Velocity with fixed rpm
     !---------------------------------------------------
-    CHARACTER*1 ANS, ANS4*4
-    LOGICAL YES
+    character*1 ans, ans4*4
+    logical yes
     !
-    !      WRITE(*,*)
-    !      WRITE(*,*) 'Overwrite or Append  to case accumulator?  O'
-    !      READ (*,1000) ANS
-    ! 1000 FORMAT(A)
-    !      IF(INDEX('Aa',ANS) == 0) NCASE = 0
+    !      write(*,*)
+    !      write(*,*) 'Overwrite or Append  to case accumulator?  o'
+    !      read (*,1000) ans
+    ! 1000 format(a)
+    !      if(index('Aa',ans) == 0) ncase = 0
     !
     !
-    IF(NCASE > 0) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'Appending to current case accumulator...'
-    ENDIF
+    if(ctxt%ncase > 0) then
+        write(*, *)
+        write(*, *) 'Appending to current case accumulator...'
+    endif
     !
-    KCASE = 0
+    ctxt%kcase = 0
     !
     !---------------------------------------------------------------------
     !--- Sequence of advance ratio
-    IF(ITYPE == 1) THEN
-        KCASE = 1
+    if(itype == 1) then
+        ctxt%kcase = 1
         !
-        IF    (NINPUT >= 3) THEN
-            ADV1 = RINPUT(1)
-            ADV2 = RINPUT(2)
-            DADV = RINPUT(3)
-        ELSEIF(NINPUT >= 2) THEN
-            ADV1 = RINPUT(1)
-            ADV2 = RINPUT(2)
-            DADV = 999.
-            CALL ASKR('Enter advance ratio increment  ^', DADV)
-        ELSEIF(NINPUT >= 1) THEN
-            ADV1 = RINPUT(1)
-            ADV2 = 999.
-            CALL ASKR('Enter last  advance ratio value^', ADV2)
-            DADV = 999.
-            CALL ASKR('Enter advance ratio increment  ^', DADV)
-        ELSE
-            ADV1 = 999.
-            CALL ASKR('Enter first advance ratio value^', ADV1)
-            ADV2 = 999.
-            CALL ASKR('Enter last  advance ratio value^', ADV2)
-            DADV = 999.
-            CALL ASKR('Enter advance ratio increment  ^', DADV)
-        ENDIF
-        IF(ADV1 == ADV2) RETURN
-        DADV = SIGN(DADV, ADV2 - ADV1)
-        NP = 1
-        IF(DADV /= 0.0) NP = INT((ADV2 - ADV1) / DADV + 0.5) + 1
-        IF(NP <= 0) RETURN
+        if    (ninput >= 3) then
+            adv1 = rinput(1)
+            adv2 = rinput(2)
+            ctxt%dadv = rinput(3)
+        elseif(ninput >= 2) then
+            adv1 = rinput(1)
+            adv2 = rinput(2)
+            ctxt%dadv = 999.
+            call askr('enter advance ratio increment  ^', ctxt%dadv)
+        elseif(ninput >= 1) then
+            adv1 = rinput(1)
+            adv2 = 999.
+            call askr('Enter last  advance ratio value^', adv2)
+            ctxt%dadv = 999.
+            call askr('enter advance ratio increment  ^', ctxt%dadv)
+        else
+            adv1 = 999.
+            call askr('Enter first advance ratio value^', adv1)
+            adv2 = 999.
+            call askr('Enter last  advance ratio value^', adv2)
+            ctxt%dadv = 999.
+            call askr('enter advance ratio increment  ^', ctxt%dadv)
+        endif
+        if(adv1 == adv2) return
+        ctxt%dadv = sign(ctxt%dadv, adv2 - adv1)
+        np = 1
+        if(ctxt%dadv /= 0.0) np = int((adv2 - adv1) / ctxt%dadv + 0.5) + 1
+        if(np <= 0) return
         !
         !--- Check for use of rpm/power relationship to set power
-        YES = .FALSE.
-        XANS = 0.
-        IF(LPWRVAR) CALL ASKL('Use engine rpm/power line ?^', YES)
-        IF(YES) XANS = 100.0
+        yes = .false.
+        xans = 0.
+        if(ctxt%lpwrvar) call askl('use engine rpm/power line ?^', yes)
+        if(yes) xans = 100.0
         !
-        IF(NCASE + NP > ICASX) THEN
-            WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
-            NP = ICASX - NCASE
-        ENDIF
+        if(ctxt%ncase + np > icasx) then
+            write(*, *) 'Limiting number of cases to array limit:', icasx
+            np = icasx - ctxt%ncase
+        endif
         !
-        DO IP = 1, NP
-            NCASE = NCASE + 1
-            CASPAR(0, NCASE) = XANS + FLOAT(KCASE)
-            CASPAR(1, NCASE) = ADV1 + DADV * FLOAT(IP - 1)
-            CASPAR(2, NCASE) = VEL
-            CASPAR(3, NCASE) = BETA(II)
-            CASPAR(4, NCASE) = ALT
-            CASPAR(5, NCASE) = RHO
-            CASPAR(6, NCASE) = RMU
-            CASPAR(7, NCASE) = VSO
-            CASPAR(8, NCASE) = 999.
-            CASPAR(9, NCASE) = 999.
-            CASPAR(10, NCASE) = 999.
-            CASPAR(11, NCASE) = 999.
-        ENDDO
+        do ip = 1, np
+            ctxt%ncase = ctxt%ncase + 1
+            ctxt%caspar(0, ctxt%ncase) = xans + float(ctxt%kcase)
+            ctxt%caspar(1, ctxt%ncase) = adv1 + ctxt%dadv * float(ip - 1)
+            ctxt%caspar(2, ctxt%ncase) = ctxt%vel
+            ctxt%caspar(3, ctxt%ncase) = ctxt%beta(ctxt%ii)
+            ctxt%caspar(4, ctxt%ncase) = ctxt%alt
+            ctxt%caspar(5, ctxt%ncase) = ctxt%rho
+            ctxt%caspar(6, ctxt%ncase) = ctxt%rmu
+            ctxt%caspar(7, ctxt%ncase) = ctxt%vso
+            ctxt%caspar(8, ctxt%ncase) = 999.
+            ctxt%caspar(9, ctxt%ncase) = 999.
+            ctxt%caspar(10, ctxt%ncase) = 999.
+            ctxt%caspar(11, ctxt%ncase) = 999.
+        enddo
         !
         !---------------------------------------------------------------------
-        !--- Sequence of RPM
-    ELSEIF(ITYPE == 2) THEN
-        KCASE = 2
+        !--- Sequence of rpm
+    elseif(itype == 2) then
+        ctxt%kcase = 2
         !
-        IF    (NINPUT >= 3) THEN
-            RPM1 = RINPUT(1)
-            RPM2 = RINPUT(2)
-            DRPM = RINPUT(3)
-        ELSEIF(NINPUT >= 2) THEN
-            RPM1 = RINPUT(1)
-            RPM2 = RINPUT(2)
-            DRPM = 999.
-            CALL ASKR('Enter rpm increment  ^', DRPM)
-        ELSEIF(NINPUT >= 1) THEN
-            RPM1 = RINPUT(1)
-            RPM2 = 999.
-            CALL ASKR('Enter last  rpm value^', RPM2)
-            DRPM = 999.
-            CALL ASKR('Enter rpm increment  ^', DRPM)
-        ELSE
-            RPM1 = 999.
-            CALL ASKR('Enter first rpm value^', RPM1)
-            RPM2 = 999.
-            CALL ASKR('Enter last  rpm value^', RPM2)
-            DRPM = 999.
-            CALL ASKR('Enter rpm increment  ^', DRPM)
-        ENDIF
-        IF(RPM1 == RPM2) RETURN
-        DRPM = SIGN(DRPM, RPM2 - RPM1)
-        NP = 1
-        IF(DRPM /= 0.0) NP = INT((RPM2 - RPM1) / DRPM + 0.5) + 1
-        IF(NP <= 0) RETURN
+        if    (ninput >= 3) then
+            rpm1 = rinput(1)
+            rpm2 = rinput(2)
+            drpm = rinput(3)
+        elseif(ninput >= 2) then
+            rpm1 = rinput(1)
+            rpm2 = rinput(2)
+            drpm = 999.
+            call askr('Enter rpm increment  ^', drpm)
+        elseif(ninput >= 1) then
+            rpm1 = rinput(1)
+            rpm2 = 999.
+            call askr('Enter last  rpm value^', rpm2)
+            drpm = 999.
+            call askr('Enter rpm increment  ^', drpm)
+        else
+            rpm1 = 999.
+            call askr('Enter first rpm value^', rpm1)
+            rpm2 = 999.
+            call askr('Enter last  rpm value^', rpm2)
+            drpm = 999.
+            call askr('Enter rpm increment  ^', drpm)
+        endif
+        if(rpm1 == rpm2) return
+        drpm = sign(drpm, rpm2 - rpm1)
+        np = 1
+        if(drpm /= 0.0) np = int((rpm2 - rpm1) / drpm + 0.5) + 1
+        if(np <= 0) return
         !
         !--- Check for use of rpm/power relationship to set power
-        YES = .FALSE.
-        XANS = 0.
-        IF(LPWRVAR) CALL ASKL('Use engine rpm/power line ?^', YES)
-        IF(YES) XANS = 100.0
+        yes = .false.
+        xans = 0.
+        if(ctxt%lpwrvar) call askl('use engine rpm/power line ?^', yes)
+        if(yes) xans = 100.0
         !
-        ANS = ' '
-        CALL ASKS('Fix power P or thrust T or blade pitch A ?^', ANS)
-        CALL LC2UC(ANS)
-        IF(ANS == 'T') XANS = XANS + 1000.0
-        IF(ANS == 'Q') XANS = XANS + 2000.0
-        IF(ANS == 'P') XANS = XANS + 3000.0
+        ans = ' '
+        call asks('fix power p or thrust ctxt%t or blade pitch a ?^', ans)
+        call lc2uc(ans)
+        if(ans == 't') xans = xans + 1000.0
+        if(ans == 'q') xans = xans + 2000.0
+        if(ans == 'p') xans = xans + 3000.0
         !
-        IF(NCASE + NP > ICASX) THEN
-            WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
-            NP = ICASX - NCASE
-        ENDIF
+        if(ctxt%ncase + np > icasx) then
+            write(*, *) 'Limiting number of cases to array limit:', icasx
+            np = icasx - ctxt%ncase
+        endif
         !
-        DO IP = 1, NP
-            NCASE = NCASE + 1
-            RPM = RPM1 + DRPM * FLOAT(IP - 1)
-            CASPAR(0, NCASE) = XANS + FLOAT(KCASE)
-            CASPAR(1, NCASE) = VEL / (RPM * RAD) * 30.0 / PI
-            CASPAR(2, NCASE) = VEL
-            CASPAR(3, NCASE) = BETA(II)
-            CASPAR(4, NCASE) = ALT
-            CASPAR(5, NCASE) = RHO
-            CASPAR(6, NCASE) = RMU
-            CASPAR(7, NCASE) = VSO
-            CASPAR(8, NCASE) = 999.
-            CASPAR(9, NCASE) = 999.
-            CASPAR(10, NCASE) = 999.
-            CASPAR(11, NCASE) = 999.
-        ENDDO
+        do ip = 1, np
+            ctxt%ncase = ctxt%ncase + 1
+            rpm = rpm1 + drpm * float(ip - 1)
+            ctxt%caspar(0, ctxt%ncase) = xans + float(ctxt%kcase)
+            ctxt%caspar(1, ctxt%ncase) = ctxt%vel / (rpm * ctxt%rad) * 30.0 / pi
+            ctxt%caspar(2, ctxt%ncase) = ctxt%vel
+            ctxt%caspar(3, ctxt%ncase) = ctxt%beta(ctxt%ii)
+            ctxt%caspar(4, ctxt%ncase) = ctxt%alt
+            ctxt%caspar(5, ctxt%ncase) = ctxt%rho
+            ctxt%caspar(6, ctxt%ncase) = ctxt%rmu
+            ctxt%caspar(7, ctxt%ncase) = ctxt%vso
+            ctxt%caspar(8, ctxt%ncase) = 999.
+            ctxt%caspar(9, ctxt%ncase) = 999.
+            ctxt%caspar(10, ctxt%ncase) = 999.
+            ctxt%caspar(11, ctxt%ncase) = 999.
+        enddo
         !
         !---------------------------------------------------------------------
         !--- Sequence of blade angle
-    ELSEIF(ITYPE == 3) THEN
-        KCASE = 3
+    elseif(itype == 3) then
+        ctxt%kcase = 3
         !
-        IF    (NINPUT >= 3) THEN
-            BET1 = RINPUT(1)
-            BET2 = RINPUT(2)
-            DBET = RINPUT(3)
-        ELSEIF(NINPUT >= 2) THEN
-            BET1 = RINPUT(1)
-            BET2 = RINPUT(2)
-            DBET = 999.
-            CALL ASKR('Enter tip angle increment   (deg) ^', DBET)
-        ELSEIF(NINPUT >= 1) THEN
-            BET1 = RINPUT(1)
-            BET2 = 999.
-            CALL ASKR('Enter last  tip angle value (deg) ^', BET2)
-            DBET = 999.
-            CALL ASKR('Enter tip angle increment   (deg) ^', DBET)
-        ELSE
-            BET1 = 999.
-            CALL ASKR('Enter first tip angle value (deg) ^', BET1)
-            BET2 = 999.
-            CALL ASKR('Enter last  tip angle value (deg) ^', BET2)
-            DBET = 999.
-            CALL ASKR('Enter tip angle increment   (deg) ^', DBET)
-        ENDIF
-        IF(BET1 == BET2) RETURN
-        DBET = SIGN(DBET, BET2 - BET1)
-        NP = 1
-        IF(DBET /= 0.0) NP = INT((BET2 - BET1) / DBET + 0.5) + 1
-        IF(NP <= 0) RETURN
+        if    (ninput >= 3) then
+            bet1 = rinput(1)
+            bet2 = rinput(2)
+            ctxt%dbet = rinput(3)
+        elseif(ninput >= 2) then
+            bet1 = rinput(1)
+            bet2 = rinput(2)
+            ctxt%dbet = 999.
+            call askr('enter tip angle increment   (deg) ^', ctxt%dbet)
+        elseif(ninput >= 1) then
+            bet1 = rinput(1)
+            bet2 = 999.
+            call askr('Enter last  tip angle value (deg) ^', bet2)
+            ctxt%dbet = 999.
+            call askr('enter tip angle increment   (deg) ^', ctxt%dbet)
+        else
+            bet1 = 999.
+            call askr('Enter first tip angle value (deg) ^', bet1)
+            bet2 = 999.
+            call askr('Enter last  tip angle value (deg) ^', bet2)
+            ctxt%dbet = 999.
+            call askr('enter tip angle increment   (deg) ^', ctxt%dbet)
+        endif
+        if(bet1 == bet2) return
+        ctxt%dbet = sign(ctxt%dbet, bet2 - bet1)
+        np = 1
+        if(ctxt%dbet /= 0.0) np = int((bet2 - bet1) / ctxt%dbet + 0.5) + 1
+        if(np <= 0) return
         !
         !--- Check for use of rpm/power relationship to set power
-        YES = .FALSE.
-        XANS = 0.
-        IF(LPWRVAR) CALL ASKL('Use engine rpm/power line ?^', YES)
-        IF(YES) XANS = 100.0
+        yes = .false.
+        xans = 0.
+        if(ctxt%lpwrvar) call askl('use engine rpm/power line ?^', yes)
+        if(yes) xans = 100.0
         !
-        IF(NCASE + NP > ICASX) THEN
-            WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
-            NP = ICASX - NCASE
-        ENDIF
+        if(ctxt%ncase + np > icasx) then
+            write(*, *) 'Limiting number of cases to array limit:', icasx
+            np = icasx - ctxt%ncase
+        endif
         !
-        DO IP = 1, NP
-            NCASE = NCASE + 1
-            BET = BET1 + DBET * FLOAT(IP - 1)
-            CASPAR(0, NCASE) = XANS + FLOAT(KCASE)
-            CASPAR(1, NCASE) = ADV
-            CASPAR(2, NCASE) = VEL
-            CASPAR(3, NCASE) = BET * PI / 180.0
-            CASPAR(4, NCASE) = ALT
-            CASPAR(5, NCASE) = RHO
-            CASPAR(6, NCASE) = RMU
-            CASPAR(7, NCASE) = VSO
-            CASPAR(8, NCASE) = 999.
-            CASPAR(9, NCASE) = 999.
-            CASPAR(10, NCASE) = 999.
-            CASPAR(11, NCASE) = 999.
-        ENDDO
+        do ip = 1, np
+            ctxt%ncase = ctxt%ncase + 1
+            bet = bet1 + ctxt%dbet * float(ip - 1)
+            ctxt%caspar(0, ctxt%ncase) = xans + float(ctxt%kcase)
+            ctxt%caspar(1, ctxt%ncase) = ctxt%adv
+            ctxt%caspar(2, ctxt%ncase) = ctxt%vel
+            ctxt%caspar(3, ctxt%ncase) = bet * pi / 180.0
+            ctxt%caspar(4, ctxt%ncase) = ctxt%alt
+            ctxt%caspar(5, ctxt%ncase) = ctxt%rho
+            ctxt%caspar(6, ctxt%ncase) = ctxt%rmu
+            ctxt%caspar(7, ctxt%ncase) = ctxt%vso
+            ctxt%caspar(8, ctxt%ncase) = 999.
+            ctxt%caspar(9, ctxt%ncase) = 999.
+            ctxt%caspar(10, ctxt%ncase) = 999.
+            ctxt%caspar(11, ctxt%ncase) = 999.
+        enddo
         !
         !---------------------------------------------------------------------
         !--- Sequence of velocities
-    ELSEIF(ITYPE == 4) THEN
-        KCASE = 4
+    elseif(itype == 4) then
+        ctxt%kcase = 4
         !
-        IF    (NINPUT >= 3) THEN
-            VEL1 = RINPUT(1)
-            VEL2 = RINPUT(2)
-            DVEL = RINPUT(3)
-        ELSEIF(NINPUT >= 2) THEN
-            VEL1 = RINPUT(1)
-            VEL2 = RINPUT(2)
-            DVEL = 999.
-            CALL ASKR('Enter speed increment   (m/s) ^', DVEL)
-        ELSEIF(NINPUT >= 1) THEN
-            VEL1 = RINPUT(1)
-            VEL2 = 999.
-            CALL ASKR('Enter last  speed value (m/s) ^', VEL2)
-            DVEL = 999.
-            CALL ASKR('Enter speed increment   (m/s) ^', DVEL)
-        ELSE
-            VEL1 = 999.
-            CALL ASKR('Enter first speed value (m/s) ^', VEL1)
-            VEL2 = 999.
-            CALL ASKR('Enter last  speed value (m/s) ^', VEL2)
-            DVEL = 999.
-            CALL ASKR('Enter speed increment   (m/s) ^', DVEL)
-        ENDIF
-        IF(VEL1 == VEL2) RETURN
-        DVEL = SIGN(DVEL, VEL2 - VEL1)
-        NP = 1
-        IF(DVEL /= 0.0) NP = INT((VEL2 - VEL1) / DVEL + 0.5) + 1
-        IF(NP <= 0) RETURN
+        if    (ninput >= 3) then
+            vel1 = rinput(1)
+            vel2 = rinput(2)
+            dvel = rinput(3)
+        elseif(ninput >= 2) then
+            vel1 = rinput(1)
+            vel2 = rinput(2)
+            dvel = 999.
+            call askr('Enter speed increment   (m/s) ^', dvel)
+        elseif(ninput >= 1) then
+            vel1 = rinput(1)
+            vel2 = 999.
+            call askr('Enter last  speed value (m/s) ^', vel2)
+            dvel = 999.
+            call askr('Enter speed increment   (m/s) ^', dvel)
+        else
+            vel1 = 999.
+            call askr('Enter first speed value (m/s) ^', vel1)
+            vel2 = 999.
+            call askr('Enter last  speed value (m/s) ^', vel2)
+            dvel = 999.
+            call askr('Enter speed increment   (m/s) ^', dvel)
+        endif
+        if(vel1 == vel2) return
+        dvel = sign(dvel, vel2 - vel1)
+        np = 1
+        if(dvel /= 0.0) np = int((vel2 - vel1) / dvel + 0.5) + 1
+        if(np <= 0) return
         !
         !--- Check for use of rpm/power relationship to set power
-        YES = .FALSE.
-        XANS = 0.
-        IF(LPWRVAR) CALL ASKL('Use engine rpm/power line ?^', YES)
-        IF(YES) XANS = 100.0
+        yes = .false.
+        xans = 0.
+        if(ctxt%lpwrvar) call askl('use engine rpm/power line ?^', yes)
+        if(yes) xans = 100.0
         !
         !--- What do we hold constant, pitch or rpm?
-        20     ANS4 = 'CS'
-        CALL ASKS('FP fixed-pitch or CS constant-speed^', ANS4)
-        CALL LC2UC(ANS4)
-        IF(ANS4 /= 'CS' .AND. ANS4 /= 'FP') GO TO 20
-        IF(ANS4 == 'CS') THEN
-            RPM = VEL / (RAD * ADV * PI / 30.)
-            CALL ASKR('Enter constant rpm value^', RPM)
-            ADV = VEL / (RAD * RPM * PI / 30.)
-            KCASE = 5
-            IF(XANS /= 100.0) THEN
-                IF(PSPEC <= 0.0 .AND. PTOT > 0.0)&
-                        PSPEC = PTOT * (RHO * VEL**3 * RAD**2)
-                CALL ASKR('Enter constant power value^', PSPEC)
-            ENDIF
-        ENDIF
+        20     ans4 = 'cs'
+        call asks('fp fixed-pitch or cs constant-speed^', ans4)
+        call lc2uc(ans4)
+        if(ans4 /= 'cs' .and. ans4 /= 'fp') go to 20
+        if(ans4 == 'cs') then
+            rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
+            call askr('Enter constant rpm value^', rpm)
+            ctxt%adv = ctxt%vel / (ctxt%rad * rpm * pi / 30.)
+            ctxt%kcase = 5
+            if(xans /= 100.0) then
+                if(ctxt%pspec <= 0.0 .and. ctxt%ptot > 0.0)&
+                        ctxt%pspec = ctxt%ptot * (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+                call askr('enter constant power value^', ctxt%pspec)
+            endif
+        endif
         !
-        IF(NCASE + NP > ICASX) THEN
-            WRITE(*, *) 'Limiting number of cases to array limit:', ICASX
-            NP = ICASX - NCASE
-        ENDIF
+        if(ctxt%ncase + np > icasx) then
+            write(*, *) 'Limiting number of cases to array limit:', icasx
+            np = icasx - ctxt%ncase
+        endif
         !
-        DO IP = 1, NP
-            NCASE = NCASE + 1
-            VVEL = VEL1 + DVEL * FLOAT(IP - 1)
-            CASPAR(0, NCASE) = XANS + FLOAT(KCASE)
-            CASPAR(1, NCASE) = VVEL * ADV / VEL
-            CASPAR(2, NCASE) = VVEL
-            CASPAR(3, NCASE) = BETA(II)
-            CASPAR(4, NCASE) = ALT
-            CASPAR(5, NCASE) = RHO
-            CASPAR(6, NCASE) = RMU
-            CASPAR(7, NCASE) = VSO
-            CASPAR(8, NCASE) = 999.
-            CASPAR(9, NCASE) = 999.
-            CASPAR(10, NCASE) = 999.
-            CASPAR(11, NCASE) = 999.
-        ENDDO
+        do ip = 1, np
+            ctxt%ncase = ctxt%ncase + 1
+            vvel = vel1 + dvel * float(ip - 1)
+            ctxt%caspar(0, ctxt%ncase) = xans + float(ctxt%kcase)
+            ctxt%caspar(1, ctxt%ncase) = vvel * ctxt%adv / ctxt%vel
+            ctxt%caspar(2, ctxt%ncase) = vvel
+            ctxt%caspar(3, ctxt%ncase) = ctxt%beta(ctxt%ii)
+            ctxt%caspar(4, ctxt%ncase) = ctxt%alt
+            ctxt%caspar(5, ctxt%ncase) = ctxt%rho
+            ctxt%caspar(6, ctxt%ncase) = ctxt%rmu
+            ctxt%caspar(7, ctxt%ncase) = ctxt%vso
+            ctxt%caspar(8, ctxt%ncase) = 999.
+            ctxt%caspar(9, ctxt%ncase) = 999.
+            ctxt%caspar(10, ctxt%ncase) = 999.
+            ctxt%caspar(11, ctxt%ncase) = 999.
+        enddo
         !
-    ENDIF
+    endif
     !
-    RETURN
-END
-! SETCAS
+    return
+end
+! setcas
 
 
 
-SUBROUTINE APER(ISPEC, ICON, LINIT)
-    USE common
-    IMPLICIT REAL (M)
-    LOGICAL LINIT
+subroutine aper(ctxt, ispec, icon, linit)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    logical linit
     !-------------------------------------------
     !     Sets reasonable initial circulation.
     !     Converges arbitrary operating point.
     !
-    !     ISPEC controls the quantity used as a target quantity
-    !       ISPEC = 1   Drive thrust to TSPEC
-    !       ISPEC = 2   Drive torque to QSPEC
-    !       ISPEC = 3   Drive power  to PSPEC
-    !       ISPEC = 4   Fix advance ratio to current value
-    !       ISPEC = 5   Drive to power specified by RPM (engine power-RPM line)
-    !     ICON controls the constrained quantity
-    !       ICON = 1    Advance ratio(rpm) fixed
-    !       ICON = 2   Blade pitch fixed
-    !     LINIT is flag for initialization of rotor condition
+    !     ispec controls the quantity used as a target quantity
+    !       ispec = 1   Drive thrust to tspec
+    !       ispec = 2   Drive torque to qspec
+    !       ispec = 3   Drive power  to pspec
+    !       ispec = 4   Fix advance ratio to current value
+    !       ispec = 5   Drive to power specified by rpm (engine power-rpm line)
+    !     icon controls the constrained quantity
+    !       icon = 1    Advance ratio(rpm) fixed
+    !       icon = 2   Blade pitch fixed
+    !     linit is flag for initialization of rotor condition
     !-------------------------------------------
     !
     !--- Initialize circulations if requested
-    IF(LINIT) THEN
-        !cc        WRITE(*,*) 'APINIT called...'
-        CALL APINIT
-    ENDIF
-    !cc      CALL PLOT_DATA(NAME)
+    if(linit) then
+        !cc        write(*,*) 'apinit called...'
+        call apinit(ctxt)
+    endif
+    !cc      call plot_data(name)
     !
-    !cc      WRITE(*,*) 'Before APITER ADV,ADW ',adv, adw
-    CALL APITER(ISPEC, ICON)
+    !cc      write(*,*) 'Before apiter adv,adw ',adv, adw
+    call apiter(ctxt, ispec, icon)
     !
-    IF(.NOT.CONV) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'Iteration limit exceeded'
-        WRITE(*, *) 'Gres Fres Ares =', GRESMX, FRESMX, ARESMX
-    ENDIF
+    if(.not.ctxt%conv) then
+        write(*, *)
+        write(*, *) 'Iteration limit exceeded'
+        write(*, *) 'gres fres ares =', ctxt%gresmx, ctxt%fresmx, ctxt%aresmx
+    endif
     !
-    RETURN
-END
-! APER
+    return
+end
+! aper
 
 
-SUBROUTINE APINIT
-    USE common
-    IMPLICIT REAL (M)
+subroutine apinit(ctxt)
+    use mod_common
+    implicit real (m)
     !---------------------------------------------------------
     !     Sets reasonable initial circulation.
     !     Initial circulations are set w/o induced effects
@@ -1280,1215 +1283,1221 @@ SUBROUTINE APINIT
     !     wake advance ratio
     !----------------------------------------------------------
     !
-    DATA NITERG / 10 /
+    data niterg / 10 /
+    type(Common), intent(inout) :: ctxt
     !
-    BLDS = FLOAT(NBLDS)
-    DBETA = 0.0
+    blds = float(ctxt%nblds)
+    ctxt%dbeta = 0.0
     !
-    UDUCT = 0.0
-    VADUCT_VA = 1.0
-    IF(DUCT) THEN
-        UDUCT = URDUCT - 1.0
-        VADUCT_VA = 2.0 * URDUCT
-    ENDIF
-    ADW = ADV * (1.0 + UDUCT)
+    uduct = 0.0
+    vaduct_va = 1.0
+    if(ctxt%duct) then
+        uduct = ctxt%urduct - 1.0
+        vaduct_va = 2.0 * ctxt%urduct
+    endif
+    ctxt%adw = ctxt%adv * (1.0 + uduct)
     !
     !======================================================================
     !---- Initialize section circulation neglecting induced velocity
-    TSUM = 0.
-    DO I = 1, II
-        UTOT = URDUCT + UBODY(I)
-        CALL UVADD(XI(I), WA, WT)
+    tsum = 0.
+    do i = 1, ctxt%ii
+        utot = ctxt%urduct + ctxt%ubody(i)
+        call uvadd(ctxt, ctxt%xi(i), wa, wt)
         !
-        SI = UTOT + WA
-        CI = XI(I) / ADV - WT
+        si = utot + wa
+        ci = ctxt%xi(i) / ctxt%adv - wt
         !
-        WSQ = CI * CI + SI * SI
-        W = SQRT(WSQ)
-        PHI = ATAN2(SI, CI)
+        wsq = ci * ci + si * si
+        w = sqrt(wsq)
+        phi = atan2(si, ci)
         !
-        ALFA = BETA(I) - PHI
-        REY = CH(I) * ABS(W) * RHO * VEL * RAD / RMU
-        CALL GETCLCDCM(I, ALFA, W, REY, &
-                CL(I), CL_AL, CL_W, &
-                CLMAX, CLMIN, DCLSTALL, STALL(I), &
-                CD(I), CD_ALF, CD_W, CD_REY, &
-                CM(I), CM_AL, CM_W)
+        alfa = ctxt%beta(i) - phi
+        rey = ctxt%ch(i) * abs(w) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
+        call getclcdcm(ctxt, i, alfa, w, rey, &
+                ctxt%cl(i), cl_al, cl_w, &
+                clmax, clmin, dclstall, ctxt%stall(i), &
+                ctxt%cd(i), cd_alf, cd_w, cd_rey, &
+                ctxt%cm(i), cm_al, cm_w)
         !
-        GAM(I) = 0.5 * CL(I) * W * CH(I)
-        TSUM = TSUM + BLDS * GAM(I) * CI * DXI(I)
+        ctxt%gam(i) = 0.5 * ctxt%cl(i) * w * ctxt%ch(i)
+        tsum = tsum + blds * ctxt%gam(i) * ci * ctxt%dxi(i)
         !c        write(8,997) 'i,alfa,cl,gam,tsum ',i,alfa,cl(i),gam(i),tsum
-    ENDDO
-    997  format(A, ' ', i4, 5(1x, f10.5))
+    enddo
+    997  format(a, ' ', i4, 5(1x, f10.5))
     !
     !---- use momentum theory estimate of axial velocity to set wake adv. ratio
-    VHSQ = 0.5 * TSUM / PI
-    VHSQ = MAX(VHSQ, -0.25)
-    ADW = ADV * 0.5 * (1.0 + SQRT(1.0 + 4.0 * VHSQ))
+    vhsq = 0.5 * tsum / pi
+    vhsq = max(vhsq, -0.25)
+    ctxt%adw = ctxt%adv * 0.5 * (1.0 + sqrt(1.0 + 4.0 * vhsq))
     !
-    !cc      WRITE(*,*) 'APINIT noVind TSUM,ADW ',TSUM,ADW
-    !cc      CALL PLOT_DATA(NAME)
+    !cc      write(*,*) 'apinit noVind tsum,adw ',tsum,adw
+    !cc      call plot_data(name)
     !
-    !---- recalculate Vtan using new GAM values
-    CALL VCALC
-    !C    GO TO 101
+    !---- recalculate Vtan using new gam values
+    call vcalc(ctxt)
+    !c    go to 101
     !
     !======================================================================
     !---- Refine the initial guess with a graded-momentum theory estimate
     !     Use momentum theory to estimate axial induced velocity to drive
     !     equation for wake advance ratio
     !
-    do ITERG = 1, NITERG
+    do iterg = 1, niterg
         !
-        CALL GRADMO(IX, II, NBLDS, DUCT, RAKE, &
-                XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
+        call gradmo(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
         !
-        TSUM = 0.
-        T_ADW = 0.
+        tsum = 0.
+        t_adw = 0.
         !
-        DCLMAX = 0.
-        RLXMIN = 1.0
+        dclmax = 0.
+        rlxmin = 1.0
         !
-        do I = 1, II
+        do i = 1, ctxt%ii
             !
-            !--- Redefine VT and VA to diagonal self-influences
-            VT = VIND_GAM(3, I, I) * GAM(I)
-            VT_GAM = VIND_GAM(3, I, I)
-            VT_ADW = VIND_ADW(3, I)
+            !--- Redefine vt and va to diagonal self-influences
+            vt = ctxt%vind_gam(3, i, i) * ctxt%gam(i)
+            vt_gam = ctxt%vind_gam(3, i, i)
+            vt_adw = ctxt%vind_adw(3, i)
             !
-            VA = VIND_GAM(1, I, I) * GAM(I)
-            VA_GAM = VIND_GAM(1, I, I)
-            VA_ADW = VIND_ADW(1, I)
+            va = ctxt%vind_gam(1, i, i) * ctxt%gam(i)
+            va_gam = ctxt%vind_gam(1, i, i)
+            va_adw = ctxt%vind_adw(1, i)
             !
             !------ include duct effect on freestream and induced axial velocity
-            UDUCT = 0.0
-            VADUCT_VA = 1.0
-            IF(DUCT) THEN
-                UDUCT = URDUCT - 1.0
-                VADUCT_VA = 2.0 * URDUCT
-            ENDIF
+            uduct = 0.0
+            vaduct_va = 1.0
+            if(ctxt%duct) then
+                uduct = ctxt%urduct - 1.0
+                vaduct_va = 2.0 * ctxt%urduct
+            endif
             !
-            UTOT = 1.0 + UDUCT + UBODY(I)
-            CALL UVADD(XI(I), WA, WT)
+            utot = 1.0 + uduct + ctxt%ubody(i)
+            call uvadd(ctxt, ctxt%xi(i), wa, wt)
             !
-            CI = XI(I) / ADV - WT - VT
-            CI_ADV = -XI(I) / ADV**2
-            CI_VT = -  1.0
+            ci = ctxt%xi(i) / ctxt%adv - wt - vt
+            ci_adv = -ctxt%xi(i) / ctxt%adv**2
+            ci_vt = -  1.0
             !
-            SI = UTOT + WA + VA * VADUCT_VA
-            SI_VA = VADUCT_VA
-            !cc        SI     = UTOT + WA  +  VA
-            !cc        SI_VA  =               1.0
+            si = utot + wa + va * vaduct_va
+            si_va = vaduct_va
+            !cc        si     = utot + wa  +  va
+            !cc        si_va  =               1.0
             !
-            WSQ = CI * CI + SI * SI
-            W = SQRT(WSQ)
-            W_ADV = (CI * CI_ADV) / W
-            W_VT = (CI * CI_VT) / W
-            W_VA = (SI * SI_VA) / W
+            wsq = ci * ci + si * si
+            w = sqrt(wsq)
+            w_adv = (ci * ci_adv) / w
+            w_vt = (ci * ci_vt) / w
+            w_va = (si * si_va) / w
             !
-            PHI = ATAN2(SI, CI)
-            P_ADV = (- SI * CI_ADV) / WSQ
-            P_VT = (- SI * CI_VT) / WSQ
-            P_VA = (CI * SI_VA) / WSQ
+            phi = atan2(si, ci)
+            p_adv = (- si * ci_adv) / wsq
+            p_vt = (- si * ci_vt) / wsq
+            p_va = (ci * si_va) / wsq
             !
-            ALFA = BETA(I) - PHI
-            AL_VT = - P_VT
-            AL_VA = - P_VA
+            alfa = ctxt%beta(i) - phi
+            al_vt = - p_vt
+            al_va = - p_va
             !
-            REY = CH(I) * ABS(W) * RHO * VEL * RAD / RMU
-            CALL GETCLCDCM(I, ALFA, W, REY, &
-                    CL(I), CL_AL, CL_W, &
-                    CLMAX, CLMIN, DCLSTALL, STALL(I), &
-                    CD(I), CD_ALF, CD_W, CD_REY, &
-                    CM(I), CM_AL, CM_W)
+            rey = ctxt%ch(i) * abs(w) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
+            call getclcdcm(ctxt, i, alfa, w, rey, &
+                    ctxt%cl(i), cl_al, cl_w, &
+                    clmax, clmin, dclstall, ctxt%stall(i), &
+                    ctxt%cd(i), cd_alf, cd_w, cd_rey, &
+                    ctxt%cm(i), cm_al, cm_w)
             !cc          write(*,*) 'iterg,i,cl ',iterg,i,cl(i)
             !
-            !-------- Res( CL( AL W ) , W , GAM )
-            REZ = CH(I) * CL(I) * W - 2.0 * GAM(I)
-            Z_CL = CH(I) * W
-            Z_W = CH(I) * CL(I)
-            Z_G = - 2.0
+            !-------- Res( cl( al w ) , w , gam )
+            rez = ctxt%ch(i) * ctxt%cl(i) * w - 2.0 * ctxt%gam(i)
+            z_cl = ctxt%ch(i) * w
+            z_w = ctxt%ch(i) * ctxt%cl(i)
+            z_g = - 2.0
             !
-            !-------- Res( AL( VT ADW ) , W( VT ADW ) , GAM )
-            Z_AL = Z_CL * CL_AL
-            Z_W = Z_CL * CL_W + Z_W
+            !-------- Res( al( vt adw ) , w( vt adw ) , gam )
+            z_al = z_cl * cl_al
+            z_w = z_cl * cl_w + z_w
             !
-            !-------- Res( VT(GAM ADW) , ADW , GAM )
-            Z_VT = Z_W * W_VT + Z_AL * AL_VT
-            Z_VA = Z_W * W_VA + Z_AL * AL_VA
+            !-------- Res( vt(gam adw) , adw , gam )
+            z_vt = z_w * w_vt + z_al * al_vt
+            z_va = z_w * w_va + z_al * al_va
             !
-            !-------- Res( ADW , GAM )
-            Z_ADW = Z_VT * VT_ADW + Z_VA * VA_ADW
-            Z_G = Z_VT * VT_GAM + Z_VA * VA_GAM + Z_G
+            !-------- Res( adw , gam )
+            z_adw = z_vt * vt_adw + z_va * va_adw
+            z_g = z_vt * vt_gam + z_va * va_gam + z_g
             !
-            DELG = -REZ / Z_G
-            DCL = 2.0 * DELG / (CH(I) * W)
+            delg = -rez / z_g
+            dcl = 2.0 * delg / (ctxt%ch(i) * w)
             !
-            !---- Apply limiter to GAM update based on CL change
-            RLX = 1.0
-            IF(RLX * ABS(DCL) > 0.2) THEN
-                IF(DCL /= 0.0) THEN
-                    RLX = MIN(RLX, 0.2 / ABS(DCL))
-                    !cc        write(*,998) 'APER CL limiter i,rlx,dcl,cl',i,rlx,dcl,cl(i)
-                ENDIF
+            !---- Apply limiter to gam update based on cl change
+            ctxt%rlx = 1.0
+            if(ctxt%rlx * abs(dcl) > 0.2) then
+                if(dcl /= 0.0) then
+                    ctxt%rlx = min(ctxt%rlx, 0.2 / abs(dcl))
+                    !cc        write(*,998) 'aper cl limiter i,rlx,dcl,cl',i,rlx,dcl,cl(i)
+                endif
 
-            ENDIF
-            998    format(a, 2x, i5, 3(2x, F12.5))
+            endif
+            998    format(a, 2x, i5, 3(2x, f12.5))
             !
-            IF(ABS(DCL) > ABS(DCLMAX)) DCLMAX = DCL
-            IF(ABS(RLX) < RLXMIN)      RLXMIN = RLX
+            if(abs(dcl) > abs(dclmax)) dclmax = dcl
+            if(abs(ctxt%rlx) < rlxmin)      rlxmin = ctxt%rlx
             !
-            GAM(I) = GAM(I) + RLX * DELG
-            !-------- dREZ = Z_G*dG + Z_ADW*dADW = 0
-            G_ADW = -Z_ADW / Z_G
+            ctxt%gam(i) = ctxt%gam(i) + ctxt%rlx * delg
+            !-------- drez = z_g*dg + z_adw*dadw = 0
+            g_adw = -z_adw / z_g
             !
-            !cc Forces for raked blade corrected for COS of rake angle
-            !          COSR = COS(RAKE)
-            COSR = 1.0
+            !cc Forces for raked blade corrected for cos of rake angle
+            !          cosr = cos(rake)
+            cosr = 1.0
             !
-            TSUM = TSUM + BLDS * GAM(I) * CI * DXI(I) * COSR
-            T_G = BLDS * CI * DXI(I) * COSR
-            T_VT = BLDS * GAM(I) * CI_VT * DXI(I) * COSR
-            T_ADW = T_ADW + (T_G + T_VT * VT_GAM) * G_ADW&
-                    + T_VT * VT_ADW
+            tsum = tsum + blds * ctxt%gam(i) * ci * ctxt%dxi(i) * cosr
+            t_g = blds * ci * ctxt%dxi(i) * cosr
+            t_vt = blds * ctxt%gam(i) * ci_vt * ctxt%dxi(i) * cosr
+            t_adw = t_adw + (t_g + t_vt * vt_gam) * g_adw&
+                    + t_vt * vt_adw
         end do
         !
         !---- Momentum theory estimate of induced axial velocity
-        VHSQ = 0.5 * TSUM / PI
-        VHSQ = MAX(VHSQ, -0.2499)
-        VHSQ_T = 0.5 / PI
+        vhsq = 0.5 * tsum / pi
+        vhsq = max(vhsq, -0.2499)
+        vhsq_t = 0.5 / pi
         !
-        REZ = ADW - ADV * 0.5 * (1.0 + SQRT(1.0 + 4.0 * VHSQ))
-        Z_ADW = 1.0 - ADV / SQRT(1.0 + 4.0 * VHSQ) * VHSQ_T * T_ADW
-        !c      Z_ADW = 1.0
-        IF(Z_ADW == 0.0) WRITE(*, *) 'APINIT Z_ADW ', Z_ADW
+        rez = ctxt%adw - ctxt%adv * 0.5 * (1.0 + sqrt(1.0 + 4.0 * vhsq))
+        z_adw = 1.0 - ctxt%adv / sqrt(1.0 + 4.0 * vhsq) * vhsq_t * t_adw
+        !c      z_adw = 1.0
+        if(z_adw == 0.0) write(*, *) 'apinit z_adw ', z_adw
         !
-        DADW = -REZ / Z_ADW
-        DADW = MIN(DADW, 10.0 * ADW)
-        DADW = MAX(DADW, -0.9 * ADW)
-        ADW = ADW + DADW
+        ctxt%dadw = -rez / z_adw
+        ctxt%dadw = min(ctxt%dadw, 10.0 * ctxt%adw)
+        ctxt%dadw = max(ctxt%dadw, -0.9 * ctxt%adw)
+        ctxt%adw = ctxt%adw + ctxt%dadw
         !
-        IF(RLXMIN < 0.2) THEN
-            !cc          WRITE(*,*) 'APINIT filtering GAM'
-            CALL FILTER(GAM, 0.2 * II, II)
-        ENDIF
-        !cc        WRITE(*,*) 'APINIT Vind iter,TSUM,ADW ',ITERG,TSUM,ADW
-        !cc        WRITE(*,*) 'APINIT ADW,DADW,DCLMAX ',ADW,DADW,DCLMAX
+        if(rlxmin < 0.2) then
+            !cc          write(*,*) 'apinit filtering gam'
+            call filter(ctxt%gam, 0.2 * ctxt%ii, ctxt%ii)
+        endif
+        !cc        write(*,*) 'apinit Vind iter,tsum,adw ',iterg,tsum,adw
+        !cc        write(*,*) 'apinit adw,dadw,dclmax ',adw,dadw,dclmax
         !
-        IF(ABS(DCLMAX) < 0.001) GO TO 101
+        if(abs(dclmax) < 0.001) go to 101
         !
     end do
-    !cc      WRITE(*,*) 'APINIT No convergence'
+    !cc      write(*,*) 'apinit No convergence'
     !
-    101  RETURN
-END
+    101  return
+end
 
 
-SUBROUTINE APITER(ISPEC, ICON)
+subroutine apiter(ctxt, ispec, icon)
     !-------------------------------------------------------
     !     Converges arbitrary performance operating point
     !
-    !     ISPEC controls the quantity used as a target quantity
+    !     ispec controls the quantity used as a target quantity
 
-    !       ISPEC = 1   Drive thrust to TSPEC
-    !       ISPEC = 2   Drive torque to QSPEC
-    !       ISPEC = 3   Drive power  to PSPEC
-    !       ISPEC = 4   Fix advance ratio to current value
-    !       ISPEC = 5   Drive to power specified by RPM (engine power-RPM line)
+    !       ispec = 1   Drive thrust to tspec
+    !       ispec = 2   Drive torque to qspec
+    !       ispec = 3   Drive power  to pspec
+    !       ispec = 4   Fix advance ratio to current value
+    !       ispec = 5   Drive to power specified by rpm (engine power-rpm line)
     !
-    !     ICON controls the constrained quantity
-    !       ICON = 1    Advance ratio(rpm) fixed
-    !       ICON = 2    Blade pitch fixed
+    !     icon controls the constrained quantity
+    !       icon = 1    Advance ratio(rpm) fixed
+    !       icon = 2    Blade pitch fixed
     !-------------------------------------------------------
-    USE common
+    use mod_common
     use mod_spline
 
-    IMPLICIT REAL (M)
-    DIMENSION CLMAX(IX), CLMIN(IX), DCLSTALL(IX)
+    implicit real (m)
+    dimension clmax(ix), clmin(ix), dclstall(ix)
     !
     !---- convergence tolerance
-    DATA EPS / 1.0E-07 /
+    data eps / 1.0e-07 /
+    type(Common), intent(inout) :: ctxt
     !
-    K1 = II + 1
-    K2 = II + 2
-    K3 = II + 3
-    WRITE(*, 2000)
+    k1 = ctxt%ii + 1
+    k2 = ctxt%ii + 2
+    k3 = ctxt%ii + 3
+    write(*, 2000)
     !
-    do ITER = 1, MAX(NITERA, 1)
+    do iter = 1, max(ctxt%nitera, 1)
         !
         !---- if wake advance ratio changed, recalculate Vtan influence coefficients
-        IF(FREE .OR. ITER == 1) THEN
-            IF(FAST) THEN
-                CALL GRADMO(IX, II, NBLDS, DUCT, RAKE, &
-                        XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-                IWTYP = 1
-            ELSEIF(.NOT.VRTX) THEN
-                CALL HELICO(IX, II, NBLDS, DUCT, RAKE, &
-                        XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-                IWTYP = 2
-            ELSEIF(VRTX) THEN
-                CALL VRTXCO(IX, II, NBLDS, DUCT, RAKE, &
-                        XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-                IWTYP = 3
-            ENDIF
-        ENDIF
+        if(ctxt%free .or. iter == 1) then
+            if(ctxt%fast) then
+                call gradmo(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                        ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
+                ctxt%iwtyp = 1
+            elseif(.not.ctxt%vrtx) then
+                call helico(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                        ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
+                ctxt%iwtyp = 2
+            elseif(ctxt%vrtx) then
+                call vrtxco(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                        ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
+                ctxt%iwtyp = 3
+            endif
+        endif
         !
         !---- recalculate Vtan
-        CALL VCALC
+        call vcalc(ctxt)
         !
         !---- recalculate wake radius array and Vwak
-        CALL SETXW
+        call setxw(ctxt)
         !
         !---- recalculate thrust, power, and sensitivities for current solution
-        CALL TPQ(1)
+        call tpq(ctxt, 1)
         !
         !---- initialize max residuals
-        GRESMX = 0.
-        FRESMX = 0.
-        ARESMX = 0.
+        ctxt%gresmx = 0.
+        ctxt%fresmx = 0.
+        ctxt%aresmx = 0.
         !
-        DO J = 1, K3
-            Q(K2, J) = 0.
-        ENDDO
+        do j = 1, k3
+            ctxt%q(k2, j) = 0.
+        enddo
         !
         !---- The wake advance ratio equation is only approximate, normally the
         !     tangential induced velocity is ignored (inconsistent with a rigid
         !     wake with constant wake advance ratio).  This calculates a factor
         !     to compensate for the Vt term at one (representative) radial station
         !
-        DO I = 1, II
-            IF(XI(I) > 0.75) GO TO 40
-        END DO
-        40   I75 = I
-        CALL CSCALC(I75, UTOT, WA, WT, &
-                VT75, VT_ADW, &
-                VA75, VA_ADW, &
-                VD75, VD_ADW, &
-                CI75, CI_ADV, CI_VT, &
-                SI75, SI_VA, &
-                W75, W_ADV, W_VT, W_VA, &
-                PHI75, P_ADV, P_VT, P_VA)
-        !---- Factor for OMEG*R-VT correction to wake advance ratio
-        ADVFACT = 1.0 / (1.0 - ADV * VT75 / XI(I75))
-        !cc      WRITE(*,*) 'ADV factor ',ADVFACT
-        !---- Set to 1.0 for now... HHY
-        ADVFACT = 1.0
+        do i = 1, ctxt%ii
+            if(ctxt%xi(i) > 0.75) go to 40
+        end do
+        40   i75 = i
+        call cscalc(ctxt, i75, utot, wa, wt, &
+                vt75, vt_adw, &
+                va75, va_adw, &
+                vd75, vd_adw, &
+                ci75, ci_adv, ci_vt, &
+                si75, si_va, &
+                w75, w_adv, w_vt, w_va, &
+                phi75, p_adv, p_vt, p_va)
+        !---- Factor for omeg*r-vt correction to wake advance ratio
+        advfact = 1.0 / (1.0 - ctxt%adv * vt75 / ctxt%xi(i75))
+        !cc      write(*,*) 'adv factor ',advfact
+        !---- Set to 1.0 for now... hhy
+        advfact = 1.0
         !
-        IF(FREE) THEN
+        if(ctxt%free) then
             !----- Set up equation to converge wake advance ratio based on
             !      average axial velocity consistent with basic momentum theory
             !
             !---- Use "equivalent" prop thrust and power
-            DQ(K2) = ADWFCTR * ADW * TWAK / PWAK - ADV * ADVFACT
-            Z_TW = ADWFCTR * ADW / PWAK
-            Z_PW = -ADWFCTR * ADW * TWAK / PWAK**2
-            DO J = 1, II
-                Q(K2, J) = Z_TW * TW_GAM(J) + Z_PW * PW_GAM(J)
-            END DO
-            Q(K2, K1) = Z_TW * TW_ADV + Z_PW * PW_ADV - ADVFACT
-            Q(K2, K2) = Z_TW * TW_ADW + Z_PW * PW_ADW + ADWFCTR * TWAK / PWAK
-            ARESMX = MAX(ARESMX, ABS(DQ(K2) / ADV))
-        ELSE
+            ctxt%dq(k2) = ctxt%adwfctr * ctxt%adw * ctxt%twak / ctxt%pwak - ctxt%adv * advfact
+            z_tw = ctxt%adwfctr * ctxt%adw / ctxt%pwak
+            z_pw = -ctxt%adwfctr * ctxt%adw * ctxt%twak / ctxt%pwak**2
+            do j = 1, ctxt%ii
+                ctxt%q(k2, j) = z_tw * ctxt%tw_gam(j) + z_pw * ctxt%pw_gam(j)
+            end do
+            ctxt%q(k2, k1) = z_tw * ctxt%tw_adv + z_pw * ctxt%pw_adv - advfact
+            ctxt%q(k2, k2) = z_tw * ctxt%tw_adw + z_pw * ctxt%pw_adw + ctxt%adwfctr * ctxt%twak / ctxt%pwak
+            ctxt%aresmx = max(ctxt%aresmx, abs(ctxt%dq(k2) / ctxt%adv))
+        else
             !----- specify zero change of wake advance ratios
-            DQ(K2) = 0.
-            Q(K2, K2) = 1.0
-        ENDIF
+            ctxt%dq(k2) = 0.
+            ctxt%q(k2, k2) = 1.0
+        endif
         !
-        !---- go over stations, enforcing Gamma-CL relation at real prop
-        do I = 1, II
+        !---- go over stations, enforcing Gamma-cl relation at real prop
+        do i = 1, ctxt%ii
             !
-            CALL CSCALC(I, UTOT, WA, WT, &
-                    VT, VT_ADW, &
-                    VA, VA_ADW, &
-                    VD, VD_ADW, &
-                    CI, CI_ADV, CI_VT, &
-                    SI, SI_VA, &
-                    W, W_ADV, W_VT, W_VA, &
-                    PHI, P_ADV, P_VT, P_VA)
+            call cscalc(ctxt, i, utot, wa, wt, &
+                    vt, vt_adw, &
+                    va, va_adw, &
+                    vd, vd_adw, &
+                    ci, ci_adv, ci_vt, &
+                    si, si_va, &
+                    w, w_adv, w_vt, w_va, &
+                    phi, p_adv, p_vt, p_va)
             !
-            ALFA = BETA(I) - PHI
-            AL_DBE = 1.0
-            AL_P = -1.0
+            alfa = ctxt%beta(i) - phi
+            al_dbe = 1.0
+            al_p = -1.0
             !
-            REY = CH(I) * ABS(W) * RHO * VEL * RAD / RMU
-            CALL GETCLCDCM(I, ALFA, W, REY, &
-                    CL(I), CL_AL, CL_W, &
-                    CLMAX(I), CLMIN(I), DCLSTALL(I), STALL(I), &
-                    CD(I), CD_ALF, CD_W, CD_REY, &
-                    CM(I), CM_AL, CM_W)
+            rey = ctxt%ch(i) * abs(w) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
+            call getclcdcm(ctxt, i, alfa, w, rey, &
+                    ctxt%cl(i), cl_al, cl_w, &
+                    clmax(i), clmin(i), dclstall(i), ctxt%stall(i), &
+                    ctxt%cd(i), cd_alf, cd_w, cd_rey, &
+                    ctxt%cm(i), cm_al, cm_w)
             !
-            !------ Enforce local Gamma-CL relation
-            DQ(I) = CH(I) * CL(I) * W - 2.0 * GAM(I)             ! Residual
-            Z_CL = CH(I) * W
-            Z_W = CH(I) * CL(I)
+            !------ Enforce local Gamma-cl relation
+            ctxt%dq(i) = ctxt%ch(i) * ctxt%cl(i) * w - 2.0 * ctxt%gam(i)             ! residual
+            z_cl = ctxt%ch(i) * w
+            z_w = ctxt%ch(i) * ctxt%cl(i)
             !
-            Z_GI = - 2.0
-            Z_VT = Z_CL * (CL_AL * AL_P * P_VT + CL_W * W_VT) + Z_W * W_VT
-            Z_VA = Z_CL * (CL_AL * AL_P * P_VA + CL_W * W_VA) + Z_W * W_VA
-            Z_ADV = Z_CL * (CL_AL * AL_P * P_ADV + CL_W * W_ADV) + Z_W * W_ADV
-            Z_DBE = Z_CL * (CL_AL * AL_DBE)
+            z_gi = - 2.0
+            z_vt = z_cl * (cl_al * al_p * p_vt + cl_w * w_vt) + z_w * w_vt
+            z_va = z_cl * (cl_al * al_p * p_va + cl_w * w_va) + z_w * w_va
+            z_adv = z_cl * (cl_al * al_p * p_adv + cl_w * w_adv) + z_w * w_adv
+            z_dbe = z_cl * (cl_al * al_dbe)
             !
-            DO J = 1, II
-                Q(I, J) = Z_VT * VIND_GAM(3, I, J)&
-                        + Z_VA * VIND_GAM(1, I, J)                ! dRes/dGamj
-            ENDDO
-            Q(I, I) = Q(I, I) + Z_GI                         ! dRes/dGami
-            Q(I, K1) = Z_ADV                                ! dRes/dAdv
-            Q(I, K2) = Z_VT * VT_ADW + Z_VA * VA_ADW    ! dRes/dAdw
-            Q(I, K3) = Z_DBE                                ! dRes/dBeta
+            do j = 1, ctxt%ii
+                ctxt%q(i, j) = z_vt * ctxt%vind_gam(3, i, j)&
+                        + z_va * ctxt%vind_gam(1, i, j)                ! dres/dgamj
+            enddo
+            ctxt%q(i, i) = ctxt%q(i, i) + z_gi                         ! dres/dgami
+            ctxt%q(i, k1) = z_adv                                ! dres/ctxt%dadv
+            ctxt%q(i, k2) = z_vt * vt_adw + z_va * va_adw    ! dres/ctxt%dadw
+            ctxt%q(i, k3) = z_dbe                                ! dres/ctxt%dbeta
             !
-            GRESMX = MAX(GRESMX, ABS(DQ(I) / (0.1 * W)))
+            ctxt%gresmx = max(ctxt%gresmx, abs(ctxt%dq(i) / (0.1 * w)))
             !
         end do
         !
         !---- equivalent prop will be used to define inviscid thrust
-        IF(ISPEC == 1) THEN
+        if(ispec == 1) then
             !----- drive thrust to specified value
-            T_SPEC = TSPEC / (RHO * VEL**2 * RAD**2)
-            DQ(K1) = TWAK + TVIS - T_SPEC
-            DO J = 1, II
-                Q(K1, J) = TW_GAM(J) + TV_GAM(J)
-            ENDDO
-            Q(K1, K1) = TW_ADV + TV_ADV
-            Q(K1, K2) = TW_ADW + TV_ADW
-            Q(K1, K3) = TV_DBE
+            t_spec = ctxt%tspec / (ctxt%rho * ctxt%vel**2 * ctxt%rad**2)
+            ctxt%dq(k1) = ctxt%twak + ctxt%tvis - t_spec
+            do j = 1, ctxt%ii
+                ctxt%q(k1, j) = ctxt%tw_gam(j) + ctxt%tv_gam(j)
+            enddo
+            ctxt%q(k1, k1) = ctxt%tw_adv + ctxt%tv_adv
+            ctxt%q(k1, k2) = ctxt%tw_adw + ctxt%tv_adw
+            ctxt%q(k1, k3) = ctxt%tv_dbe
             !
-            FRESMX = MAX(FRESMX, ABS(DQ(K1)))
+            ctxt%fresmx = max(ctxt%fresmx, abs(ctxt%dq(k1)))
             !
-        ELSE IF(ISPEC == 2) THEN
-            !----- drive torque (= PTOT*ADV) to specified value
-            Q_SPEC = QSPEC / (RHO * VEL**2 * RAD**3)
-            DQ(K1) = (PWAK + PVIS) * ADV - Q_SPEC
-            DO J = 1, II
-                Q(K1, J) = (PW_GAM(J) + PV_GAM(J)) * ADV
-            ENDDO
-            Q(K1, K1) = (PW_ADV + PV_ADV) * ADV + PWAK + PVIS
-            Q(K1, K2) = (PW_ADW + PV_ADW) * ADV
-            Q(K1, K3) = (PV_DBE) * ADV
+        else if(ispec == 2) then
+            !----- drive torque (= ptot*adv) to specified value
+            q_spec = ctxt%qspec / (ctxt%rho * ctxt%vel**2 * ctxt%rad**3)
+            ctxt%dq(k1) = (ctxt%pwak + ctxt%pvis) * ctxt%adv - q_spec
+            do j = 1, ctxt%ii
+                ctxt%q(k1, j) = (ctxt%pw_gam(j) + ctxt%pv_gam(j)) * ctxt%adv
+            enddo
+            ctxt%q(k1, k1) = (ctxt%pw_adv + ctxt%pv_adv) * ctxt%adv + ctxt%pwak + ctxt%pvis
+            ctxt%q(k1, k2) = (ctxt%pw_adw + ctxt%pv_adw) * ctxt%adv
+            ctxt%q(k1, k3) = (ctxt%pv_dbe) * ctxt%adv
             !
-            FRESMX = MAX(FRESMX, ABS(DQ(K1)))
+            ctxt%fresmx = max(ctxt%fresmx, abs(ctxt%dq(k1)))
             !
-        ELSE IF(ISPEC == 3) THEN
+        else if(ispec == 3) then
             !----- drive power to specified value
-            P_SPEC = PSPEC / (RHO * VEL**3 * RAD**2)
-            DQ(K1) = PWAK + PVIS - P_SPEC
-            DO J = 1, II
-                Q(K1, J) = PW_GAM(J) + PV_GAM(J)
-            ENDDO
-            Q(K1, K1) = PW_ADV + PV_ADV
-            Q(K1, K2) = PW_ADW + PV_ADW
-            Q(K1, K3) = PV_DBE
+            p_spec = ctxt%pspec / (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+            ctxt%dq(k1) = ctxt%pwak + ctxt%pvis - p_spec
+            do j = 1, ctxt%ii
+                ctxt%q(k1, j) = ctxt%pw_gam(j) + ctxt%pv_gam(j)
+            enddo
+            ctxt%q(k1, k1) = ctxt%pw_adv + ctxt%pv_adv
+            ctxt%q(k1, k2) = ctxt%pw_adw + ctxt%pv_adw
+            ctxt%q(k1, k3) = ctxt%pv_dbe
             !
-            FRESMX = MAX(FRESMX, ABS(DQ(K1)))
+            ctxt%fresmx = max(ctxt%fresmx, abs(ctxt%dq(k1)))
             !
-        ELSE IF(ISPEC == 4) THEN
+        else if(ispec == 4) then
             !----- fix advance ratio
-            DQ(K1) = 0.
-            DO J = 1, II
-                Q(K1, J) = 0.
-            ENDDO
-            Q(K1, K1) = 1.0
-            Q(K1, K2) = 0.
-            Q(K1, K3) = 0.
+            ctxt%dq(k1) = 0.
+            do j = 1, ctxt%ii
+                ctxt%q(k1, j) = 0.
+            enddo
+            ctxt%q(k1, k1) = 1.0
+            ctxt%q(k1, k2) = 0.
+            ctxt%q(k1, k3) = 0.
             !
-        ELSE IF(ISPEC == 5) THEN
-            !----- drive power to value given by RPM
-            P_SPEC = PSPEC / (RHO * VEL**3 * RAD**2)
-            P_SPEC_ADV = 0.0
-            IF(LPWRVAR) THEN
-                RPM = VEL / (RAD * ADV * PI / 30.)
-                RPM_ADV = -RPM / ADV
+        else if(ispec == 5) then
+            !----- drive power to value given by rpm
+            p_spec = ctxt%pspec / (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+            p_spec_adv = 0.0
+            if(ctxt%lpwrvar) then
+                rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
+                rpm_adv = -rpm / ctxt%adv
                 !
                 !----- fix 5/15/03 use linear interpolation for engine power/rpm line
-                !cc         CALL SEVLIN(RPM,PWRVAR,RPMVAR,NPWRVAR,PSPEC,PSPEC_RPM)
-                PSPEC = SEVAL(RPM, PWRVAR(1:NPWRVAR), XPWRVAR(1:NPWRVAR), RPMVAR(1:NPWRVAR))
-                PSPEC_RPM = DEVAL(RPM, PWRVAR(1:NPWRVAR), XPWRVAR(1:NPWRVAR), RPMVAR(1:NPWRVAR))
+                !cc         call sevlin(rpm,pwrvar,rpmvar,npwrvar,pspec,pspec_rpm)
+                ctxt%pspec = seval(rpm, ctxt%pwrvar(1:ctxt%npwrvar), ctxt%xpwrvar(1:ctxt%npwrvar), ctxt%rpmvar(1:ctxt%npwrvar))
+                pspec_rpm = deval(rpm, ctxt%pwrvar(1:ctxt%npwrvar), ctxt%xpwrvar(1:ctxt%npwrvar), ctxt%rpmvar(1:ctxt%npwrvar))
                 !
-                PSPEC_ADV = PSPEC_RPM * RPM_ADV
+                pspec_adv = pspec_rpm * rpm_adv
                 !
-                P_SPEC = PSPEC / (RHO * VEL**3 * RAD**2)
-                P_SPEC_ADV = PSPEC_ADV / (RHO * VEL**3 * RAD**2)
-            ENDIF
+                p_spec = ctxt%pspec / (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+                p_spec_adv = pspec_adv / (ctxt%rho * ctxt%vel**3 * ctxt%rad**2)
+            endif
             !
-            DQ(K1) = PWAK + PVIS - P_SPEC
-            DO J = 1, II
-                Q(K1, J) = PW_GAM(J) + PV_GAM(J)
-            ENDDO
-            Q(K1, K1) = PW_ADV + PV_ADV - P_SPEC_ADV
-            Q(K1, K2) = PW_ADW + PV_ADW
-            Q(K1, K3) = PV_DBE
+            ctxt%dq(k1) = ctxt%pwak + ctxt%pvis - p_spec
+            do j = 1, ctxt%ii
+                ctxt%q(k1, j) = ctxt%pw_gam(j) + ctxt%pv_gam(j)
+            enddo
+            ctxt%q(k1, k1) = ctxt%pw_adv + ctxt%pv_adv - p_spec_adv
+            ctxt%q(k1, k2) = ctxt%pw_adw + ctxt%pv_adw
+            ctxt%q(k1, k3) = ctxt%pv_dbe
             !
-            FRESMX = MAX(FRESMX, ABS(DQ(K1)))
+            ctxt%fresmx = max(ctxt%fresmx, abs(ctxt%dq(k1)))
             !
-        ENDIF
+        endif
         !
         !---- Constraint conditions
-        DQ(K3) = 0.
-        DO J = 1, K3
-            Q(K3, J) = 0.
-        ENDDO
-        IF(ICON == 1) Q(K3, K1) = 1.0      ! advance ratio(rpm) fixed
-        IF(ICON == 2) Q(K3, K3) = 1.0      ! blade pitch fixed
+        ctxt%dq(k3) = 0.
+        do j = 1, k3
+            ctxt%q(k3, j) = 0.
+        enddo
+        if(icon == 1) ctxt%q(k3, k1) = 1.0      ! advance ratio(rpm) fixed
+        if(icon == 2) ctxt%q(k3, k3) = 1.0      ! blade pitch fixed
         !
         !---- solve linearized Newton system
-        CALL GAUSS(IQ, K3, Q(1, 1), DQ(1), 1)
+        call gauss(iq, k3, ctxt%q(1, 1), ctxt%dq(1), 1)
         !
         !
-        RLX = 1.0
+        ctxt%rlx = 1.0
         !---  Set initial iterations to underrelax
-        IF(ITER <= 2) RLX = 0.2
+        if(iter <= 2) ctxt%rlx = 0.2
         !---- Apply limiters to the Newton updates based on physical properties
-        DO I = 1, II
-            DGAM(I) = -DQ(I)
+        do i = 1, ctxt%ii
+            ctxt%dgam(i) = -ctxt%dq(i)
             !
-            !---- limit CL changes near +- stall
-            DCL = 2.0 * DGAM(I) / (CH(I) * W)
-            DCLMIN = MAX(1.5 * DCLSTALL(I), ABS(CL(I) - CLMIN(I)))
-            DCLMAX = MAX(1.5 * DCLSTALL(I), ABS(CLMAX(I) - CL(I)))
+            !---- limit cl changes near +- stall
+            dcl = 2.0 * ctxt%dgam(i) / (ctxt%ch(i) * w)
+            dclmin = max(1.5 * dclstall(i), abs(ctxt%cl(i) - clmin(i)))
+            dclmax = max(1.5 * dclstall(i), abs(clmax(i) - ctxt%cl(i)))
             !
-            DCLLIM = MIN(0.5, DCLMIN, DCLMAX)
-            DCLLIM = MAX(DCLLIM, 0.01)
-            IF(RLX * ABS(DCL) > DCLLIM) THEN
-                RLX = MIN(RLX, DCLLIM / ABS(DCL))
-                !cc      write(1,998) 'DCL lim i,rlx,cl,dcl ',i,rlx,cl(i),dcl,dcllim
+            dcllim = min(0.5, dclmin, dclmax)
+            dcllim = max(dcllim, 0.01)
+            if(ctxt%rlx * abs(dcl) > dcllim) then
+                ctxt%rlx = min(ctxt%rlx, dcllim / abs(dcl))
+                !cc      write(1,998) 'dcl lim i,rlx,cl,dcl ',i,rlx,cl(i),dcl,dcllim
                 !cc      write(1,998) 'clmax,clmin,dclstall ',i,clmax(i),clmin(i),
                 !cc     &              dclstall(i)
-            ENDIF
-            998    format(a, 2x, i5, 4(2x, F12.5))
+            endif
+            998    format(a, 2x, i5, 4(2x, f12.5))
             !
-            !---- limit GAM changes that change sign
-            IF(DGAM(I) * DGAMOLD(I) < 0.0) THEN
-                IF(ABS(DGAM(I)) > 0.2 * ABS(DGAMOLD(I))) THEN
-                    RLX = MIN(RLX, 0.2)
-                    !c        write(*,998) 'DGAM lim i,rlx,gam,dgam ',i,rlx,gam(i),
+            !---- limit gam changes that change sign
+            if(ctxt%dgam(i) * ctxt%dgamold(i) < 0.0) then
+                if(abs(ctxt%dgam(i)) > 0.2 * abs(ctxt%dgamold(i))) then
+                    ctxt%rlx = min(ctxt%rlx, 0.2)
+                    !c        write(*,998) 'dgam lim i,rlx,gam,dgam ',i,rlx,gam(i),
                     !c     &               dgam(i),dgamold(i)
-                ENDIF
-            ENDIF
+                endif
+            endif
             !
-        ENDDO
+        enddo
         !
-        DADV = -DQ(K1)
-        DADW = -DQ(K2)
-        DBET = -DQ(K3)
+        ctxt%dadv = -ctxt%dq(k1)
+        ctxt%dadw = -ctxt%dq(k2)
+        ctxt%dbet = -ctxt%dq(k3)
         !
-        IF(NITERA == 0) RLX = 0.0
+        if(ctxt%nitera == 0) ctxt%rlx = 0.0
         !
         !---- limit blade angle change to 0.05 radians  (~3 degrees)
-        IF(RLX * DBET > 0.05) RLX = MIN(RLX, 0.05 / DBET)
-        IF(RLX * DBET < -.05) RLX = MIN(RLX, -0.05 / DBET)
+        if(ctxt%rlx * ctxt%dbet > 0.05) ctxt%rlx = min(ctxt%rlx, 0.05 / ctxt%dbet)
+        if(ctxt%rlx * ctxt%dbet < -.05) ctxt%rlx = min(ctxt%rlx, -0.05 / ctxt%dbet)
         !
         !---- limit advance ratio changes
-        !      IF(RLX*DADV > 0.8*ADV) RLX = MIN(RLX,0.8*ADV/DADV)
-        !      IF(RLX*DADV < -.5*ADV) RLX = MIN(RLX,-.5*ADV/DADV)
+        !      if(rlx*dadv > 0.8*adv) rlx = min(rlx,0.8*adv/dadv)
+        !      if(rlx*dadv < -.5*adv) rlx = min(rlx,-.5*adv/dadv)
         !
-        !      IF(RLX*DADW > 0.8*ADW) RLX = MIN(RLX, 0.8*ADW/DADW)
-        !      IF(RLX*DADW < -.5*ADW) RLX = MIN(RLX,-0.5*ADW/DADW)
+        !      if(rlx*dadw > 0.8*adw) rlx = min(rlx, 0.8*adw/dadw)
+        !      if(rlx*dadw < -.5*adw) rlx = min(rlx,-0.5*adw/dadw)
         !
-        IF(RLX * DADV > 0.5 * ADV) RLX = MIN(RLX, 0.5 * ADV / DADV)
-        IF(RLX * DADV < -.3 * ADV) RLX = MIN(RLX, -.3 * ADV / DADV)
-        IF(RLX * DADW > 0.5 * ADW) RLX = MIN(RLX, 0.5 * ADW / DADW)
-        IF(RLX * DADW < -.3 * ADW) RLX = MIN(RLX, -0.3 * ADW / DADW)
+        if(ctxt%rlx * ctxt%dadv > 0.5 * ctxt%adv) ctxt%rlx = min(ctxt%rlx, 0.5 * ctxt%adv / ctxt%dadv)
+        if(ctxt%rlx * ctxt%dadv < -.3 * ctxt%adv) ctxt%rlx = min(ctxt%rlx, -.3 * ctxt%adv / ctxt%dadv)
+        if(ctxt%rlx * ctxt%dadw > 0.5 * ctxt%adw) ctxt%rlx = min(ctxt%rlx, 0.5 * ctxt%adw / ctxt%dadw)
+        if(ctxt%rlx * ctxt%dadw < -.3 * ctxt%adw) ctxt%rlx = min(ctxt%rlx, -0.3 * ctxt%adw / ctxt%dadw)
         !---- update circulation, blade angle arrays
-        RMS = 0.
-        GMX = 0.
-        IMX = 0
-        DO I = 1, II
-            GAM(I) = GAM(I) + RLX * DGAM(I)
-            BETA(I) = BETA(I) + RLX * DBET
-            BETA0(I) = BETA0(I) + RLX * DBET
+        ctxt%rms = 0.
+        gmx = 0.
+        imx = 0
+        do i = 1, ctxt%ii
+            ctxt%gam(i) = ctxt%gam(i) + ctxt%rlx * ctxt%dgam(i)
+            ctxt%beta(i) = ctxt%beta(i) + ctxt%rlx * ctxt%dbet
+            ctxt%beta0(i) = ctxt%beta0(i) + ctxt%rlx * ctxt%dbet
             !
-            RMS = RMS + DGAM(I)**2 / (1.0 + 1.0 / ADV**2)
-            IF(ABS(DGAM(I)) >= ABS(GMX)) THEN
-                GMX = DGAM(I)
-                IMX = I
-            ENDIF
-            DGAMOLD(I) = DGAM(I)
-        ENDDO
+            ctxt%rms = ctxt%rms + ctxt%dgam(i)**2 / (1.0 + 1.0 / ctxt%adv**2)
+            if(abs(ctxt%dgam(i)) >= abs(gmx)) then
+                gmx = ctxt%dgam(i)
+                imx = i
+            endif
+            ctxt%dgamold(i) = ctxt%dgam(i)
+        enddo
         !
         !---- update incremental blade angle
-        DBETA = DBETA + RLX * DBET
+        ctxt%dbeta = ctxt%dbeta + ctxt%rlx * ctxt%dbet
         !
         !---- update advance ratios
-        ADV = ADV + RLX * DADV
-        ADW = ADW + RLX * DADW
+        ctxt%adv = ctxt%adv + ctxt%rlx * ctxt%dadv
+        ctxt%adw = ctxt%adw + ctxt%rlx * ctxt%dadw
         !
-        RMS = SQRT(RMS / FLOAT(II))
+        ctxt%rms = sqrt(ctxt%rms / float(ctxt%ii))
         !
         !---- display iteration history
-        WRITE(*, 2100) ITER, GMX, IMX, RMS, &
-                ADV, ADW, BETA(II) * 180.0 / PI, RLX
+        write(*, 2100) iter, gmx, imx, ctxt%rms, &
+                ctxt%adv, ctxt%adw, ctxt%beta(ctxt%ii) * 180.0 / pi, ctxt%rlx
         !
-        2000 FORMAT(/' Iter     dGmax  @Imax    gGrms       Av        ', &
-                'Aw         Be       RLX')
-        2100 FORMAT(1X, I3, 3X, E10.3, 2X, I3, 2X, E10.3, 2(2X, F8.4), 2X, F8.3, 2X, F8.4)
+        2000 format(/' Iter     dGmax  @Imax    gGrms       Av        ', &
+                'Aw         Be       rlx')
+        2100 format(1x, i3, 3x, e10.3, 2x, i3, 2x, e10.3, 2(2x, f8.4), 2x, f8.3, 2x, f8.4)
         !
-        ! Iter     dGmax    (I)    gGrms      Av        Aw         Be       RLX
-        !IIIXXXEEEEEEEEEEXXIIIXXEEEEEEEEEEXXFF.FFFFXXXFF.FFFFXXFFFF.FFFXXFFF.FFFF
+        ! Iter     dGmax    (i)    gGrms      Av        Aw         Be       rlx
+        !iiixxxeeeeeeeeeexxiiixxeeeeeeeeeexxff.ffffxxxff.ffffxxffff.fffxxfff.ffff
         !
         !
-        !---- Smooth filter the GAM for low relaxation factors
-        IF(RLX < 0.2) THEN
-            WRITE(*, *) 'APITER filtering GAM'
-            CALL FILTER(GAM, 0.2 * II, II)
-        ENDIF
+        !---- Smooth filter the gam for low relaxation factors
+        if(ctxt%rlx < 0.2) then
+            write(*, *) 'apiter filtering ctxt%gam'
+            call filter(ctxt%gam, 0.2 * ctxt%ii, ctxt%ii)
+        endif
         !
         !---- test for convergence
-        IF(RMS <= EPS) THEN
+        if(ctxt%rms <= eps) then
             !----- final update of various quantities corresponding to converged solution
             !
-            IF(FREE) THEN
-                IF(FAST) THEN
-                    CALL GRADMO(IX, II, NBLDS, DUCT, RAKE, &
-                            XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-                    IWTYP = 1
-                ELSEIF(.NOT.VRTX) THEN
-                    CALL HELICO(IX, II, NBLDS, DUCT, RAKE, &
-                            XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-                    IWTYP = 2
-                ELSEIF(VRTX) THEN
-                    CALL VRTXCO(IX, II, NBLDS, DUCT, RAKE, &
-                            XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-                    IWTYP = 3
-                ENDIF
-            ENDIF
+            if(ctxt%free) then
+                if(ctxt%fast) then
+                    call gradmo(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                            ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
+                    ctxt%iwtyp = 1
+                elseif(.not.ctxt%vrtx) then
+                    call helico(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                            ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
+                    ctxt%iwtyp = 2
+                elseif(ctxt%vrtx) then
+                    call vrtxco(ix, ctxt%ii, ctxt%nblds, ctxt%duct, ctxt%rake, &
+                            ctxt%xi, ctxt%xv, ctxt%gam, ctxt%adw, ctxt%vind_gam, ctxt%vind_adw)
+                    ctxt%iwtyp = 3
+                endif
+            endif
             !
-            CALL VCALC
-            CALL TPQ(1)
+            call vcalc(ctxt)
+            call tpq(ctxt, 1)
             !
-            CONV = .TRUE.
-            RETURN
-        ENDIF
-        !c      IF(MOD(ITER,5) == 0) CALL APINIT
+            ctxt%conv = .true.
+            return
+        endif
+        !c      if(mod(iter,5) == 0) call apinit(ctxt)
         !
     end do
     !
-    RETURN
-END
-! APITER
+    return
+end
+! apiter
 
 
-SUBROUTINE CSCALC(I, UTOT, WA, WT, &
-        VT, VT_ADW, &
-        VA, VA_ADW, &
-        VD, VD_ADW, &
-        CI, CI_ADV, CI_VT, &
-        SI, SI_VA, &
-        W, W_ADV, W_VT, W_VA, &
-        PHI, P_ADV, P_VT, P_VA)
+subroutine cscalc(ctxt, i, utot, wa, wt, &
+        vt, vt_adw, &
+        va, va_adw, &
+        vd, vd_adw, &
+        ci, ci_adv, ci_vt, &
+        si, si_va, &
+        w, w_adv, w_vt, w_va, &
+        phi, p_adv, p_vt, p_va)
     !
-    !---- Calculate velocity components at radial station I on real prop
+    !---- Calculate velocity components at radial station i on real prop
     !
-    USE common
-    IMPLICIT REAL (M)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !
-    VT = VIND(3, I)
-    VT_ADW = VIND_ADW(3, I)
+    vt = ctxt%vind(3, i)
+    vt_adw = ctxt%vind_adw(3, i)
     !
-    VA = VIND(1, I)
-    VA_ADW = VIND_ADW(1, I)
+    va = ctxt%vind(1, i)
+    va_adw = ctxt%vind_adw(1, i)
     !
     !---- Include duct effect on freestream and induced axial velocity
-    UDUCT = 0.0
-    VADUCT_VA = 1.0
-    IF(DUCT) THEN
-        UDUCT = URDUCT - 1.0
-        VADUCT_VA = 2.0 * URDUCT
-    ENDIF
+    uduct = 0.0
+    vaduct_va = 1.0
+    if(ctxt%duct) then
+        uduct = ctxt%urduct - 1.0
+        vaduct_va = 2.0 * ctxt%urduct
+    endif
     !------ duct induced axial velocity
-    VD = VA * (VADUCT_VA - 1.0)
-    VD_VA = (VADUCT_VA - 1.0)
-    VD_ADW = VD_VA * VA_ADW
+    vd = va * (vaduct_va - 1.0)
+    vd_va = (vaduct_va - 1.0)
+    vd_adw = vd_va * va_adw
     !
     !---- Freestream, body induced and added inflow velocities
-    UTOT = 1.0 + UDUCT + UBODY(I)
-    CALL UVADD(XI(I), WA, WT)
+    utot = 1.0 + uduct + ctxt%ubody(i)
+    call uvadd(ctxt, ctxt%xi(i), wa, wt)
     !
-    CI = XI(I) / ADV - WT - VT
-    CI_ADV = -XI(I) / ADV**2
-    CI_VT = -  1.0
+    ci = ctxt%xi(i) / ctxt%adv - wt - vt
+    ci_adv = -ctxt%xi(i) / ctxt%adv**2
+    ci_vt = -  1.0
     !
-    SI = UTOT + WA + VA + VD
-    SI_VA = 1.0 + VD_VA
+    si = utot + wa + va + vd
+    si_va = 1.0 + vd_va
     !
-    !---- Redefine VA to include duct induced velocity
-    !cc      VA     =  VA + VD
+    !---- Redefine va to include duct induced velocity
+    !cc      va     =  va + vd
     !
-    WSQ = CI * CI + SI * SI
-    W = SQRT(WSQ)
-    W_ADV = (CI * CI_ADV) / W
-    W_VT = (CI * CI_VT) / W
-    W_VA = (SI * SI_VA) / W
+    wsq = ci * ci + si * si
+    w = sqrt(wsq)
+    w_adv = (ci * ci_adv) / w
+    w_vt = (ci * ci_vt) / w
+    w_va = (si * si_va) / w
     !
-    PHI = ATAN2(SI, CI)
-    P_ADV = (- SI * CI_ADV) / WSQ
-    P_VT = (- SI * CI_VT) / WSQ
-    P_VA = (CI * SI_VA) / WSQ
+    phi = atan2(si, ci)
+    p_adv = (- si * ci_adv) / wsq
+    p_vt = (- si * ci_vt) / wsq
+    p_va = (ci * si_va) / wsq
     !
     !c      write(*,*) 'i,vt,va ',i,vt,va
-    RETURN
-END
-! CSCALC
+    return
+end
+! cscalc
 
 
-SUBROUTINE XWINIT
-    USE common
-    IMPLICIT REAL (M)
+subroutine xwinit(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !------------------------------------------------------------
     !     Initial estimate for equivalent prop radial coordinate
-    !     array (XW)
+    !     array (xw)
     !------------------------------------------------------------
     !
-    UDUCT = 0.0
-    VADUCT_VA = 1.0
-    IF(DUCT) THEN
-        UDUCT = URDUCT - 1.0
-        VADUCT_VA = 2.0 * URDUCT
-    ENDIF
+    uduct = 0.0
+    vaduct_va = 1.0
+    if(ctxt%duct) then
+        uduct = ctxt%urduct - 1.0
+        vaduct_va = 2.0 * ctxt%urduct
+    endif
 
-    XM = XW0
-    DO I = 1, II
-        URAT = 1.0 + UDUCT + UBODY(I)
-        DXW(I) = SQRT(XM**2 + 2.0 * URAT * XI(I) * DXI(I)) - XM
-        XP = XM + DXW(I)
-        XW(I) = 0.5 * (XP + XM)
+    xm = ctxt%xw0
+    do i = 1, ctxt%ii
+        urat = 1.0 + uduct + ctxt%ubody(i)
+        ctxt%dxw(i) = sqrt(xm**2 + 2.0 * urat * ctxt%xi(i) * ctxt%dxi(i)) - xm
+        xp = xm + ctxt%dxw(i)
+        ctxt%xw(i) = 0.5 * (xp + xm)
         !
-        XW_ADV(I) = 0.
-        XW_ADW(I) = 0.
-        DO J = 1, II
-            XW_GAM(I, J) = 0.
-        END DO
+        ctxt%xw_adv(i) = 0.
+        ctxt%xw_adw(i) = 0.
+        do j = 1, ctxt%ii
+            ctxt%xw_gam(i, j) = 0.
+        end do
         !
-        VWAK(I) = VIND(3, I) * XI(I) / XW(I)
-        VW_ADV(I) = 0.
-        VW_ADW(I) = VIND_ADW(3, I) * XI(I) / XW(I)
-        DO J = 1, II
-            VW_GAM(I, J) = VIND_GAM(3, I, J) * XI(I) / XW(I)
-        END DO
+        ctxt%vwak(i) = ctxt%vind(3, i) * ctxt%xi(i) / ctxt%xw(i)
+        ctxt%vw_adv(i) = 0.
+        ctxt%vw_adw(i) = ctxt%vind_adw(3, i) * ctxt%xi(i) / ctxt%xw(i)
+        do j = 1, ctxt%ii
+            ctxt%vw_gam(i, j) = ctxt%vind_gam(3, i, j) * ctxt%xi(i) / ctxt%xw(i)
+        end do
         !
-        XM = XP
-    END DO
+        xm = xp
+    end do
     !
-    XWTIP = XM
+    ctxt%xwtip = xm
     !
-    RETURN
-END
-! XWINIT
+    return
+end
+! xwinit
 
 
-SUBROUTINE SETXW
-    USE common
-    IMPLICIT REAL (M)
-    REAL XWM_GAM(IX), Z_GAM(IX)
+subroutine setxw(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    real xwm_gam(ix), z_gam(ix)
     !---------------------------------------------------------------------
     !     Calculates Xw (radial coordinate) and Vwak (Vtheta) for
     !     the "equivalent prop"
-    !     The radial stream function S xi dxi (Vax r dr) is used to
+    !     The radial stream function s xi dxi (Vax r dr) is used to
     !     define radial coordinate for the equivalent prop. The angular
     !     momentum is preserved to define the equivalent prop Vwak (Vtheta)
     !----------------------------------------------------------------------
     !
-    XWM = XW0
+    xwm = ctxt%xw0
     !
-    DO J = 1, II
-        XWM_GAM(J) = 0.
-    END DO
-    XWM_ADV = 0.
-    XWM_ADW = 0.
+    do j = 1, ctxt%ii
+        xwm_gam(j) = 0.
+    end do
+    xwm_adv = 0.
+    xwm_adw = 0.
     !cc      write(*,*) 'setxw adv,adw ',adv,adw
     !
-    do I = 1, II
-        XDX = XI(I) * DXI(I)
+    do i = 1, ctxt%ii
+        xdx = ctxt%xi(i) * ctxt%dxi(i)
         !
-        CALL CSCALC(I, UTOT, WA, WT, &
-                VT, VT_ADW, &
-                VA, VA_ADW, &
-                VD, VD_ADW, &
-                CI, CI_ADV, CI_VT, &
-                SI, SI_VA, &
-                W, W_ADV, W_VT, W_VA, &
-                PHI, P_ADV, P_VT, P_VA)
+        call cscalc(ctxt, i, utot, wa, wt, &
+                vt, vt_adw, &
+                va, va_adw, &
+                vd, vd_adw, &
+                ci, ci_adv, ci_vt, &
+                si, si_va, &
+                w, w_adv, w_vt, w_va, &
+                phi, p_adv, p_vt, p_va)
         !
-        !------ first guess for XWO
-        DXWO = SQRT(XWM**2 + 2.0 * UTOT * XDX) - XWM
-        XWO = XWM + 0.5 * DXWO
+        !------ first guess for xwo
+        dxwo = sqrt(xwm**2 + 2.0 * utot * xdx) - xwm
+        xwo = xwm + 0.5 * dxwo
         !
-        !------ Newton loop for XWO
-        DO ITX = 1, 30
+        !------ Newton loop for xwo
+        do itx = 1, 30
             !
-            VW = VT * XI(I) / XWO
-            VW_XWO = -VW / XWO
-            VW_VT = XI(I) / XWO
+            vw = vt * ctxt%xi(i) / xwo
+            vw_xwo = -vw / xwo
+            vw_vt = ctxt%xi(i) / xwo
             !
             !------ swirl velocity on equivalent prop
             !cc************ not used
-            CW = XWO / ADV - WT - VW
-            CW_XWO = 1.0 / ADV - VW_XWO
+            cw = xwo / ctxt%adv - wt - vw
+            cw_xwo = 1.0 / ctxt%adv - vw_xwo
             !
-            UTOTW = URDUCT
+            utotw = ctxt%urduct
             !------ axial velocity on equivalent prop (derived from swirl)
-            VAW = VW * XWO / ADW
+            vaw = vw * xwo / ctxt%adw
             !------ no duct effect on freestream or axial induced velocity for equiv prop
-            VAW_VW = XWO / ADW
-            VAW_XWO = VW / ADW + VAW_VW * VW_XWO
+            vaw_vw = xwo / ctxt%adw
+            vaw_xwo = vw / ctxt%adw + vaw_vw * vw_xwo
             !
-            SW = UTOTW + WA + VAW
-            SW_XWO = VAW_XWO
+            sw = utotw + wa + vaw
+            sw_xwo = vaw_xwo
             !
-            REZ = SW * XWO * 2.0 * (XWO - XWM) - SI * XDX
-            REZ_XWO = SW * 2.0 * (2.0 * XWO - XWM) + SW_XWO * XWO * 2.0 * (XWO - XWM)
-            DELXWO = -REZ / REZ_XWO
+            rez = sw * xwo * 2.0 * (xwo - xwm) - si * xdx
+            rez_xwo = sw * 2.0 * (2.0 * xwo - xwm) + sw_xwo * xwo * 2.0 * (xwo - xwm)
+            delxwo = -rez / rez_xwo
             !
-            RLX = 1.0
-            IF(ABS(DELXWO) > 0.2 * (XWO - XWM))&
-                    RLX = 0.2 * (XWO - XWM) / ABS(DELXWO)
+            ctxt%rlx = 1.0
+            if(abs(delxwo) > 0.2 * (xwo - xwm))&
+                    ctxt%rlx = 0.2 * (xwo - xwm) / abs(delxwo)
             !
-            XWO = XWO + RLX * DELXWO
-            IF(ABS(DELXWO) < 1.0E-6) GO TO 101
+            xwo = xwo + ctxt%rlx * delxwo
+            if(abs(delxwo) < 1.0e-6) go to 101
             !
-        END DO
-        WRITE(*, 990) 'SETXW: Xw convergence failed.  i, r/R, dXw :', &
-                I, XI(I), DELXWO
-        990    FORMAT(A, I5, 2(1X, F12.6))
+        end do
+        write(*, 990) 'setxw: ctxt%xw convergence failed.  i, r/r, ctxt%dxw :', &
+                i, ctxt%xi(i), delxwo
+        990    format(a, i5, 2(1x, f12.6))
         !
-        101   CONTINUE
+        101   continue
         !
-        DXWO = 2.0 * (XWO - XWM)
+        dxwo = 2.0 * (xwo - xwm)
         !
         !------ Vw( xwo , Vt(Adw Gj) )
-        VW = VT * XI(I) / XWO
-        VW_XWO = -VW / XWO
-        VW_VT = XI(I) / XWO
+        vw = vt * ctxt%xi(i) / xwo
+        vw_xwo = -vw / xwo
+        vw_vt = ctxt%xi(i) / xwo
         !
         !------ swirl velocity on equivalent prop
         !cc************ not used
-        CW = XWO / ADV - WT - VW
-        CW_XWO = 1.0 / ADV - VW_XWO
-        CW_VT = - VW_VT
-        CW_ADV = -XWO / ADV**2
+        cw = xwo / ctxt%adv - wt - vw
+        cw_xwo = 1.0 / ctxt%adv - vw_xwo
+        cw_vt = - vw_vt
+        cw_adv = -xwo / ctxt%adv**2
         !
-        UTOTW = URDUCT
+        utotw = ctxt%urduct
         !------ axial velocity on equivalent prop (derived from swirl)
         !------ no duct effect on freestream or axial induced velocity for equiv prop
-        VAW = VW * XWO / ADW
-        VAW_VW = XWO / ADW
-        VAW_XWO = VW / ADW
-        VAW_ADW = -VAW / ADW
+        vaw = vw * xwo / ctxt%adw
+        vaw_vw = xwo / ctxt%adw
+        vaw_xwo = vw / ctxt%adw
+        vaw_adw = -vaw / ctxt%adw
         !
-        SW = UTOTW + WA + VAW
-        SW_XWO = VAW_XWO + VAW_VW * VW_XWO
-        SW_VT = VAW_VW * VW_VT
-        SW_ADW = VAW_ADW
+        sw = utotw + wa + vaw
+        sw_xwo = vaw_xwo + vaw_vw * vw_xwo
+        sw_vt = vaw_vw * vw_vt
+        sw_adw = vaw_adw
         !
         !        write(*,9999) 'setxw xi,xwvt,vw,sw ',xi(i),xwo,vt,vw,sw
-        ! 9999   format(A,5F10.5)
+        ! 9999   format(a,5f10.5)
         !
-        !------ Res ( xwo , xwm , Sw(Adw Vt xw) , S(Adw Vt) )
-        !CC       REZ = SW*XWO*2.0*(XWO-XWM) - SI*XDX
-        Z_XWO = SW * 2.0 * (2.0 * XWO - XWM)
-        Z_XWM = -SW * XWO * 2.0
-        Z_SW = XWO * 2.0 * (XWO - XWM)
-        Z_SI = -XDX
+        !------ Res ( xwo , xwm , Sw(Adw Vt xw) , s(Adw Vt) )
+        !cc       rez = sw*xwo*2.0*(xwo-xwm) - si*xdx
+        z_xwo = sw * 2.0 * (2.0 * xwo - xwm)
+        z_xwm = -sw * xwo * 2.0
+        z_sw = xwo * 2.0 * (xwo - xwm)
+        z_si = -xdx
         !
-        !------ Res ( xwo , xwm(Gj Adv Adw) , VT(Gj Adw) , VA(Gj Adw) , Adw )
-        Z_XWO = Z_SW * SW_XWO + Z_XWO
-        Z_VT = Z_SW * SW_VT
-        Z_VA = Z_SI * SI_VA
-        Z_ADW = Z_SW * SW_ADW
+        !------ Res ( xwo , xwm(Gj Adv Adw) , vt(Gj Adw) , va(Gj Adw) , Adw )
+        z_xwo = z_sw * sw_xwo + z_xwo
+        z_vt = z_sw * sw_vt
+        z_va = z_si * si_va
+        z_adw = z_sw * sw_adw
         !
         !------ Res ( xwo , Adv , Adw , Gj )
-        Z_ADV = Z_XWM * XWM_ADV
-        Z_ADW = Z_XWM * XWM_ADW + Z_VT * VT_ADW&
-                + Z_VA * VA_ADW + Z_ADW
-        DO J = 1, II
-            Z_GAM(J) = Z_XWM * XWM_GAM(J) + Z_VT * VIND_GAM(3, I, J)&
-                    + Z_VA * VIND_GAM(1, I, J)
-        END DO
+        z_adv = z_xwm * xwm_adv
+        z_adw = z_xwm * xwm_adw + z_vt * vt_adw&
+                + z_va * va_adw + z_adw
+        do j = 1, ctxt%ii
+            z_gam(j) = z_xwm * xwm_gam(j) + z_vt * ctxt%vind_gam(3, i, j)&
+                    + z_va * ctxt%vind_gam(1, i, j)
+        end do
         !
         !------ xwo( Adv , Adw , Gj )
-        XW_ADV(I) = -Z_ADV / Z_XWO
-        XW_ADW(I) = -Z_ADW / Z_XWO
-        DO J = 1, II
-            XW_GAM(I, J) = -Z_GAM(J) / Z_XWO
-        END DO
+        ctxt%xw_adv(i) = -z_adv / z_xwo
+        ctxt%xw_adw(i) = -z_adw / z_xwo
+        do j = 1, ctxt%ii
+            ctxt%xw_gam(i, j) = -z_gam(j) / z_xwo
+        end do
         !
         !------ Vw( xwo(Adv Adw Gj) , Vt(Adw Gj) )
-        VWAK(I) = VW
+        ctxt%vwak(i) = vw
         !------ Vw( Adv Adw Gj )
-        VW_ADV(I) = VW_XWO * XW_ADV(I)
-        VW_ADW(I) = VW_XWO * XW_ADW(I) + VW_VT * VT_ADW
-        DO J = 1, II
-            VW_GAM(I, J) = VW_XWO * XW_GAM(I, J) + VW_VT * VIND_GAM(3, I, J)
-        END DO
+        ctxt%vw_adv(i) = vw_xwo * ctxt%xw_adv(i)
+        ctxt%vw_adw(i) = vw_xwo * ctxt%xw_adw(i) + vw_vt * vt_adw
+        do j = 1, ctxt%ii
+            ctxt%vw_gam(i, j) = vw_xwo * ctxt%xw_gam(i, j) + vw_vt * ctxt%vind_gam(3, i, j)
+        end do
         !
         !
-        XW(I) = XWO
+        ctxt%xw(i) = xwo
         !
         !------ dxw( xwo(Adv Adw Gj) , xwm(Adv Adw Gj) )
-        DXW(I) = 2.0 * (XWO - XWM)
-        DXW_ADV(I) = 2.0 * (XW_ADV(I) - XWM_ADV)
-        DXW_ADW(I) = 2.0 * (XW_ADW(I) - XWM_ADW)
-        DO J = 1, II
-            DXW_GAM(I, J) = 2.0 * (XW_GAM(I, J) - XWM_GAM(J))
-        END DO
+        ctxt%dxw(i) = 2.0 * (xwo - xwm)
+        ctxt%dxw_adv(i) = 2.0 * (ctxt%xw_adv(i) - xwm_adv)
+        ctxt%dxw_adw(i) = 2.0 * (ctxt%xw_adw(i) - xwm_adw)
+        do j = 1, ctxt%ii
+            ctxt%dxw_gam(i, j) = 2.0 * (ctxt%xw_gam(i, j) - xwm_gam(j))
+        end do
         !
         !------ new  xwm(Adv Adw Gj)  for next loop pass
-        XWM = 2.0 * XWO - XWM
-        XWM_ADV = 2.0 * XW_ADV(I) - XWM_ADV
-        XWM_ADW = 2.0 * XW_ADW(I) - XWM_ADW
-        DO J = 1, II
-            XWM_GAM(J) = 2.0 * XW_GAM(I, J) - XWM_GAM(J)
-        END DO
+        xwm = 2.0 * xwo - xwm
+        xwm_adv = 2.0 * ctxt%xw_adv(i) - xwm_adv
+        xwm_adw = 2.0 * ctxt%xw_adw(i) - xwm_adw
+        do j = 1, ctxt%ii
+            xwm_gam(j) = 2.0 * ctxt%xw_gam(i, j) - xwm_gam(j)
+        end do
         !
     end do
     !
-    XWTIP = XWM
+    ctxt%xwtip = xwm
     !      write(*,*) 'xwtip ',xwtip
     !      do i=1,ii
     !        write(20,*) 'xi,xw,vwak ',xi(i),xw(i),vwak(i)
     !      end do
     !
-    RETURN
-END
-! SETXW
+    return
+end
+! setxw
 
 
 
-SUBROUTINE TPQ(ITYPE)
-    USE common
-    IMPLICIT REAL (M)
+subroutine tpq(ctxt, itype)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !----------------------------------------------------------
     !     Sets Thrust, Torque, Power, and their sensitivities
     !     wrt  beta, chord(i), Vtan(i), and lambda
     !----------------------------------------------------------
     !
-    TINV = 0.
-    PINV = 0.
+    ctxt%tinv = 0.
+    ctxt%pinv = 0.
     !
-    TWAK = 0.
-    PWAK = 0.
+    ctxt%twak = 0.
+    ctxt%pwak = 0.
     !
-    VAAavg = 0.
-    VATavg = 0.
-    TMOM = 0.
-    PMOM = 0.
+    vaAavg = 0.
+    vaTavg = 0.
+    tmom = 0.
+    pmom = 0.
     !
-    TVIS = 0.
-    PVIS = 0.
+    ctxt%tvis = 0.
+    ctxt%pvis = 0.
     !
-    TI_ADV = 0.
-    PI_ADV = 0.
-    TI_ADW = 0.
-    PI_ADW = 0.
+    ctxt%ti_adv = 0.
+    ctxt%pi_adv = 0.
+    ctxt%ti_adw = 0.
+    ctxt%pi_adw = 0.
     !
-    TW_ADV = 0.
-    PW_ADV = 0.
-    TW_ADW = 0.
-    PW_ADW = 0.
+    ctxt%tw_adv = 0.
+    ctxt%pw_adv = 0.
+    ctxt%tw_adw = 0.
+    ctxt%pw_adw = 0.
     !
-    TV_ADV = 0.
-    PV_ADV = 0.
-    TV_ADW = 0.
-    PV_ADW = 0.
-    TV_DBE = 0.
-    PV_DBE = 0.
+    ctxt%tv_adv = 0.
+    ctxt%pv_adv = 0.
+    ctxt%tv_adw = 0.
+    ctxt%pv_adw = 0.
+    ctxt%tv_dbe = 0.
+    ctxt%pv_dbe = 0.
     !
-    DO I = 1, II
-        TI_GAM(I) = 0.
-        PI_GAM(I) = 0.
-        TW_GAM(I) = 0.
-        PW_GAM(I) = 0.
-        TV_GAM(I) = 0.
-        PV_GAM(I) = 0.
-    ENDDO
+    do i = 1, ctxt%ii
+        ctxt%ti_gam(i) = 0.
+        ctxt%pi_gam(i) = 0.
+        ctxt%tw_gam(i) = 0.
+        ctxt%pw_gam(i) = 0.
+        ctxt%tv_gam(i) = 0.
+        ctxt%pv_gam(i) = 0.
+    enddo
     !
-    COSR = COS(RAKE)
+    cosr = cos(ctxt%rake)
     !
     !---- go over radial stations, setting viscous thrust and power
-    BLDS = FLOAT(NBLDS)
-    do I = 1, II
-        BDX = BLDS * DXI(I)
+    blds = float(ctxt%nblds)
+    do i = 1, ctxt%ii
+        bdx = blds * ctxt%dxi(i)
         !
-        XX = XI(I) / ADV
-        XX_ADV = -XX / ADV
+        xx = ctxt%xi(i) / ctxt%adv
+        xx_adv = -xx / ctxt%adv
         !
-        !------ set  W(Adv,Adw,Vt)  and  Phi(Adv,Adw,Vt)  sensitivities
-        CALL CSCALC(I, UTOT, WA, WT, &
-                VT, VT_ADW, &
-                VA, VA_ADW, &
-                VD, VD_ADW, &
-                CI, CI_ADV, CI_VT, &
-                SI, SI_VA, &
-                W, W_ADV, W_VT, W_VA, &
-                PHI, P_ADV, P_VT, P_VA)
+        !------ set  w(Adv,Adw,Vt)  and  Phi(Adv,Adw,Vt)  sensitivities
+        call cscalc(ctxt, i, utot, wa, wt, &
+                vt, vt_adw, &
+                va, va_adw, &
+                vd, vd_adw, &
+                ci, ci_adv, ci_vt, &
+                si, si_va, &
+                w, w_adv, w_vt, w_va, &
+                phi, p_adv, p_vt, p_va)
         !
-        ALFA = BETA(I) - PHI
-        AL_DBE = 1.0
-        AL_P = -1.0
+        alfa = ctxt%beta(i) - phi
+        al_dbe = 1.0
+        al_p = -1.0
         !
         !
-        IF(ITYPE == 1) THEN
+        if(itype == 1) then
             !------- analysis case:  fix local Beta (except for pitch change)
             !
             !------- set alfa(Gi,dBeta,Adv,Vt) sensitivites
-            ALFA = BETA(I) - PHI
-            AL_GI = 0.
-            AL_DBE = 1.0
-            AL_ADV = -P_ADV
-            AL_VT = -P_VT
-            AL_VA = -P_VA
+            alfa = ctxt%beta(i) - phi
+            al_gi = 0.
+            al_dbe = 1.0
+            al_adv = -p_adv
+            al_vt = -p_vt
+            al_va = -p_va
             !
-            !------- set CL(Gi,dBeta,Adv,Adw,Vt) sensitivites
-            REY = CH(I) * ABS(W) * RHO * VEL * RAD / RMU
-            CALL GETCLCDCM(I, ALFA, W, REY, &
-                    CL(I), CL_AL, CL_W, &
-                    CLMAX, CLMIN, DCLSTALL, STALL(I), &
-                    CD(I), CD_ALF, CD_W, CD_REY, &
-                    CM(I), CM_AL, CM_W)
-            CL_GI = CL_AL * AL_GI
-            CL_DBE = CL_AL * AL_DBE
-            CL_ADV = CL_AL * AL_ADV + CL_W * W_ADV
-            CL_VT = CL_AL * AL_VT + CL_W * W_VT
-            CL_VA = CL_AL * AL_VA + CL_W * W_VA
+            !------- set cl(Gi,dBeta,Adv,Adw,Vt) sensitivites
+            rey = ctxt%ch(i) * abs(w) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
+            call getclcdcm(ctxt, i, alfa, w, rey, &
+                    ctxt%cl(i), cl_al, cl_w, &
+                    clmax, clmin, dclstall, ctxt%stall(i), &
+                    ctxt%cd(i), cd_alf, cd_w, cd_rey, &
+                    ctxt%cm(i), cm_al, cm_w)
+            cl_gi = cl_al * al_gi
+            cl_dbe = cl_al * al_dbe
+            cl_adv = cl_al * al_adv + cl_w * w_adv
+            cl_vt = cl_al * al_vt + cl_w * w_vt
+            cl_va = cl_al * al_va + cl_w * w_va
             !
             !------- set c(Gi,Adv,Vt) sensitivites  (chord is fixed)
-            CH_GI = 0.
-            CH_ADV = 0.
-            CH_VT = 0.
-            CH_VA = 0.
+            ch_gi = 0.
+            ch_adv = 0.
+            ch_vt = 0.
+            ch_va = 0.
             !
-        ELSE IF(ITYPE == 2) THEN
-            !------- design case:  fix local CL and set chord based on circulation
+        else if(itype == 2) then
+            !------- design case:  fix local cl and set chord based on circulation
             !
             !------- set alfa(Gi,dBeta,Adv,Adw,Vt) sensitivites
             !c         write(*,*) 'tpq2 getalf i,cl,w ',i,cl(i),w
-            CALL GETALF(I, CL(I), W, ALFA, AL_CL, AL_W, STALL(I))
-            AL_GI = 0.
-            AL_DBE = 0.
-            AL_ADV = AL_W * W_ADV
-            AL_VT = AL_W * W_VT
-            AL_VA = AL_W * W_VA
+            call getalf(ctxt, i, ctxt%cl(i), w, alfa, al_cl, al_w, ctxt%stall(i))
+            al_gi = 0.
+            al_dbe = 0.
+            al_adv = al_w * w_adv
+            al_vt = al_w * w_vt
+            al_va = al_w * w_va
             !
-            !------- set CL(Gi,dBeta,Adv,Adw,Vt) sensitivites
-            CL_GI = 0.
-            CL_DBE = 0.
-            CL_ADV = 0.
-            CL_VT = 0.
-            CL_VA = 0.
+            !------- set cl(Gi,dBeta,Adv,Adw,Vt) sensitivites
+            cl_gi = 0.
+            cl_dbe = 0.
+            cl_adv = 0.
+            cl_vt = 0.
+            cl_va = 0.
             !
             !------- set c(Gi,Adv,Adw,Vt) sensitivites
-            CHNEW = 2.0 * GAM(I) / (W * CL(I))
+            chnew = 2.0 * ctxt%gam(i) / (w * ctxt%cl(i))
             !--- Check for chord going zero or negative and use nearby station data
             !    for this iteration
-            IF(CHNEW <= 0.0) THEN
-                !c           write(*,*) 'TPQ negative chord @I = ',I,CHNEW
-                IF(I == 1) THEN
-                    CH(I) = CH(I + 1)
-                ELSEIF(I == II) THEN
-                    CH(I) = CH(I - 1)
-                ELSE
-                    CH(I) = 0.5 * (CH(I - 1) + CH(I + 1))
-                ENDIF
-                CH_GI = 0.0
-                CH_ADV = 0.0
-                CH_VT = 0.0
-                CH_VA = 0.0
-            ELSE
-                CH(I) = 2.0 * GAM(I) / (W * CL(I))
-                CH_GI = 2.0 / (W * CL(I))
-                CH_ADV = (-CH(I) / W) * W_ADV
-                CH_VT = (-CH(I) / W) * W_VT
-                CH_VA = (-CH(I) / W) * W_VA
-            ENDIF
+            if(chnew <= 0.0) then
+                !c           write(*,*) 'tpq negative chord @i = ',i,chnew
+                if(i == 1) then
+                    ctxt%ch(i) = ctxt%ch(i + 1)
+                elseif(i == ctxt%ii) then
+                    ctxt%ch(i) = ctxt%ch(i - 1)
+                else
+                    ctxt%ch(i) = 0.5 * (ctxt%ch(i - 1) + ctxt%ch(i + 1))
+                endif
+                ch_gi = 0.0
+                ch_adv = 0.0
+                ch_vt = 0.0
+                ch_va = 0.0
+            else
+                ctxt%ch(i) = 2.0 * ctxt%gam(i) / (w * ctxt%cl(i))
+                ch_gi = 2.0 / (w * ctxt%cl(i))
+                ch_adv = (-ctxt%ch(i) / w) * w_adv
+                ch_vt = (-ctxt%ch(i) / w) * w_vt
+                ch_va = (-ctxt%ch(i) / w) * w_va
+            endif
             !
-            BETA(I) = ALFA + PHI
-            BETA0(I) = BETA(I)
+            ctxt%beta(i) = alfa + phi
+            ctxt%beta0(i) = ctxt%beta(i)
             !
-        ELSE IF(ITYPE == 3) THEN
-            !------- design case:  fix local chord and set angles based on CL
+        else if(itype == 3) then
+            !------- design case:  fix local chord and set angles based on cl
             !
-            !------- set CL(Gi,dBeta,Adv,Adw,Vt) sensitivites
-            CL(I) = 2.0 * GAM(I) / (W * CH(I))
-            CL_GI = 2.0 / (W * CH(I))
-            CL_DBE = 0.
-            CL_ADV = (-CL(I) / W) * W_ADV
-            CL_VT = (-CL(I) / W) * W_VT
-            CL_VA = (-CL(I) / W) * W_VA
+            !------- set cl(Gi,dBeta,Adv,Adw,Vt) sensitivites
+            ctxt%cl(i) = 2.0 * ctxt%gam(i) / (w * ctxt%ch(i))
+            cl_gi = 2.0 / (w * ctxt%ch(i))
+            cl_dbe = 0.
+            cl_adv = (-ctxt%cl(i) / w) * w_adv
+            cl_vt = (-ctxt%cl(i) / w) * w_vt
+            cl_va = (-ctxt%cl(i) / w) * w_va
             !
             !------- set alfa(Gi,dBeta,Adv,Adw,Vt) sensitivites
             !c         write(*,*) 'tpq3 getalf i,cl,w ',i,cl(i)
-            CALL GETALF(I, CL(I), W, ALFA, AL_CL, AL_W, STALL(I))
-            AL_GI = AL_CL * CL_GI
-            AL_DBE = AL_CL * CL_DBE
-            AL_ADV = AL_CL * CL_ADV + AL_W * W_ADV
-            AL_VT = AL_CL * CL_VT + AL_W * W_VT
-            AL_VA = AL_CL * CL_VA + AL_W * W_VA
+            call getalf(ctxt, i, ctxt%cl(i), w, alfa, al_cl, al_w, ctxt%stall(i))
+            al_gi = al_cl * cl_gi
+            al_dbe = al_cl * cl_dbe
+            al_adv = al_cl * cl_adv + al_w * w_adv
+            al_vt = al_cl * cl_vt + al_w * w_vt
+            al_va = al_cl * cl_va + al_w * w_va
             !
             !------- set c(Gi,Adv,Adw,Vt) sensitivites
-            CH_GI = 0.
-            CH_ADV = 0.
-            CH_VT = 0.
-            CH_VA = 0.
+            ch_gi = 0.
+            ch_adv = 0.
+            ch_vt = 0.
+            ch_va = 0.
             !
-            BETA(I) = ALFA + PHI
-            BETA0(I) = BETA(I)
+            ctxt%beta(i) = alfa + phi
+            ctxt%beta0(i) = ctxt%beta(i)
             !
-        ENDIF
+        endif
         !
-        RE(I) = CH(I) * ABS(W) * RHO * VEL * RAD / RMU
-        RE_W = CH(I) * RHO * VEL * RAD / RMU
-        RE_CH = ABS(W) * RHO * VEL * RAD / RMU
+        ctxt%re(i) = ctxt%ch(i) * abs(w) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
+        re_w = ctxt%ch(i) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
+        re_ch = abs(w) * ctxt%rho * ctxt%vel * ctxt%rad / ctxt%rmu
         !
         !------ set Re(Gi,Adv,Adw,Vt) sensitivites
-        RE_GI = RE_CH * CH_GI
-        RE_ADV = RE_CH * CH_ADV + RE_W * W_ADV
-        RE_VT = RE_CH * CH_VT + RE_W * W_VT
-        RE_VA = RE_CH * CH_VA + RE_W * W_VA
+        re_gi = re_ch * ch_gi
+        re_adv = re_ch * ch_adv + re_w * w_adv
+        re_vt = re_ch * ch_vt + re_w * w_vt
+        re_va = re_ch * ch_va + re_w * w_va
         !
-        !------ set CM and (not used at present) sensitivites
-        !------ set CD(Gi,dBeta,Adv,Adw,Vt) sensitivites
-        CALL GETCLCDCM(I, ALFA, W, RE(I), &
-                CL(I), CL_AL, CL_W, &
-                CLMAX, CLMIN, DCLSTALL, STALL(I), &
-                CD(I), CD_AL, CD_W, CD_RE, &
-                CM(I), CM_AL, CM_W)
+        !------ set cm and (not used at present) sensitivites
+        !------ set cd(Gi,dBeta,Adv,Adw,Vt) sensitivites
+        call getclcdcm(ctxt, i, alfa, w, ctxt%re(i), &
+                ctxt%cl(i), cl_al, cl_w, &
+                clmax, clmin, dclstall, ctxt%stall(i), &
+                ctxt%cd(i), cd_al, cd_w, cd_re, &
+                ctxt%cm(i), cm_al, cm_w)
         !cc        write(*,*) 'tpq alfa,cl,cd,cm ',i,alfa,cl(i),cd(i),cm(i)
-        CD_GI = CD_AL * AL_GI + CD_RE * RE_GI
-        CD_ADV = CD_AL * AL_ADV + CD_RE * RE_ADV + CD_W * W_ADV
-        CD_VT = CD_AL * AL_VT + CD_RE * RE_VT + CD_W * W_VT
-        CD_VA = CD_AL * AL_VA + CD_RE * RE_VA + CD_W * W_VA
-        CD_DBE = CD_AL * AL_DBE
+        cd_gi = cd_al * al_gi + cd_re * re_gi
+        cd_adv = cd_al * al_adv + cd_re * re_adv + cd_w * w_adv
+        cd_vt = cd_al * al_vt + cd_re * re_vt + cd_w * w_vt
+        cd_va = cd_al * al_va + cd_re * re_va + cd_w * w_va
+        cd_dbe = cd_al * al_dbe
         !
         !------ set total local efficiency
-        EFF = (CL(I) * CI - CD(I) * SI) / (CD(I) * CI + CL(I) * SI) / XX
+        eff = (ctxt%cl(i) * ci - ctxt%cd(i) * si) / (ctxt%cd(i) * ci + ctxt%cl(i) * si) / xx
         !---Correct for blade rake
-        EFF = EFF * COSR
+        eff = eff * cosr
         !
         !------ set induced and profile local efficiencies
-        EFFI = CI / (SI * XX)
+        effi = ci / (si * xx)
         !---Correct for blade rake
-        EFFI = EFFI * COSR
+        effi = effi * cosr
         !
-        EFFP(I) = EFF / EFFI
+        ctxt%effp(i) = eff / effi
         !
-        HWC = 0.5 * W * CH(I)
-        HWC_W = 0.5 * CH(I)
-        HWC_CH = 0.5 * W
+        hwc = 0.5 * w * ctxt%ch(i)
+        hwc_w = 0.5 * ctxt%ch(i)
+        hwc_ch = 0.5 * w
         !
         !
         !*******************************************************
         !------ Viscous Thrust & Power contributions on real prop
-        !c      COSRV = COSR
-        COSRV = 1.0
+        !c      cosrv = cosr
+        cosrv = 1.0
         !
-        !------ dTv ( Cd , S , W , c ) sensitivites
-        DTV = -HWC * CD(I) * SI * BDX * COSRV
+        !------ dTv ( Cd , s , w , c ) sensitivites
+        dtv = -hwc * ctxt%cd(i) * si * bdx * cosrv
         !
-        DTV_CD = -HWC * SI * BDX * COSRV
-        DTV_SI = -HWC * CD(I) * BDX * COSRV
-        DTV_W = -HWC_W * CD(I) * SI * BDX * COSRV
-        DTV_CH = -HWC_CH * CD(I) * SI * BDX * COSRV
+        dtv_cd = -hwc * si * bdx * cosrv
+        dtv_si = -hwc * ctxt%cd(i) * bdx * cosrv
+        dtv_w = -hwc_w * ctxt%cd(i) * si * bdx * cosrv
+        dtv_ch = -hwc_ch * ctxt%cd(i) * si * bdx * cosrv
         !
         !------ set Tv(Gi,dBeta,Adv,Vt) sensitivites using chain rule
-        DTV_GI = DTV_CD * CD_GI + DTV_CH * CH_GI
-        DTV_DBE = DTV_CD * CD_DBE
-        DTV_ADV = DTV_CD * CD_ADV + DTV_CH * CH_ADV&
-                + DTV_W * W_ADV
-        DTV_VT = DTV_CD * CD_VT + DTV_CH * CH_VT&
-                + DTV_W * W_VT
-        DTV_VA = DTV_CD * CD_VA + DTV_CH * CH_VA&
-                + DTV_SI * SI_VA + DTV_W * W_VA
+        dtv_gi = dtv_cd * cd_gi + dtv_ch * ch_gi
+        dtv_dbe = dtv_cd * cd_dbe
+        dtv_adv = dtv_cd * cd_adv + dtv_ch * ch_adv&
+                + dtv_w * w_adv
+        dtv_vt = dtv_cd * cd_vt + dtv_ch * ch_vt&
+                + dtv_w * w_vt
+        dtv_va = dtv_cd * cd_va + dtv_ch * ch_va&
+                + dtv_si * si_va + dtv_w * w_va
         !
         !------ accumulate viscous Thrust and sensitivities
-        TVIS = TVIS + DTV
-        TV_ADV = TV_ADV + DTV_ADV
-        TV_ADW = DTV_VT * VT_ADW + DTV_VA * VA_ADW
-        TV_DBE = TV_DBE + DTV_DBE
+        ctxt%tvis = ctxt%tvis + dtv
+        ctxt%tv_adv = ctxt%tv_adv + dtv_adv
+        ctxt%tv_adw = dtv_vt * vt_adw + dtv_va * va_adw
+        ctxt%tv_dbe = ctxt%tv_dbe + dtv_dbe
         !
-        TV_GAM(I) = TV_GAM(I) + DTV_GI
-        DO J = 1, II
-            TV_GAM(J) = TV_GAM(J) + DTV_VT * VIND_GAM(3, I, J)&
-                    + DTV_VA * VIND_GAM(1, I, J)
-        ENDDO
+        ctxt%tv_gam(i) = ctxt%tv_gam(i) + dtv_gi
+        do j = 1, ctxt%ii
+            ctxt%tv_gam(j) = ctxt%tv_gam(j) + dtv_vt * ctxt%vind_gam(3, i, j)&
+                    + dtv_va * ctxt%vind_gam(1, i, j)
+        enddo
         !
-        !------ dPv( Cd , C , W , c )
-        DPV = HWC * CD(I) * CI * BDX * XX
+        !------ dPv( Cd , c , w , c )
+        dpv = hwc * ctxt%cd(i) * ci * bdx * xx
         !
-        DPV_CD = HWC * CI * BDX * XX
-        DPV_CI = HWC * CD(I) * BDX * XX
-        DPV_W = HWC_W * CD(I) * CI * BDX * XX
-        DPV_CH = HWC_CH * CD(I) * CI * BDX * XX
+        dpv_cd = hwc * ci * bdx * xx
+        dpv_ci = hwc * ctxt%cd(i) * bdx * xx
+        dpv_w = hwc_w * ctxt%cd(i) * ci * bdx * xx
+        dpv_ch = hwc_ch * ctxt%cd(i) * ci * bdx * xx
         !
         !------ set Pv(Gi,dBeta,Adv,Vt) sensitivites using chain rule
-        DPV_GI = DPV_CD * CD_GI + DPV_CH * CH_GI
-        DPV_DBE = DPV_CD * CD_DBE
-        DPV_ADV = DPV_CD * CD_ADV + DPV_CH * CH_ADV&
-                + DPV_CI * CI_ADV + DPV_W * W_ADV&
-                + HWC * CD(I) * CI * BDX * XX_ADV
-        DPV_VT = DPV_CD * CD_VT + DPV_CH * CH_VT&
-                + DPV_CI * CI_VT + DPV_W * W_VT
-        DPV_VA = DPV_CD * CD_VA + DPV_CH * CH_VA&
-                + DPV_W * W_VA
+        dpv_gi = dpv_cd * cd_gi + dpv_ch * ch_gi
+        dpv_dbe = dpv_cd * cd_dbe
+        dpv_adv = dpv_cd * cd_adv + dpv_ch * ch_adv&
+                + dpv_ci * ci_adv + dpv_w * w_adv&
+                + hwc * ctxt%cd(i) * ci * bdx * xx_adv
+        dpv_vt = dpv_cd * cd_vt + dpv_ch * ch_vt&
+                + dpv_ci * ci_vt + dpv_w * w_vt
+        dpv_va = dpv_cd * cd_va + dpv_ch * ch_va&
+                + dpv_w * w_va
         !
         !------ accumulate viscous Power and sensitivities
-        PVIS = PVIS + DPV
-        PV_ADV = PV_ADV + DPV_ADV
-        PV_ADW = DPV_VT * VT_ADW + DPV_VA * VA_ADW
-        PV_DBE = PV_DBE + DPV_DBE
+        ctxt%pvis = ctxt%pvis + dpv
+        ctxt%pv_adv = ctxt%pv_adv + dpv_adv
+        ctxt%pv_adw = dpv_vt * vt_adw + dpv_va * va_adw
+        ctxt%pv_dbe = ctxt%pv_dbe + dpv_dbe
         !
-        PV_GAM(I) = PV_GAM(I) + DPV_GI
-        DO J = 1, II
-            PV_GAM(J) = PV_GAM(J) + DPV_VT * VIND_GAM(3, I, J)&
-                    + DPV_VA * VIND_GAM(1, I, J)
-        ENDDO
+        ctxt%pv_gam(i) = ctxt%pv_gam(i) + dpv_gi
+        do j = 1, ctxt%ii
+            ctxt%pv_gam(j) = ctxt%pv_gam(j) + dpv_vt * ctxt%vind_gam(3, i, j)&
+                    + dpv_va * ctxt%vind_gam(1, i, j)
+        enddo
         !
         !
         !*******************************************************
         !------ Inviscid Thrust & Power contributions on real prop
-        !c      COSRI = COSR
-        COSRI = 1.0
+        !c      cosri = cosr
+        cosri = 1.0
         !
-        !------ dTi( Gi , C( Adv Vt ) )
-        DTI = GAM(I) * CI * BDX * COSRI
+        !------ dTi( Gi , c( Adv Vt ) )
+        dti = ctxt%gam(i) * ci * bdx * cosri
         !
-        DTI_CI = GAM(I) * BDX * COSRI
-        DTI_GI = CI * BDX * COSRI
+        dti_ci = ctxt%gam(i) * bdx * cosri
+        dti_gi = ci * bdx * cosri
         !
         !------ dTi( Adv , Vt(Adw Gj) )
-        DTI_VT = DTI_CI * CI_VT
-        DTI_ADV = DTI_CI * CI_ADV
-        DTI_ADW = DTI_VT * VT_ADW
+        dti_vt = dti_ci * ci_vt
+        dti_adv = dti_ci * ci_adv
+        dti_adw = dti_vt * vt_adw
         !
         !------ accumulate inviscid Thrust and sensitivities
-        TINV = TINV + DTI
-        TI_ADV = TI_ADV + DTI_ADV
-        TI_ADW = TI_ADW + DTI_ADW
+        ctxt%tinv = ctxt%tinv + dti
+        ctxt%ti_adv = ctxt%ti_adv + dti_adv
+        ctxt%ti_adw = ctxt%ti_adw + dti_adw
         !------ Resolve dTi dependencies ( Vt ) to Gamma
-        TI_GAM(I) = TI_GAM(I) + DTI_GI
-        DO J = 1, II
-            TI_GAM(J) = TI_GAM(J) + DTI_VT * VIND_GAM(3, I, J)
-        ENDDO
+        ctxt%ti_gam(i) = ctxt%ti_gam(i) + dti_gi
+        do j = 1, ctxt%ii
+            ctxt%ti_gam(j) = ctxt%ti_gam(j) + dti_vt * ctxt%vind_gam(3, i, j)
+        enddo
         !
-        !------ dPi( S(Va) , Gi, Adv )
-        DPI = GAM(I) * SI * BDX * XX
+        !------ dPi( s(Va) , Gi, Adv )
+        dpi = ctxt%gam(i) * si * bdx * xx
         !
-        DPI_SI = GAM(I) * BDX * XX
-        DPI_GI = SI * BDX * XX
-        DPI_XX = GAM(I) * SI * BDX
+        dpi_si = ctxt%gam(i) * bdx * xx
+        dpi_gi = si * bdx * xx
+        dpi_xx = ctxt%gam(i) * si * bdx
         !
         !------ dPi( Va(Gj Adw) , Adv , Adw , Gi )
-        DPI_VA = DPI_SI * SI_VA
-        DPI_ADV = DPI_XX * XX_ADV
-        DPI_ADW = DPI_VA * VA_ADW
+        dpi_va = dpi_si * si_va
+        dpi_adv = dpi_xx * xx_adv
+        dpi_adw = dpi_va * va_adw
         !
         !------ accumulate inviscid Power and sensitivities
-        PINV = PINV + DPI
-        PI_ADV = PI_ADV + DPI_ADV
-        PI_ADW = PI_ADW + DPI_ADW
+        ctxt%pinv = ctxt%pinv + dpi
+        ctxt%pi_adv = ctxt%pi_adv + dpi_adv
+        ctxt%pi_adw = ctxt%pi_adw + dpi_adw
         !------ Resolve dPi dependencies ( Va ) to Gamma
-        PI_GAM(I) = PI_GAM(I) + DPI_GI
-        DO J = 1, II
-            PI_GAM(J) = PI_GAM(J) + DPI_VA * VIND_GAM(1, I, J)
-        ENDDO
+        ctxt%pi_gam(i) = ctxt%pi_gam(i) + dpi_gi
+        do j = 1, ctxt%ii
+            ctxt%pi_gam(j) = ctxt%pi_gam(j) + dpi_va * ctxt%vind_gam(1, i, j)
+        enddo
         !
         !*******************************************************
 
@@ -2497,262 +2506,263 @@ SUBROUTINE TPQ(ITYPE)
         !------ Inviscid Thrust & Power contributions on equivalent prop
         !       Assumes Omega and Gamma are same in real and equivalent prop
         !
-        VW = VWAK(I)
-        UTOTW = URDUCT
-        CALL UVADD(XI(I), WA, WT)
+        vw = ctxt%vwak(i)
+        utotw = ctxt%urduct
+        call uvadd(ctxt, ctxt%xi(i), wa, wt)
         !
         !------ Cw defined by same omega as real prop
-        CW = XW(I) / ADV - WT - VW
-        CW_ADV = -XW(I) / ADV**2
-        CW_VW = -  1.0
-        CW_XW = 1.0 / ADV
+        cw = ctxt%xw(i) / ctxt%adv - wt - vw
+        cw_adv = -ctxt%xw(i) / ctxt%adv**2
+        cw_vw = -  1.0
+        cw_xw = 1.0 / ctxt%adv
         !------ Sw( Adw , xw , Vw ) ;  xw, Vw( Gj , Adv , Adw )
-        SW = UTOTW + WA + VW * XW(I) / ADW
-        SW_ADW = -  VW * XW(I) / ADW**2
-        SW_VW = XW(I) / ADW
-        SW_XW = VW / ADW
+        sw = utotw + wa + vw * ctxt%xw(i) / ctxt%adw
+        sw_adw = -  vw * ctxt%xw(i) / ctxt%adw**2
+        sw_vw = ctxt%xw(i) / ctxt%adw
+        sw_xw = vw / ctxt%adw
         !
-        !------ dTw( Gi , CW( Adv Vw ) , dxw( Gj, Adv, Adw) )
-        DTW = GAM(I) * CW * BLDS * DXW(I)
+        !------ dTw( Gi , cw( Adv Vw ) , dxw( Gj, Adv, Adw) )
+        dtw = ctxt%gam(i) * cw * blds * ctxt%dxw(i)
         !
-        DTW_GI = CW * BLDS * DXW(I)
-        DTW_CW = GAM(I) * BLDS * DXW(I)
-        DTW_DXW = GAM(I) * CW * BLDS
+        dtw_gi = cw * blds * ctxt%dxw(i)
+        dtw_cw = ctxt%gam(i) * blds * ctxt%dxw(i)
+        dtw_dxw = ctxt%gam(i) * cw * blds
         !------ dTw( Vt(Adw Gj) , Adv , Adw , Gi , dxw(Gj Adv Adw) )
-        DTW_VW = DTW_CW * CW_VW
-        DTW_ADV = DTW_CW * CW_ADV + DTW_VW * VW_ADV(I)&
-                + DTW_DXW * DXW_ADV(I)
-        DTW_ADW = DTW_VW * VW_ADW(I) + DTW_DXW * DXW_ADW(I)
+        dtw_vw = dtw_cw * cw_vw
+        dtw_adv = dtw_cw * cw_adv + dtw_vw * ctxt%vw_adv(i)&
+                + dtw_dxw * ctxt%dxw_adv(i)
+        dtw_adw = dtw_vw * ctxt%vw_adw(i) + dtw_dxw * ctxt%dxw_adw(i)
         !
         !------ accumulate Thrust and sensitivities
-        TWAK = TWAK + DTW
-        TW_ADV = TW_ADV + DTW_ADV
-        TW_ADW = TW_ADW + DTW_ADW
+        ctxt%twak = ctxt%twak + dtw
+        ctxt%tw_adv = ctxt%tw_adv + dtw_adv
+        ctxt%tw_adw = ctxt%tw_adw + dtw_adw
         !
         !------ Resolve dTw dependencies ( Vt, Va, dxw ) to Gamma
-        TW_GAM(I) = TW_GAM(I) + DTW_GI
-        DO J = 1, II
-            TW_GAM(J) = TW_GAM(J) + DTW_VW * VW_GAM(I, J)&
-                    + DTW_DXW * DXW_GAM(I, J)
-        ENDDO
+        ctxt%tw_gam(i) = ctxt%tw_gam(i) + dtw_gi
+        do j = 1, ctxt%ii
+            ctxt%tw_gam(j) = ctxt%tw_gam(j) + dtw_vw * ctxt%vw_gam(i, j)&
+                    + dtw_dxw * ctxt%dxw_gam(i, j)
+        enddo
         !
         !
-        !------ dPw( S(Va) , Gi , Adv )
-        DPW = GAM(I) * SI * BDX * XI(I) / ADV
+        !------ dPw( s(Va) , Gi , Adv )
+        dpw = ctxt%gam(i) * si * bdx * ctxt%xi(i) / ctxt%adv
         !
-        DPW_SI = GAM(I) * BDX * XI(I) / ADV
-        DPW_GI = SI * BDX * XI(I) / ADV
-        DPW_ADV = -DPW / ADV
+        dpw_si = ctxt%gam(i) * bdx * ctxt%xi(i) / ctxt%adv
+        dpw_gi = si * bdx * ctxt%xi(i) / ctxt%adv
+        dpw_adv = -dpw / ctxt%adv
         !
         !------ dPw( Adv , Adw , Va(Gj Adw) , Gi )
-        DPW_VA = DPW_SI * SI_VA
-        DPW_ADW = DPW_VA * VA_ADW
+        dpw_va = dpw_si * si_va
+        dpw_adw = dpw_va * va_adw
         !
         !------ accumulate Power and sensitivities
-        PWAK = PWAK + DPW
-        PW_ADV = PW_ADV + DPW_ADV
-        PW_ADW = PW_ADW + DPW_ADW
+        ctxt%pwak = ctxt%pwak + dpw
+        ctxt%pw_adv = ctxt%pw_adv + dpw_adv
+        ctxt%pw_adw = ctxt%pw_adw + dpw_adw
         !
         !------ Resolve dPw dependencies ( Va ) to Gamma
-        PW_GAM(I) = PW_GAM(I) + DPW_GI
-        DO J = 1, II
-            PW_GAM(J) = PW_GAM(J) + DPW_VA * VIND_GAM(1, I, J)
-        ENDDO
+        ctxt%pw_gam(i) = ctxt%pw_gam(i) + dpw_gi
+        do j = 1, ctxt%ii
+            ctxt%pw_gam(j) = ctxt%pw_gam(j) + dpw_va * ctxt%vind_gam(1, i, j)
+        enddo
         !
-        !        write(*,1011) 'DTW DPW DTI DPI ',DTW,DPW,DTI,DPI,cw/sw,ci/si
-        ! 1011   format(a,6F11.5)
+        !        write(*,1011) 'dtw dpw dti dpi ',dtw,dpw,dti,dpi,cw/sw,ci/si
+        ! 1011   format(a,6f11.5)
         !
         !------ Save blade thrust and power contributions (per blade, per span)
-        DTII(I) = DTI / BDX
-        DPII(I) = DPI / BDX
-        DTWI(I) = DTW / BDX
-        DPWI(I) = DPW / BDX
-        DTVI(I) = DTV / BDX
-        DPVI(I) = DPV / BDX
+        ctxt%dtii(i) = dti / bdx
+        ctxt%dpii(i) = dpi / bdx
+        ctxt%dtwi(i) = dtw / bdx
+        ctxt%dpwi(i) = dpw / bdx
+        ctxt%dtvi(i) = dtv / bdx
+        ctxt%dpvi(i) = dpv / bdx
         !
-        !cc        write(21,*) XI(I),TWAK
+        !cc        write(21,*) xi(i),twak
         !
         !*******************************************************
         !------ Inviscid Thrust & Power from momentum
         !
-        !------ dTmom( S(Va) , Va )
-        VTGM = GAM(I) * BLDS / (4.0 * PI * XI(I))
-        VAGM = VTGM * XI(I) / ADW
-        DTM = 2.0 * PI * XI(I) * DXI(I) * SI * (2.0 * VA)
-        TMOM = TMOM + DTM
-        !cc        write(20,*) XI(I),TMOM,VA,VD
+        !------ dTmom( s(Va) , Va )
+        vtgm = ctxt%gam(i) * blds / (4.0 * pi * ctxt%xi(i))
+        vagm = vtgm * ctxt%xi(i) / ctxt%adw
+        dtm = 2.0 * pi * ctxt%xi(i) * ctxt%dxi(i) * si * (2.0 * va)
+        tmom = tmom + dtm
+        !cc        write(20,*) xi(i),tmom,va,vd
         !
-        !------ dPmom( S(Va) )
-        DPM = DTM * (SI - VD)
-        PMOM = PMOM + DPM
+        !------ dPmom( s(Va) )
+        dpm = dtm * (si - vd)
+        pmom = pmom + dpm
         !
-        VATavg = VATavg + DTW * (VA + VD)
-        VAAavg = VAAavg + 2.0 * PI * XI(I) * DXI(I) * (VA + VD)
+        vaTavg = vaTavg + dtw * (va + vd)
+        vaaavg = vaaavg + 2.0 * pi * ctxt%xi(i) * ctxt%dxi(i) * (va + vd)
         !
     end do
     !cc        write(20,*) '&'
     !cc        write(21,*) '&'
     !
-    TTOT = TWAK + TVIS
-    PTOT = PWAK + PVIS
-    QTOT = PTOT * ADV
-    !cc      write(*,*) 'TW,TI,TM ',TWAK,TINV,TMOM
-    !      write(*,*) 'TBLDdim ',TINV*RHO*VEL**2*RAD**2
-    !      write(*,*) 'TWAKdim ',TWAK*RHO*VEL**2*RAD**2
-    !      write(*,*) 'TTOTdim ',TTOT*RHO*VEL**2*RAD**2
-    !      write(*,*) 'TMOMdim ',TMOM*RHO*VEL**2*RAD**2
+    ctxt%ttot = ctxt%twak + ctxt%tvis
+    ctxt%ptot = ctxt%pwak + ctxt%pvis
+    ctxt%qtot = ctxt%ptot * ctxt%adv
+    !cc      write(*,*) 'tw,ti,tm ',twak,tinv,tmom
+    !      write(*,*) 'tblDdim ',tinv*rho*vel**2*rad**2
+    !      write(*,*) 'twaKdim ',twak*rho*vel**2*rad**2
+    !      write(*,*) 'ttoTdim ',ttot*rho*vel**2*rad**2
+    !      write(*,*) 'tmoMdim ',tmom*rho*vel**2*rad**2
     !
-    !      write(*,*) 'PBLDdim ',PINV*RHO*VEL**3*RAD**2
-    !      write(*,*) 'PWAKdim ',PWAK*RHO*VEL**3*RAD**2
-    !      write(*,*) 'PMOMdim ',PMOM*RHO*VEL**3*RAD**2
+    !      write(*,*) 'pblDdim ',pinv*rho*vel**3*rad**2
+    !      write(*,*) 'pwaKdim ',pwak*rho*vel**3*rad**2
+    !      write(*,*) 'pmoMdim ',pmom*rho*vel**3*rad**2
     !
     !---- disk area
-    ADISK = PI * (1.0 - XI0**2)
-    VAAavg = VAAavg / ADISK
-    VATavg = VATavg / TWAK
-    !      write(*,*) '     VA Aavg ',VAAavg*VEL
-    !      write(*,*) '     VA Tavg ',VATavg*VEL
+    adisk = pi * (1.0 - ctxt%xi0**2)
+    vaAavg = vaAavg / adisk
+    vatavg = vatavg / ctxt%twak
+    !      write(*,*) '     va Aavg ',vaAavg*vel
+    !      write(*,*) '     va Tavg ',vaTavg*vel
     !
-    TDIM = TWAK * RHO * VEL**2 * RAD**2
-    PDIM = PWAK * RHO * VEL**3 * RAD**2
-    !      write(*,*) 'Vinduced from PWAK/TWAK ',PDIM/TDIM
+    tdim = ctxt%twak * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+    pdim = ctxt%pwak * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
+    !      write(*,*) 'Vinduced from pwak/twak ',pdim/tdim
     !
-    RETURN
-END
-! TPQ
+    return
+end
+! tpq
 
 
 
-SUBROUTINE VCALC
-    USE common
-    IMPLICIT REAL (M)
+subroutine vcalc(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !---------------------------------------------
     !     Calculates cartesian induced velocities
     !---------------------------------------------
-    DO I = 1, II
-        VXSUM = 0.
-        VYSUM = 0.
-        VZSUM = 0.
-        DO J = 1, II
-            VXSUM = VXSUM + VIND_GAM(1, I, J) * GAM(J)
-            VYSUM = VYSUM + VIND_GAM(2, I, J) * GAM(J)
-            VZSUM = VZSUM + VIND_GAM(3, I, J) * GAM(J)
-        ENDDO
-        VIND(1, I) = VXSUM
-        VIND(2, I) = VYSUM
-        VIND(3, I) = VZSUM
-    ENDDO
+    do i = 1, ctxt%ii
+        vxsum = 0.
+        vysum = 0.
+        vzsum = 0.
+        do j = 1, ctxt%ii
+            vxsum = vxsum + ctxt%vind_gam(1, i, j) * ctxt%gam(j)
+            vysum = vysum + ctxt%vind_gam(2, i, j) * ctxt%gam(j)
+            vzsum = vzsum + ctxt%vind_gam(3, i, j) * ctxt%gam(j)
+        enddo
+        ctxt%vind(1, i) = vxsum
+        ctxt%vind(2, i) = vysum
+        ctxt%vind(3, i) = vzsum
+    enddo
     !
-    RETURN
-END
-! VCALC
+    return
+end
+! vcalc
 
 
 
-SUBROUTINE GRADMO(IMAX, II, NBLDS, LDUCT, RAKE, &
-        XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-    DIMENSION XI(IMAX), XV(IMAX), GAM(IMAX)
-    DIMENSION VIND_ADW(3, IMAX), VIND_GAM(3, IMAX, IMAX)
-    LOGICAL LDUCT
+subroutine gradmo(imax, ii, nblds, lduct, rake, &
+        xi, xv, gam, adw, vind_gam, vind_adw)
+    dimension xi(imax), xv(imax), gam(imax)
+    dimension vind_adw(3, imax), vind_gam(3, imax, imax)
+    logical lduct
     !-----------------------------------------
     !     Calculates "Graded Momentum"
     !     Gamma-swirl influence coefficients
     !
     !     Input:
-    !       IMAX         array dimension
-    !       II           number of radial points on blade (circulation stations)
-    !       NN           number of Fourier harmonics
-    !       NBLDS        number of blades
-    !       LDUCT        T for duct outer BC
-    !       XI(i)        radial coordinate array
-    !       GAM(i)       circulation array
-    !       ADW          wake advance ratio  V/wR
+    !       imax         array dimension
+    !       ii           number of radial points on blade (circulation stations)
+    !       nn           number of Fourier harmonics
+    !       nblds        number of blades
+    !       lduct        t for duct outer bc
+    !       xi(i)        radial coordinate array
+    !       gam(i)       circulation array
+    !       adw          wake advance ratio  v/wr
     !
     !     Output:
     !
     !     Output:
-    !       VIND_GAM(i,j)  sensitivity of velocity at i to circulation at j
-    !       VIND_ADW(i)    sensitivity of velocity at i to wake advance ratio
+    !       vind_gam(i,j)  sensitivity of velocity at i to circulation at j
+    !       vind_adw(i)    sensitivity of velocity at i to wake advance ratio
     !
-    !        Where VIND_XXX(1,i,j) is the axial component
-    !              VIND_XXX(3,i,j) is the swirl component
+    !        Where vind_xxx(1,i,j) is the axial component
+    !              vind_xxx(3,i,j) is the swirl component
     !-----------------------------------------
-    BLDS = FLOAT(NBLDS)
+    blds = float(nblds)
     !
-    PI = 4.0 * ATAN(1.0)
+    pi = 4.0 * atan(1.0)
     !
-    XI0 = XV(1)
-    XITIP = XV(II + 1)
+    xi0 = xv(1)
+    xitip = xv(ii + 1)
     !
-    IF(LDUCT) THEN
+    if(lduct) then
         !
         !----- Circulation defines mean swirl at blade
         !----- use simple mean swirl to get swirl at blade
-        DO I = 1, II
-            DO J = 1, II
-                VIND_GAM(1, I, J) = 0.
-                VIND_GAM(2, I, J) = 0.
-                VIND_GAM(3, I, J) = 0.
-            ENDDO
-            VIND_GAM(3, I, I) = BLDS / (4.0 * PI * XI(I))
-            VIND_ADW(3, I) = 0.0
-            VIND_ADW(2, I) = 0.0
-            VIND_GAM(1, I, I) = VIND_GAM(3, I, I) * XI(I) / ADW
-            VIND_ADW(1, I) = -VIND_GAM(1, I, I) * GAM(I) / ADW
-        ENDDO
+        do i = 1, ii
+            do j = 1, ii
+                vind_gam(1, i, j) = 0.
+                vind_gam(2, i, j) = 0.
+                vind_gam(3, i, j) = 0.
+            enddo
+            vind_gam(3, i, i) = blds / (4.0 * pi * xi(i))
+            vind_adw(3, i) = 0.0
+            vind_adw(2, i) = 0.0
+            vind_gam(1, i, i) = vind_gam(3, i, i) * xi(i) / adw
+            vind_adw(1, i) = -vind_gam(1, i, i) * gam(i) / adw
+        enddo
         !
-    ELSE
+    else
         !
         !----- Circulation defines mean swirl at blade
-        !----- Free-tip treatment incorporates Prandtl's averaging factor F
-        SFAC = SQRT(1.0 + 1.0 / ADW**2)
-        SF_ADW = 0.5 / SFAC * (-2.0 / ADW**3)
+        !----- Free-tip treatment incorporates Prandtl's averaging factor f
+        sfac = sqrt(1.0 + 1.0 / adw**2)
+        sf_adw = 0.5 / sfac * (-2.0 / adw**3)
         !
-        do I = 1, II
+        do i = 1, ii
             !
-            DO J = 1, II
-                VIND_GAM(1, I, J) = 0.
-                VIND_GAM(2, I, J) = 0.
-                VIND_GAM(3, I, J) = 0.
-            ENDDO
-            VIND_ADW(1, I) = 0.0
-            VIND_ADW(2, I) = 0.0
-            VIND_ADW(3, I) = 0.0
+            do j = 1, ii
+                vind_gam(1, i, j) = 0.
+                vind_gam(2, i, j) = 0.
+                vind_gam(3, i, j) = 0.
+            enddo
+            vind_adw(1, i) = 0.0
+            vind_adw(2, i) = 0.0
+            vind_adw(3, i) = 0.0
             !
-            ARG = MIN(20.0, 0.5 * BLDS * (1.0 - XI(I) / XITIP) * SFAC)
-            EK = EXP(-ARG)
-            EK_ADW = -EK * 0.5 * BLDS * (1.0 - XI(I) / XITIP) * SF_ADW
-            FK = SQRT(1.0 - EK * EK)
-            FK_ADW = 0.5 / FK * (-2.0 * EK * EK_ADW)
-            F = ATAN2(FK, EK) * 2.0 / PI
-            F_ADW = (EK * FK_ADW - FK * EK_ADW) / (EK * EK + FK * FK) * 2.0 / PI
+            arg = min(20.0, 0.5 * blds * (1.0 - xi(i) / xitip) * sfac)
+            ek = exp(-arg)
+            ek_adw = -ek * 0.5 * blds * (1.0 - xi(i) / xitip) * sf_adw
+            fk = sqrt(1.0 - ek * ek)
+            fk_adw = 0.5 / fk * (-2.0 * ek * ek_adw)
+            f = atan2(fk, ek) * 2.0 / pi
+            f_adw = (ek * fk_adw - fk * ek_adw) / (ek * ek + fk * fk) * 2.0 / pi
             !
-            VIND_GAM(3, I, I) = BLDS / (4.0 * PI * F * XI(I))
-            VIND_ADW(3, I) = BLDS / (4.0 * PI * F * XI(I)) * GAM(I) * (-F_ADW / F)
-            VIND_GAM(1, I, I) = VIND_GAM(3, I, I) * XI(I) / ADW
-            VIND_ADW(1, I) = VIND_ADW(3, I) * XI(I) / ADW&
-                    - VIND_GAM(1, I, I) * GAM(I) / ADW
+            vind_gam(3, i, i) = blds / (4.0 * pi * f * xi(i))
+            vind_adw(3, i) = blds / (4.0 * pi * f * xi(i)) * gam(i) * (-f_adw / f)
+            vind_gam(1, i, i) = vind_gam(3, i, i) * xi(i) / adw
+            vind_adw(1, i) = vind_adw(3, i) * xi(i) / adw&
+                    - vind_gam(1, i, i) * gam(i) / adw
             !
-            !--- Reverse VZ signs
-            !         VIND_GAM(3,I,I) = -VIND_GAM(3,I,I)
-            !         VIND_ADW(3,I)   = -VIND_ADW(3,I)
-            !cc          VA_ADW = VIND_ADW(1,I) - VA/ADW
+            !--- Reverse vz signs
+            !         vind_gam(3,i,i) = -vind_gam(3,i,i)
+            !         vind_adw(3,i)   = -vind_adw(3,i)
+            !cc          va_adw = vind_adw(1,i) - va/adw
             !
         end do
-    ENDIF
+    endif
     !
-    RETURN
-END
-! GRADMO
+    return
+end
+! gradmo
 
 
 
-SUBROUTINE HELICO(IMAX, II, NBLDS, LDUCT, RAKE, &
-        XI, XV, GAM, ADW, VIND_GAM, VIND_ADW)
-    DIMENSION XI(IMAX), XV(IMAX), GAM(IMAX)
-    DIMENSION VIND_ADW(3, IMAX), VIND_GAM(3, IMAX, IMAX)
+subroutine helico(imax, ii, nblds, lduct, rake, &
+        xi, xv, gam, adw, vind_gam, vind_adw)
+    dimension xi(imax), xv(imax), gam(imax)
+    dimension vind_adw(3, imax), vind_gam(3, imax, imax)
     !
-    LOGICAL LDUCT
+    logical lduct
     !--------------------------------------------------------------------------
     !     Calculates Swirl-Gamma influence coefficients by a mixed
     !     spectral/finite-difference method.
@@ -2766,298 +2776,298 @@ SUBROUTINE HELICO(IMAX, II, NBLDS, LDUCT, RAKE, &
     !     some expense of clarity.
     !
     !     Input:
-    !       IMAX         array dimension
-    !       II           number of radial points on blade (circulation stations)
-    !       NBLDS        number of blades
-    !       LDUCT        T for duct outer BC
-    !       XI(i)        r/R radial coordinate array
-    !       XV(i)        r/R vortex  leg   coordinate array
-    !       GAM(i)       circulation array
-    !       ADW          wake advance ratio  V/wR
+    !       imax         array dimension
+    !       ii           number of radial points on blade (circulation stations)
+    !       nblds        number of blades
+    !       lduct        t for duct outer bc
+    !       xi(i)        r/r radial coordinate array
+    !       xv(i)        r/r vortex  leg   coordinate array
+    !       gam(i)       circulation array
+    !       adw          wake advance ratio  v/wr
     !
     !     Output:
-    !       VIND_GAM(i,j)  sensitivity of velocity at i to circulation at j
-    !       VIND_ADW(i)    sensitivity of velocity at i to wake advance ratio
+    !       vind_gam(i,j)  sensitivity of velocity at i to circulation at j
+    !       vind_adw(i)    sensitivity of velocity at i to wake advance ratio
     !
-    !        Where VIND_XXX(1,i,j) is the axial component
-    !              VIND_XXX(3,i,j) is the swirl component
+    !        Where vind_xxx(1,i,j) is the axial component
+    !              vind_xxx(3,i,j) is the swirl component
     !--------------------------------------------------------------------------
-    PARAMETER (IDIM = 150)
-    DIMENSION X(0:IDIM), AINV(0:IDIM), CSAV(0:IDIM), &
-            AN_GAM(0:IDIM, 0:IDIM), AN_ADW(0:IDIM)
-    DIMENSION SYS(4, IDIM)
+    parameter (idim = 150)
+    dimension x(0:idim), ainv(0:idim), csav(0:idim), &
+            an_gam(0:idim, 0:idim), an_adw(0:idim)
+    dimension sys(4, idim)
     !
-    IF(IDIM < IMAX) STOP 'HELICO: Array overflow:  Increase IDIM.'
+    if(idim < imax) stop 'helico: Array overflow:  Increase idim.'
     !
-    PI = 4.0 * ATAN(1.0)
+    pi = 4.0 * atan(1.0)
     !
     !---- number of Fourier harmonics
-    NN = 128
+    nn = 128
     !
     !
     !---- set radial coordinate array for finite-difference solution
-    DO I = 1, II
-        X(I) = XI(I)
-    ENDDO
+    do i = 1, ii
+        x(i) = xi(i)
+    enddo
     !
-    XI0 = XV(1)
-    XITIP = XV(II + 1)
+    xi0 = xv(1)
+    xitip = xv(ii + 1)
     !
     !---- radial coordinate array is also needed outside of blade
-    X(0) = 2.0 * XI0 - XI(1)
-    X(II + 1) = 2.0 * XITIP - XI(II)
+    x(0) = 2.0 * xi0 - xi(1)
+    x(ii + 1) = 2.0 * xitip - xi(ii)
     !
-    IF(LDUCT) THEN
-        IIMAX = II + 1
+    if(lduct) then
+        iimax = ii + 1
         !
-    ELSE
+    else
         !------ position of outermost point (at "infinity")
-        XINF = 4.0 * XITIP
+        xinf = 4.0 * xitip
         !
         !------ set first few points beyond tip at mirror locations of those inside tip
-        X(II + 2) = 2.0 * XITIP - XI(II - 1)
-        X(II + 3) = 2.0 * XITIP - XI(II - 2)
-        X(II + 4) = 2.0 * XITIP - XI(II - 3)
+        x(ii + 2) = 2.0 * xitip - xi(ii - 1)
+        x(ii + 3) = 2.0 * xitip - xi(ii - 2)
+        x(ii + 4) = 2.0 * xitip - xi(ii - 3)
         !
         !------ set remaining points with exponential stretching to outermost point
-        XFAC = (X(II + 4) - X(II + 3)) / (X(II + 3) - X(II + 2))
-        DX = (X(II + 4) - X(II + 3)) * XFAC
-        DO I = II + 5, IDIM - 1
-            X(I) = X(I - 1) + DX
-            IF(X(I) >= XINF) GO TO 5
-            DX = DX * XFAC
-        ENDDO
-        WRITE(*, *) 'HELICO: Local array too small. Increase IDIM.'
-        5      CONTINUE
-        IIMAX = I
-    ENDIF
+        xfac = (x(ii + 4) - x(ii + 3)) / (x(ii + 3) - x(ii + 2))
+        dx = (x(ii + 4) - x(ii + 3)) * xfac
+        do i = ii + 5, idim - 1
+            x(i) = x(i - 1) + dx
+            if(x(i) >= xinf) go to 5
+            dx = dx * xfac
+        enddo
+        write(*, *) 'helico: Local array too small. Increase idim.'
+        5      continue
+        iimax = i
+    endif
     !
     !
-    DO I = 1, II
-        DO J = 1, II
-            VIND_GAM(1, I, J) = 0.
-            VIND_GAM(2, I, J) = 0.
-            VIND_GAM(3, I, J) = 0.
-        ENDDO
-        VIND_ADW(1, I) = 0.
-        VIND_ADW(2, I) = 0.
-        VIND_ADW(3, I) = 0.
-    ENDDO
+    do i = 1, ii
+        do j = 1, ii
+            vind_gam(1, i, j) = 0.
+            vind_gam(2, i, j) = 0.
+            vind_gam(3, i, j) = 0.
+        enddo
+        vind_adw(1, i) = 0.
+        vind_adw(2, i) = 0.
+        vind_adw(3, i) = 0.
+    enddo
     !
     !==== Set up tridiagonal system
-    ADWINV = 1.0 / ADW**2
-    QBSQ = 0.25 * FLOAT(NBLDS)**2
+    adwinv = 1.0 / adw**2
+    qbsq = 0.25 * float(nblds)**2
     !
-    DO I = 1, IIMAX - 1
-        SYS(1, I) = (X(I) + X(I - 1)) / (X(I) - X(I - 1))
-        SYS(3, I) = (X(I + 1) + X(I)) / (X(I + 1) - X(I))
-        SYS(2, I) = QBSQ * (1.0 / X(I) + X(I) * ADWINV) * (X(I + 1) - X(I - 1))
-        SYS(4, I) = QBSQ * (-2.0 * X(I) * ADWINV / ADW) * (X(I + 1) - X(I - 1))
-    ENDDO
+    do i = 1, iimax - 1
+        sys(1, i) = (x(i) + x(i - 1)) / (x(i) - x(i - 1))
+        sys(3, i) = (x(i + 1) + x(i)) / (x(i + 1) - x(i))
+        sys(2, i) = qbsq * (1.0 / x(i) + x(i) * adwinv) * (x(i + 1) - x(i - 1))
+        sys(4, i) = qbsq * (-2.0 * x(i) * adwinv / adw) * (x(i + 1) - x(i - 1))
+    enddo
     !
-    I = IIMAX
-    IF(LDUCT) THEN
-        SYS(1, I) = -1.0
-    ELSE
-        SYS(1, I) = 1.0
-    ENDIF
+    i = iimax
+    if(lduct) then
+        sys(1, i) = -1.0
+    else
+        sys(1, i) = 1.0
+    endif
     !
-    !==== Loop over all NN harmonics for n = 2,4,6,...
-    do N = 2, NN, 2
-        RN = FLOAT(N)
+    !==== Loop over all nn harmonics for n = 2,4,6,...
+    do n = 2, nn, 2
+        rn = float(n)
         !
         !------ set up and factor tridiagonal system for this n
         !
-        !------ inner BC:  dAn/dx = 0
-        AINV(0) = 1.0
-        CSAV(0) = -1.0
+        !------ inner bc:  dAn/dx = 0
+        ainv(0) = 1.0
+        csav(0) = -1.0
         !                                                2          2
-        !------ interior equations:  d[ x dAn/dx ]/dx - n K An  =  n K Gam
-        DO I = 1, IIMAX - 1
-            B = SYS(1, I)
-            A = -(SYS(1, I) + SYS(2, I) * RN**2 + SYS(3, I))
-            C = SYS(3, I)
+        !------ interior equations:  d[ x dAn/dx ]/dx - n k An  =  n k Gam
+        do i = 1, iimax - 1
+            b = sys(1, i)
+            a = -(sys(1, i) + sys(2, i) * rn**2 + sys(3, i))
+            c = sys(3, i)
             !
             !-------- set 1 / (modified diagonal element)
-            AINV(I) = 1.0 / (A - B * CSAV(I - 1))
+            ainv(i) = 1.0 / (a - b * csav(i - 1))
             !
             !-------- set normalized upper diagonal element for back substitution
-            CSAV(I) = C * AINV(I)
-        ENDDO
+            csav(i) = c * ainv(i)
+        enddo
         !
-        !------ outer BC:  dAn/dx = 0  (duct) ,  or   An = 0  (free tip)
-        I = IIMAX
-        B = SYS(1, I)
-        A = 1.0
+        !------ outer bc:  dAn/dx = 0  (duct) ,  or   An = 0  (free tip)
+        i = iimax
+        b = sys(1, i)
+        a = 1.0
         !
-        AINV(I) = 1.0 / (A - B * CSAV(I - 1))
+        ainv(i) = 1.0 / (a - b * csav(i - 1))
         !
         !
         !====== solve  An, dAn(i)/dGam(j) problems
         !
         !
         !------ set righthand sides
-        DO I = 0, IIMAX
-            DO J = 0, II
-                AN_GAM(I, J) = 0.
-            ENDDO
-        ENDDO
+        do i = 0, iimax
+            do j = 0, ii
+                an_gam(i, j) = 0.
+            enddo
+        enddo
         !
-        DO I = 1, II
-            AN_GAM(I, 0) = SYS(2, I) * RN**2 * GAM(I)
-            AN_GAM(I, I) = SYS(2, I) * RN**2
-        ENDDO
+        do i = 1, ii
+            an_gam(i, 0) = sys(2, i) * rn**2 * gam(i)
+            an_gam(i, i) = sys(2, i) * rn**2
+        enddo
         !
         !
-        !------ back-substitute RHSs
-        DO I = 1, IIMAX
-            IM = I - 1
-            B = SYS(1, I)
+        !------ back-substitute rhSs
+        do i = 1, iimax
+            im = i - 1
+            b = sys(1, i)
             !
             !-------- eliminate and normalize only up to nonzero elements
-            JLAST = MIN(I, II)
-            DO J = 0, JLAST
-                AN_GAM(I, J) = (AN_GAM(I, J) - B * AN_GAM(IM, J)) * AINV(I)
-            ENDDO
-        ENDDO
+            jlast = min(i, ii)
+            do j = 0, jlast
+                an_gam(i, j) = (an_gam(i, j) - b * an_gam(im, j)) * ainv(i)
+            enddo
+        enddo
         !
-        DO I = IIMAX - 1, 0, -1
-            IP = I + 1
-            DO J = 0, II
-                AN_GAM(I, J) = AN_GAM(I, J) - CSAV(I) * AN_GAM(IP, J)
-            ENDDO
-        ENDDO
+        do i = iimax - 1, 0, -1
+            ip = i + 1
+            do j = 0, ii
+                an_gam(i, j) = an_gam(i, j) - csav(i) * an_gam(ip, j)
+            enddo
+        enddo
         !
         !
         !====== solve dAn(i)/dAdw problem
         !
-        !------ set RHS
-        AN_ADW(0) = 0.
-        DO I = 1, IIMAX - 1
-            AN_ADW(I) = SYS(4, I) * RN**2 * (GAM(I) + AN_GAM(I, 0))
-        ENDDO
-        AN_ADW(IIMAX) = 0.
+        !------ set rhs
+        an_adw(0) = 0.
+        do i = 1, iimax - 1
+            an_adw(i) = sys(4, i) * rn**2 * (gam(i) + an_gam(i, 0))
+        enddo
+        an_adw(iimax) = 0.
         !
-        !------ back-substitute RHS
-        DO I = 1, IIMAX
-            IM = I - 1
-            B = SYS(1, I)
-            AN_ADW(I) = (AN_ADW(I) - B * AN_ADW(IM)) * AINV(I)
-        ENDDO
+        !------ back-substitute rhs
+        do i = 1, iimax
+            im = i - 1
+            b = sys(1, i)
+            an_adw(i) = (an_adw(i) - b * an_adw(im)) * ainv(i)
+        enddo
         !
-        DO I = IIMAX - 1, 0, -1
-            IP = I + 1
-            AN_ADW(I) = AN_ADW(I) - CSAV(I) * AN_ADW(IP)
-        ENDDO
+        do i = iimax - 1, 0, -1
+            ip = i + 1
+            an_adw(i) = an_adw(i) - csav(i) * an_adw(ip)
+        enddo
         !
         !
         !------ sum potential harmonics to get Swirl-Gamma influence coefficients
-        DO I = 1, II
-            DO J = 1, II
-                VIND_GAM(3, I, J) = VIND_GAM(3, I, J) + AN_GAM(I, J)
-            ENDDO
+        do i = 1, ii
+            do j = 1, ii
+                vind_gam(3, i, j) = vind_gam(3, i, j) + an_gam(i, j)
+            enddo
             !
-            VIND_GAM(3, I, I) = VIND_GAM(3, I, I) + 1.0
-            VIND_ADW(3, I) = VIND_ADW(3, I) + AN_ADW(I)
-        ENDDO
+            vind_gam(3, i, i) = vind_gam(3, i, i) + 1.0
+            vind_adw(3, i) = vind_adw(3, i) + an_adw(i)
+        enddo
         !
     end do
     !
     !
-    !---- extrapolate the series to the next NN terms
+    !---- extrapolate the series to the next nn terms
     !-     assuming the known aymptotic behavior (An + Gam) ~ 1/n^2
     !
-    IF(.NOT.LDUCT) THEN
+    if(.not.lduct) then
         !
-        FSUM = 0.
-        DO N = NN + 2, 4 * NN, 2
-            FSUM = FSUM + (FLOAT(NN) / FLOAT(N))**2
-        ENDDO
+        fsum = 0.
+        do n = nn + 2, 4 * nn, 2
+            fsum = fsum + (float(nn) / float(n))**2
+        enddo
         !
-        DO I = 1, II
-            DO J = 1, II
-                VIND_GAM(3, I, J) = VIND_GAM(3, I, J) + AN_GAM(I, J) * FSUM
-            ENDDO
+        do i = 1, ii
+            do j = 1, ii
+                vind_gam(3, i, j) = vind_gam(3, i, j) + an_gam(i, j) * fsum
+            enddo
             !
-            VIND_GAM(3, I, I) = VIND_GAM(3, I, I) + 1.0 * FSUM
-            VIND_ADW(3, I) = VIND_ADW(3, I) + AN_ADW(I) * FSUM
-        ENDDO
+            vind_gam(3, i, i) = vind_gam(3, i, i) + 1.0 * fsum
+            vind_adw(3, i) = vind_adw(3, i) + an_adw(i) * fsum
+        enddo
         !
-    ENDIF
+    endif
     !
     !---- Add on sawtooth self-influence term and scale properly
-    DO I = 1, II
-        BFAC = FLOAT(NBLDS) / (2.0 * PI * X(I))
+    do i = 1, ii
+        bfac = float(nblds) / (2.0 * pi * x(i))
         !
-        VIND_GAM(3, I, I) = VIND_GAM(3, I, I) + 0.5
-        DO J = 1, II
-            VIND_GAM(3, I, J) = VIND_GAM(3, I, J) * BFAC
-        ENDDO
-        VIND_ADW(3, I) = VIND_ADW(3, I) * BFAC
+        vind_gam(3, i, i) = vind_gam(3, i, i) + 0.5
+        do j = 1, ii
+            vind_gam(3, i, j) = vind_gam(3, i, j) * bfac
+        enddo
+        vind_adw(3, i) = vind_adw(3, i) * bfac
         !
-    ENDDO
+    enddo
     !
-    !---- Define other velocity components VX,VY from VZ
-    DO I = 1, II
-        VSUM = 0.0
-        DO J = 1, II
-            VIND_GAM(1, I, J) = VIND_GAM(3, I, J) * XI(I) / ADW
-            VIND_GAM(2, I, J) = 0.0
-            VSUM = VSUM + GAM(J) * VIND_GAM(3, I, J)
-        ENDDO
-        !c        VIND_ADW(1,I) = VIND_ADW(3,I)*XI(I)/ADW
-        VIND_ADW(1, I) = VIND_ADW(3, I) * XI(I) / ADW - VSUM * XI(I) / ADW**2
-        VIND_ADW(2, I) = 0.0
+    !---- Define other velocity components vx,vy from vz
+    do i = 1, ii
+        vsum = 0.0
+        do j = 1, ii
+            vind_gam(1, i, j) = vind_gam(3, i, j) * xi(i) / adw
+            vind_gam(2, i, j) = 0.0
+            vsum = vsum + gam(j) * vind_gam(3, i, j)
+        enddo
+        !c        vind_adw(1,i) = vind_adw(3,i)*xi(i)/adw
+        vind_adw(1, i) = vind_adw(3, i) * xi(i) / adw - vsum * xi(i) / adw**2
+        vind_adw(2, i) = 0.0
         !
-        !--- Reverse VZ signs
-        !        DO J = 1, II
-        !         VIND_GAM(3,I,J) = -VIND_GAM(3,I,J)
-        !        ENDDO
-        !        VIND_ADW(3,I) = -VIND_ADW(3,I)
+        !--- Reverse vz signs
+        !        do j = 1, ii
+        !         vind_gam(3,i,j) = -vind_gam(3,i,j)
+        !        enddo
+        !        vind_adw(3,i) = -vind_adw(3,i)
         !
-    ENDDO
+    enddo
     !
-    RETURN
-END
-! HELICO
+    return
+end
+! helico
 
 
 
 
 
-SUBROUTINE FILTER(Q, SMLEN, N)
+subroutine filter(q, smlen, n)
     !-----------------------------------------
-    !     Smooths array Q.
-    !     SMLEN is the number of points over
+    !     Smooths array q.
+    !     smlen is the number of points over
     !     which information is smeared.
     !-----------------------------------------
     use mod_spline
-    IMPLICIT REAL (A-H, M, O-Z)
-    DIMENSION Q(N)
+    implicit real (a-h, m, o-z)
+    dimension q(n)
     !
-    PARAMETER (NMAX = 500)
-    DIMENSION A(NMAX), B(NMAX), C(NMAX)
+    parameter (nmax = 500)
+    dimension a(nmax), b(nmax), c(nmax)
     !
-    IF(N > NMAX) THEN
-        WRITE(*, *) 'FILTER:  Array overflow.  No action taken'
-        RETURN
-    ENDIF
+    if(n > nmax) then
+        write(*, *) 'filter:  Array overflow.  No action taken'
+        return
+    endif
     !
-    !---- set up and solve tridiagonal system for smoothed Q
+    !---- set up and solve tridiagonal system for smoothed q
     !
-    CON = SMLEN**2
-    A(1) = 1.0
-    C(1) = 0.
-    do I = 2, N - 1
-        B(I) = -CON
-        A(I) = 2.0 * CON + 1.0
-        C(I) = -CON
+    con = smlen**2
+    a(1) = 1.0
+    c(1) = 0.
+    do i = 2, n - 1
+        b(i) = -con
+        a(i) = 2.0 * con + 1.0
+        c(i) = -con
     end do
-    A(N) = 1.0
-    B(N) = 0.
+    a(n) = 1.0
+    b(n) = 0.
     !
-    CALL TRISOL(A, B, C, Q)
+    call trisol(a, b, c, q)
     !
-    RETURN
-END
-! FILTER
+    return
+end
+! filter

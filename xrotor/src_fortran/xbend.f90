@@ -1,1205 +1,1214 @@
 !***********************************************************************
 !    Module:  xbend.f
 ! 
-!    Copyright (C) 2011 Mark Drela 
+!    Copyright (c) 2011 Mark Drela 
 ! 
 !    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the GNU General Public License as published by
+!    it under the terms of the gnu General Public License as published by
 !    the Free Software Foundation; either version 2 of the License, or
 !    (at your option) any later version.
 !
 !    This program is distributed in the hope that it will be useful,
-!    but WITHOUT ANY WARRANTY; without even the implied warranty of
-!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-!    GNU General Public License for more details.
+!    but without any warranty; without even the implied warranty of
+!    merchantability or fitness for a particular purpose.  See the
+!    gnu General Public License for more details.
 !
-!    You should have received a copy of the GNU General Public License
+!    You should have received a copy of the gnu General Public License
 !    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
 !***********************************************************************
 !
-SUBROUTINE BEND
-    USE common
-    IMPLICIT REAL (M)
-    CHARACTER*4 COMAND
-    CHARACTER*132 COMARG
+subroutine bend(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    character*4 comand
+    character*132 comarg
     !
-    DIMENSION IINPUT(20)
-    DIMENSION RINPUT(20)
-    LOGICAL ERROR
+    dimension iinput(20)
+    dimension rinput(20)
+    logical error
     !
     !---------------------------------------------
     !     Run rotor at arbitrary operating points
     !---------------------------------------------
     !
-    GREEK = .FALSE.
+    ctxt%greek = .false.
     !
-    IF(LSTRUC) THEN
-        WRITE(*, *)
-        WRITE(*, *) 'Structural properties available'
-    ELSE
-        WRITE(*, *)
-        WRITE(*, *) 'Structural properties not available'
-    ENDIF
+    if(ctxt%lstruc) then
+        write(*, *)
+        write(*, *) 'Structural properties available'
+    else
+        write(*, *)
+        write(*, *) 'Structural properties not available'
+    endif
     !
-    900  CALL ASKC('.BEND^', COMAND, COMARG)
+    900  call askc('.bend^', comand, comarg)
     !
-    DO I = 1, 20
-        IINPUT(I) = 0
-        RINPUT(I) = 0.0
-    ENDDO
-    NINPUT = 0
-    CALL GETINT(COMARG, IINPUT, NINPUT, ERROR)
-    NINPUT = 0
-    CALL GETFLT(COMARG, RINPUT, NINPUT, ERROR)
+    do i = 1, 20
+        iinput(i) = 0
+        rinput(i) = 0.0
+    enddo
+    ninput = 0
+    call getint(comarg, iinput, ninput, error)
+    ninput = 0
+    call getflt(comarg, rinput, ninput, error)
     !
-    IF(COMAND == '    ') RETURN
-    IF(COMAND == '?   ') WRITE(*, 1100)
-    IF(COMAND == '?   ') GO TO 900
-    IF(COMAND == 'READ') GO TO 10
-    IF(COMAND == 'CLR ') GO TO 20
-    IF(COMAND == 'EVAL') GO TO 30
-    IF(COMAND == 'DEFL') GO TO 40
-    IF(COMAND == 'REST') GO TO 50
-    IF(COMAND == 'WRIT') GO TO 70
-    IF(COMAND == 'SETS') GO TO 80
-    IF(COMAND == 'MCLR') GO TO 85
-    IF(COMAND == 'HELP') GO TO 100
-    !
-    !-------------------------------------------------------------
-    WRITE(*, 1000) COMAND
-    GO TO 900
+    if(comand == '    ') return
+    if(comand == '?   ') write(*, 1100)
+    if(comand == '?   ') go to 900
+    if(comand == 'read') go to 10
+    if(comand == 'clr ') go to 20
+    if(comand == 'eval') go to 30
+    if(comand == 'defl') go to 40
+    if(comand == 'rest') go to 50
+    if(comand == 'writ') go to 70
+    if(comand == 'sets') go to 80
+    if(comand == 'mclr') go to 85
+    if(comand == 'help') go to 100
     !
     !-------------------------------------------------------------
-    10   CALL EILOAD(COMARG)
-    GO TO 900
+    write(*, 1000) comand
+    go to 900
     !
     !-------------------------------------------------------------
-    20   CALL STCLR
-    GO TO 900
+    10   call eiload(ctxt, comarg)
+    go to 900
     !
     !-------------------------------------------------------------
-    30   IF(.NOT.LSTRUC) THEN
-        WRITE(*, *) 'Structural properties not available'
-        WRITE(*, *) 'Assuming zero mass, infinite stiffness...'
-    ENDIF
-    !cc      CALL STLOAD
-    CALL STCALC
-    CALL STWRIT(LUWRIT)
-    GO TO 900
+    20   call stclr(ctxt)
+    go to 900
     !
     !-------------------------------------------------------------
-    40   CALL STADD
-    GO TO 900
+    30   if(.not.ctxt%lstruc) then
+        write(*, *) 'Structural properties not available'
+        write(*, *) 'Assuming zero mass, infinite stiffness...'
+    endif
+    !cc      call stload(ctxt)
+    call stcalc(ctxt)
+    call stwrit(ctxt, ctxt%luwrit)
+    go to 900
     !
     !-------------------------------------------------------------
-    50   do I = 1, II
-        BETA(I) = BETA0(I)
+    40   call stadd(ctxt)
+    go to 900
+    !
+    !-------------------------------------------------------------
+    50   do i = 1, ctxt%ii
+        ctxt%beta(i) = ctxt%beta0(i)
     end do
-    CONV = .FALSE.
-    GO TO 900
+    ctxt%conv = .false.
+    go to 900
     !
     !-------------------------------------------------------------
-    70   IF(COMARG(1:1) /= ' ') SAVFIL = COMARG
-    CALL OPFILE(LUSAVE, SAVFIL)
-    CALL STWRIT(LUSAVE)
-    CLOSE(LUSAVE)
-    GO TO 900
+    70   if(comarg(1:1) /= ' ') ctxt%savfil = comarg
+    call opfile(ctxt%lusave, ctxt%savfil)
+    call stwrit(ctxt, ctxt%lusave)
+    close(ctxt%lusave)
+    go to 900
     !
     !-------------------------------------------------------------
-    80   CALL STSET
-    GO TO 900
+    80   call stset(ctxt)
+    go to 900
     !
     !-------------------------------------------------------------
-    85   CALL MCLR
-    GO TO 900
+    85   call mclr(ctxt)
+    go to 900
     !
     !-------------------------------------------------------------
-    100  WRITE(*, 3000)
-    GO TO 900
+    100  write(*, 3000)
+    go to 900
     !
     !.......................................................................
     !
-    1000 FORMAT(1X, A4, ' command not recognized.  Type a "?" for list')
-    1100 FORMAT(&
-            /'   READ f Read in blade structural properties'&
-            /'   EVAL   Evaluate structural loads and deflections'&
-            /'   CLR    Clear all structural deflections'&
-            //'   DEFL   Set new twist  =  static  +  structural twist'&
-            /'   REST   Set new twist  =  static twist'&
-            /'   SETS   Set static twist = current - structural twist'&
-            //'   WRIT f Write structural solution to disk file'&
-            //'   HELP   Display help on structural calculation')
+    1000 format(1x, a4, ' command not recognized.  Type a "?" for list')
+    1100 format(&
+            /'   read f Read in blade structural properties'&
+            /'   eval   Evaluate structural loads and deflections'&
+            /'   clr    Clear all structural deflections'&
+            //'   defl   Set new twist  =  static  +  structural twist'&
+            /'   rest   Set new twist  =  static twist'&
+            /'   sets   Set static twist = current - structural twist'&
+            //'   writ f Write structural solution to disk file'&
+            //'   help   Display help on structural calculation')
     !
     !
-    3000 FORMAT(/&
+    3000 format(/&
             'The axis definitions are:'//&
-            '  X  aft along prop rotation axis'/&
-            '  Y  radial alng blade'/&
-            '  Z  perpendicular to blade:    X x Y = Z'//&
+            '  x  aft along prop rotation axis'/&
+            '  y  radial alng blade'/&
+            '  z  perpendicular to blade:    x x y = z'//&
             'The structural solution contains two groups of data, '&
             'the first group has:'//&
-            '  u/R    deflections in the X direction'/&
-            '  w/R    deflections in the Z direction'/&
+            '  u/r    deflections in the x direction'/&
+            '  w/r    deflections in the z direction'/&
             '   t     torsional twist (positive in the increasing '&
             'incidence direction)'/&
-            '   Mz    bending moment about the Z axis'/&
-            '   Mx    bending moment about the X axis'/&
-            '   T     moment about the radial Y axis (i.e. torsion)'/&
-            '   P     tensile load (shear in Y direction)'/&
-            '   Sx    shear in X direction'/&
-            '   Sz    shear in Z direction'//&
+            '   Mz    bending moment about the z axis'/&
+            '   Mx    bending moment about the x axis'/&
+            '   t     moment about the radial y axis (i.e. torsion)'/&
+            '   p     tensile load (shear in y direction)'/&
+            '   Sx    shear in x direction'/&
+            '   Sz    shear in z direction'//&
             'The second group of structural data contains:'//&
-            '   Ex    strain due to bending in the X direction'/&
-            '   Ey    strain due to extension in the Y direction'/&
-            '   Ez    strain due to bending in the Z direction'/&
+            '   Ex    strain due to bending in the x direction'/&
+            '   Ey    strain due to extension in the y direction'/&
+            '   Ez    strain due to bending in the z direction'/&
             '   Emax  maximum strain calculated by  '&
             'Emax = sqrt(Ex^2 + Ez^2) + Ey'/&
             '   g     shear strain due to twist t'//&
             '   Note that Ex, Ez, and g are evaluated at the '&
-            'local radius RST from'/&
-            '   the structural axis (RST is an input quantity, '&
+            'local radius rst from'/&
+            '   the structural axis (rst is an input quantity, '&
             'normally set to the '/&
             '   distance of the highest or lowest profile point '&
             'from the structural axis)'/)
     !
-END
-! BEND
+end
+! bend
 
 
 
-SUBROUTINE EILOAD(FNAME1)
-    USE common
+subroutine eiload(ctxt, fname1)
+    use mod_common
     use mod_spline
-    IMPLICIT REAL (M)
-    CHARACTER*(*) FNAME1
-    DIMENSION XT(IX)
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
+    character*(*) fname1
+    dimension xt(ix)
     !----------------------------------------------------
     !     Reads and splines blade structural properties.
     !----------------------------------------------------
     !
-    !    XT =    R    radius
-    !    W0 = EIXX    in-plane stiffness
-    !    W1 = EIYY    out-of-plane stiffness
-    !    W2 =   EA    extensional stiffness
-    !    W3 =   GJ    torsional stiffness
-    !    W4 =   EK    extensional/torsional cross-stiffness
-    !    W5 =    M    mass density / length
-    !    W6 =  MXX    pitch axis inertia / length
-    !    W7 = XOCG    x/c of section CG
-    !    W8 = XOSC    x/c of section shear center (structural axis)
-    !    W9 = RST     structural radius for strain evaluation
+    !    xt =    r    radius
+    !    w0 = eixx    in-plane stiffness
+    !    w1 = eiyy    out-of-plane stiffness
+    !    w2 =   ea    extensional stiffness
+    !    w3 =   gj    torsional stiffness
+    !    w4 =   ek    extensional/torsional cross-stiffness
+    !    w5 =    m    mass density / length
+    !    w6 =  mxx    pitch axis inertia / length
+    !    w7 = xocg    x/c of section cg
+    !    w8 = xosc    x/c of section shear center (structural axis)
+    !    w9 = rst     structural radius for strain evaluation
     !
-    LU = 14
+    lu = 14
     !
-    FNAME = FNAME1
-    IF(FNAME(1:1) == ' ') CALL ASKS('Enter input filename^', FNAME)
+    ctxt%fname = fname1
+    if(ctxt%fname(1:1) == ' ') call asks('enter input filename^', ctxt%fname)
     !
-    OPEN(LU, FILE = FNAME, STATUS = 'OLD', ERR = 200)
-    READ(LU, 1000) DUMMY
-    READ(LU, 1000) DUMMY
-    READ(LU, 1000) DUMMY
-    do IT = 1, IX
-        READ(LU, *, END = 11, ERR = 210) XT(IT), &
-                W0(IT), W1(IT), W2(IT), W3(IT), W4(IT), &
-                W5(IT), W6(IT), W7(IT), W8(IT), W9(IT)
-        XT(IT) = XT(IT) / RAD
+    open(lu, file = ctxt%fname, status = 'old', err = 200)
+    read(lu, 1000) dummy
+    read(lu, 1000) dummy
+    read(lu, 1000) dummy
+    do it = 1, ix
+        read(lu, *, end = 11, err = 210) xt(it), &
+                ctxt%w0(it), ctxt%w1(it), ctxt%w2(it), ctxt%w3(it), ctxt%w4(it), &
+                ctxt%w5(it), ctxt%w6(it), ctxt%w7(it), ctxt%w8(it), ctxt%w9(it)
+        xt(it) = xt(it) / ctxt%rad
     end do
-    WRITE(*, *) 'EILOAD: Array overflow.  Too many radial stations.'
-    11   CONTINUE
-    NT = IT - 1
-    CLOSE(LU)
+    write(*, *) 'eiload: Array overflow.  Too many radial stations.'
+    11   continue
+    nt = it - 1
+    close(lu)
     !
-    ! TODO: test these
-    T0(1:NT) = SEGSPL(XT(1:NT), W0(1:NT))
-    T1(1:NT) = SEGSPL(XT(1:NT), W1(1:NT))
-    T2(1:NT) = SEGSPL(XT(1:NT), W2(1:NT))
-    T3(1:NT) = SEGSPL(XT(1:NT), W3(1:NT))
-    T4(1:NT) = SEGSPL(XT(1:NT), W4(1:NT))
-    T5(1:NT) = SEGSPL(XT(1:NT), W5(1:NT))
-    T6(1:NT) = SEGSPL(XT(1:NT), W6(1:NT))
-    T7(1:NT) = SEGSPL(XT(1:NT), W7(1:NT))
-    T8(1:NT) = SEGSPL(XT(1:NT), W8(1:NT))
-    T9(1:NT) = SEGSPL(XT(1:NT), W9(1:NT))
+    ! todo: test these
+    ctxt%t0(1:nt) = segspl(xt(1:nt), ctxt%w0(1:nt))
+    ctxt%t1(1:nt) = segspl(xt(1:nt), ctxt%w1(1:nt))
+    ctxt%t2(1:nt) = segspl(xt(1:nt), ctxt%w2(1:nt))
+    ctxt%t3(1:nt) = segspl(xt(1:nt), ctxt%w3(1:nt))
+    ctxt%t4(1:nt) = segspl(xt(1:nt), ctxt%w4(1:nt))
+    ctxt%t5(1:nt) = segspl(xt(1:nt), ctxt%w5(1:nt))
+    ctxt%t6(1:nt) = segspl(xt(1:nt), ctxt%w6(1:nt))
+    ctxt%t7(1:nt) = segspl(xt(1:nt), ctxt%w7(1:nt))
+    ctxt%t8(1:nt) = segspl(xt(1:nt), ctxt%w8(1:nt))
+    ctxt%t9(1:nt) = segspl(xt(1:nt), ctxt%w9(1:nt))
     !
-    do I = 1, II
-        ! TODO: test these
-        EIXXB(I) = SEVAL(XI(I), W0, T0, XT)
-        EIYYB(I) = SEVAL(XI(I), W1, T1, XT)
-        EAB(I) = SEVAL(XI(I), W2, T2, XT)
-        GJB(I) = SEVAL(XI(I), W3, T3, XT)
-        EKB(I) = SEVAL(XI(I), W4, T4, XT)
-        MB(I) = SEVAL(XI(I), W5, T5, XT)
-        MXXB(I) = SEVAL(XI(I), W6, T6, XT)
-        XOCG(I) = SEVAL(XI(I), W7, T7, XT)
-        XOSC(I) = SEVAL(XI(I), W8, T8, XT)
-        RSTB(I) = SEVAL(XI(I), W9, T9, XT)
-    end do
-    !
-    MASS = 0.0
-    MRSQ = 0.0
-    MAXX = 0.0
-    do I = 1, II
-        MASS = MASS + MB(I) * RAD * DXI(I)
-        MRSQ = MRSQ + MB(I) * RAD * DXI(I) * (XI(I) * RAD)**2
-        MAXX = MAXX + MXXB(I) * RAD * DXI(I)
+    do i = 1, ctxt%ii
+        ! todo: test these
+        ctxt%eixxb(i) = seval(ctxt%xi(i), ctxt%w0, ctxt%t0, xt)
+        ctxt%eiyyb(i) = seval(ctxt%xi(i), ctxt%w1, ctxt%t1, xt)
+        ctxt%eab(i) = seval(ctxt%xi(i), ctxt%w2, ctxt%t2, xt)
+        ctxt%gjb(i) = seval(ctxt%xi(i), ctxt%w3, ctxt%t3, xt)
+        ctxt%ekb(i) = seval(ctxt%xi(i), ctxt%w4, ctxt%t4, xt)
+        ctxt%mb(i) = seval(ctxt%xi(i), ctxt%w5, ctxt%t5, xt)
+        ctxt%mxxb(i) = seval(ctxt%xi(i), ctxt%w6, ctxt%t6, xt)
+        ctxt%xocg(i) = seval(ctxt%xi(i), ctxt%w7, ctxt%t7, xt)
+        ctxt%xosc(i) = seval(ctxt%xi(i), ctxt%w8, ctxt%t8, xt)
+        ctxt%rstb(i) = seval(ctxt%xi(i), ctxt%w9, ctxt%t9, xt)
     end do
     !
-    WRITE(*, 3100) MASS, MAXX, MRSQ
+    mass = 0.0
+    mrsq = 0.0
+    maxx = 0.0
+    do i = 1, ctxt%ii
+        mass = mass + ctxt%mb(i) * ctxt%rad * ctxt%dxi(i)
+        mrsq = mrsq + ctxt%mb(i) * ctxt%rad * ctxt%dxi(i) * (ctxt%xi(i) * ctxt%rad)**2
+        maxx = maxx + ctxt%mxxb(i) * ctxt%rad * ctxt%dxi(i)
+    end do
     !
-    LSTRUC = .TRUE.
-    RETURN
+    write(*, 3100) mass, maxx, mrsq
     !
-    200 WRITE(*, 1010) FNAME(1:32)
-    RETURN
+    ctxt%lstruc = .true.
+    return
     !
-    210 WRITE(*, 1020) FNAME(1:32)
-    CLOSE(LU)
-    CONV = .FALSE.
-    RETURN
+    200 write(*, 1010) ctxt%fname(1:32)
+    return
+    !
+    210 write(*, 1020) ctxt%fname(1:32)
+    close(lu)
+    ctxt%conv = .false.
+    return
     !..............................
-    1000 FORMAT(32A1)
-    1010 FORMAT(' File  ', A, ' not found'/)
-    1020 FORMAT(' File  ', A, ' has incompatible format'/&
+    1000 format(32a1)
+    1010 format(' File  ', a, ' not found'/)
+    1020 format(' File  ', a, ' has incompatible format'/&
             ' Loading not completed'/)
-    3100 FORMAT(/' Blade mass =', G12.4&
-            /' Pitch-axis inertia =', G14.5&
-            /' Rotational inertia =', G14.5)
-END
-! EILOAD
+    3100 format(/' Blade mass =', g12.4&
+            /' Pitch-axis inertia =', g14.5&
+            /' Rotational inertia =', g14.5)
+end
+! eiload
 
 
-SUBROUTINE STCLR
-    USE common
-    IMPLICIT REAL (M)
+subroutine stclr(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !
-    do I = 1, II
-        TX(I) = 0.0
-        TY(I) = 0.0
-        TZ(I) = 0.0
-        WX(I) = 0.0
-        WY(I) = 0.0
-        WZ(I) = 0.0
-        MOMX(I) = 0.0
-        MOMY(I) = 0.0
-        MOMZ(I) = 0.0
-        SHRX(I) = 0.0
-        SHRY(I) = 0.0
-        SHRZ(I) = 0.0
+    do i = 1, ctxt%ii
+        ctxt%tx(i) = 0.0
+        ctxt%ty(i) = 0.0
+        ctxt%tz(i) = 0.0
+        ctxt%wx(i) = 0.0
+        ctxt%wy(i) = 0.0
+        ctxt%wz(i) = 0.0
+        ctxt%momx(i) = 0.0
+        ctxt%momy(i) = 0.0
+        ctxt%momz(i) = 0.0
+        ctxt%shrx(i) = 0.0
+        ctxt%shry(i) = 0.0
+        ctxt%shrz(i) = 0.0
     end do
     !
-    RETURN
-END
-! STCLR
+    return
+end
+! stclr
 
 
-SUBROUTINE MCLR
-    USE common
-    IMPLICIT REAL (M)
+subroutine mclr(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !
-    do I = 1, II
-        MB(I) = 0.0
-        MXXB(I) = 0.0
-        EKB(I) = 0.0
+    do i = 1, ctxt%ii
+        ctxt%mb(i) = 0.0
+        ctxt%mxxb(i) = 0.0
+        ctxt%ekb(i) = 0.0
     end do
     !
-    RETURN
-END
-! MCLR
+    return
+end
+! mclr
 
 
 
-SUBROUTINE STLOAD
-    USE common
-    IMPLICIT REAL (M)
+subroutine stload(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !-----------------------------------------------------------
     !     Calculates force and moment loadings along blade.
-    ! HHY 3/99 a local x',y',z' system is assumed that is tilted by
+    ! hhy 3/99 a local x',y',z' system is assumed that is tilted by
     !          a rake angle about the z axis, the y' axis runs out
     !          the blade axis.  z' = z, x',y' are rotated from x,y by rake angle
     !
-    !     The ()_A and ()_B sensitivities below should be set
-    !     only if BETA(.) and the aero solution CL(.), GAM(.),
-    !     etc. are updated every iteration in STCALC.
+    !     The ()_a and ()_b sensitivities below should be set
+    !     only if beta(.) and the aero solution cl(.), gam(.),
+    !     etc. are updated every iteration in stcalc.
     !-----------------------------------------------------------
     !
-    FX = 0.0
-    FY = 0.0
-    FZ = 0.0
-    SINR = SIN(RAKE)
-    COSR = COS(RAKE)
+    fx = 0.0
+    fy = 0.0
+    fz = 0.0
+    sinr = sin(ctxt%rake)
+    cosr = cos(ctxt%rake)
     !
-    do I = 1, II
+    do i = 1, ctxt%ii
         !
-        DXII = DXI(I) / COSR
+        dxii = ctxt%dxi(i) / cosr
         !
-        CALL CSCALC(I, UTOT, WA, WT, &
-                VT, VT_ADW, &
-                VA, VA_ADW, &
-                VD, VD_ADW, &
-                CI, CI_ADV, CI_VT, &
-                SI, SI_VA, &
-                W, W_ADV, W_VT, W_VA, &
-                PHI, P_ADV, P_VT, P_VA)
+        call cscalc(ctxt, i, utot, wa, wt, &
+                vt, vt_adw, &
+                va, va_adw, &
+                vd, vd_adw, &
+                ci, ci_adv, ci_vt, &
+                si, si_va, &
+                w, w_adv, w_vt, w_va, &
+                phi, p_adv, p_vt, p_va)
         !
-        WSQ = W * W
+        wsq = w * w
         !
-        SINB = SIN(BETA(I))
-        COSB = COS(BETA(I))
+        sinb = sin(ctxt%beta(i))
+        cosb = cos(ctxt%beta(i))
         !
-        TXA = 0.5 * (TX(I) + TX(I + 1))
-        TZA = 0.5 * (TZ(I) + TZ(I + 1))
-        WZA = 0.5 * (WZ(I) + WZ(I + 1))
+        txa = 0.5 * (ctxt%tx(i) + ctxt%tx(i + 1))
+        tza = 0.5 * (ctxt%tz(i) + ctxt%tz(i + 1))
+        wza = 0.5 * (ctxt%wz(i) + ctxt%wz(i + 1))
         !
         !--- Aerodynamic lift and drag forces (act in blade normal plane)
-        FLIFT = 0.5 * WSQ * CH(I) * CL(I)
-        FDRAG = 0.5 * WSQ * CH(I) * CD(I)
+        flift = 0.5 * wsq * ctxt%ch(i) * ctxt%cl(i)
+        fdrag = 0.5 * wsq * ctxt%ch(i) * ctxt%cd(i)
         !
-        FLIFT_A = 0.0
-        !cc     FLIFT_A = 0.5*WSQ*CH(I)*DCLDA
+        flift_a = 0.0
+        !cc     flift_a = 0.5*wsq*ch(i)*dclda
         !--- blade resolved force components
-        FXA = -CI / W * FLIFT + SI / W * FDRAG
-        FYA = 0.0
-        FZA = SI / W * FLIFT + CI / W * FDRAG
+        fxa = -ci / w * flift + si / w * fdrag
+        fya = 0.0
+        fza = si / w * flift + ci / w * fdrag
         !
         !***************************************
         !--- Integrate blade aerodynamic forces
-        FX = FX + COSR * DXII * FXA
-        FY = FY + SINR * DXII * FXA
-        FZ = FZ + DXII * FZA
+        fx = fx + cosr * dxii * fxa
+        fy = fy + sinr * dxii * fxa
+        fz = fz + dxii * fza
         !***************************************
         !
         !
         !--- Centrifugal forces (y direction)
-        FCENT = 0.0
-        IF(LSTRUC) FCENT = MB(I) * XI(I) / ADV**2&
-                / (RHO * RAD**2)
+        fcent = 0.0
+        if(ctxt%lstruc) fcent = ctxt%mb(i) * ctxt%xi(i) / ctxt%adv**2&
+                / (rho * rad**2)
         !--- blade resolved force components
-        FXC = -SINR * FCENT
-        FYC = COSR * FCENT
-        FZC = 0.0
+        fxc = -sinr * fcent
+        fyc = cosr * fcent
+        fzc = 0.0
         !
         !--- Assemble force loadings
-        PX(I) = FXA + FXC + FYC * TZA * COSR
-        PY(I) = FYA + FYC
-        PZ(I) = FZA + FZC + FYC * (WZA / XI(I) - TXA)
-        PX_TY(I) = -FLIFT_A * CI / W
-        PX_TZ(I) = FYC * COSR
-        PZ_TX(I) = -FYC
-        PZ_TY(I) = FLIFT_A * SI / W
-        PZ_WZ(I) = FYC / XI(I)
+        ctxt%px(i) = fxa + fxc + fyc * tza * cosr
+        ctxt%py(i) = fya + fyc
+        ctxt%pz(i) = fza + fzc + fyc * (wza / ctxt%xi(i) - txa)
+        ctxt%px_ty(i) = -flift_a * ci / w
+        ctxt%px_tz(i) = fyc * cosr
+        ctxt%pz_tx(i) = -fyc
+        ctxt%pz_ty(i) = flift_a * si / w
+        ctxt%pz_wz(i) = fyc / ctxt%xi(i)
         !
-        !        PX(I) =  -FLIFT*CI/W + FDRAG*SI/W + FCENT* TZA
-        !        PZ(I) =   FLIFT*SI/W + FDRAG*CI/W + FCENT*(WZA/XI(I) - TXA)
-        !        PY(I) =                             FCENT
-        !        PX_TY(I) = -FLIFT_A*CI/W
-        !        PX_TZ(I) =  FCENT
-        !        PZ_TX(I) = -FCENT
-        !        PZ_TY(I) =  FLIFT_A*SI/W
-        !        PZ_WZ(I) =  FCENT/XI(I)
+        !        px(i) =  -flift*ci/w + fdrag*si/w + fcent* tza
+        !        pz(i) =   flift*si/w + fdrag*ci/w + fcent*(wza/xi(i) - txa)
+        !        py(i) =                             fcent
+        !        px_ty(i) = -flift_a*ci/w
+        !        px_tz(i) =  fcent
+        !        pz_tx(i) = -fcent
+        !        pz_ty(i) =  flift_a*si/w
+        !        pz_wz(i) =  fcent/xi(i)
         !
         !--- Define moment components
-        IF(LSTRUC) THEN
-            MCENT = SINB * (XOCG(I) - XOSC(I)) * CH(I) * MB(I) * XI(I) / ADV**2&
-                    / (RHO * RAD**2)
-            MPREC = -SINB * COSB * MXXB(I) / ADV**2&
-                    / (RHO * RAD**4)
-            MAERO = 0.5 * WSQ * (CL(I) * (XOSC(I) - 0.25) + CM(I)) * CH(I)**2
-        ELSE
-            MCENT = 0.0
-            MPREC = 0.0
-            MAERO = 0.5 * WSQ * (CL(I) * (0.40 - 0.25) + CM(I)) * CH(I)**2
-        ENDIF
+        if(ctxt%lstruc) then
+            mcent = sinb * (ctxt%xocg(i) - ctxt%xosc(i)) * ctxt%ch(i) * ctxt%mb(i) * ctxt%xi(i) / ctxt%adv**2&
+                    / (rho * rad**2)
+            mprec = -sinb * cosb * ctxt%mxxb(i) / ctxt%adv**2&
+                    / (rho * rad**4)
+            maero = 0.5 * wsq * (ctxt%cl(i) * (ctxt%xosc(i) - 0.25) + ctxt%cm(i)) * ctxt%ch(i)**2
+        else
+            mcent = 0.0
+            mprec = 0.0
+            maero = 0.5 * wsq * (ctxt%cl(i) * (0.40 - 0.25) + ctxt%cm(i)) * ctxt%ch(i)**2
+        endif
         !
-        MCENT_B = 0.0
-        MPREC_B = 0.0
-        MAERO_A = 0.0
-        !cc     MCENT_B = COSB * (XOCG(I)-XOSC(I))*CH(I) * MB(I)*XI(I)/ADV**2
-        !cc  &          / (RHO * RAD**2)
-        !cc     MPREC_B = -(COSB**2 - SINB**2) * MXXB(I)/ADV**2
-        !cc  &          / (RHO * RAD**4)
-        !cc     MAERO_A = 0.5*WSQ*(DCLDA*(XOSC(I)-0.25)     ) * CH(I)**2
+        mcent_b = 0.0
+        mprec_b = 0.0
+        maero_a = 0.0
+        !cc     mcent_b = cosb * (xocg(i)-xosc(i))*ch(i) * mb(i)*xi(i)/adv**2
+        !cc  &          / (rho * rad**2)
+        !cc     mprec_b = -(cosb**2 - sinb**2) * mxxb(i)/adv**2
+        !cc  &          / (rho * rad**4)
+        !cc     maero_a = 0.5*wsq*(dclda*(xosc(i)-0.25)     ) * ch(i)**2
         !
         !--- Assemble imposed moments
-        MX(I) = 0.0
-        MY(I) = MAERO + MPREC
-        MZ(I) = MCENT + MPREC * (WZA / XI(I) - TXA)
+        ctxt%mx(i) = 0.0
+        ctxt%my(i) = maero + mprec
+        ctxt%mz(i) = mcent + mprec * (wza / ctxt%xi(i) - txa)
         !
-        MY_TY(I) = MAERO_A + MPREC_B * (WZA / XI(I) - TXA)
-        MZ_TY(I) = MCENT_B
-        MZ_TX(I) = - MPREC
-        MZ_WZ(I) = MPREC / XI(I)
+        ctxt%my_ty(i) = maero_a + mprec_b * (wza / ctxt%xi(i) - txa)
+        ctxt%mz_ty(i) = mcent_b
+        ctxt%mz_tx(i) = - mprec
+        ctxt%mz_wz(i) = mprec / ctxt%xi(i)
         !
     end do
     !
     !--- Print the blade aerodynamic forces
-    WRITE(*, 20) FX * RHO * VEL**2 * RAD**2, &
-            FY * RHO * VEL**2 * RAD**2, &
-            FZ * RHO * VEL**2 * RAD**2
-    20   FORMAT(/'Blade aerodynamic forces:', &
-            /' FX (axial)      = ', F12.6, &
-            /' FY (radial)     = ', F12.6, &
-            /' FZ (tangential) = ', F12.6)
+    write(*, 20) fx * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
+            fy * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
+            fz * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+    20   format(/'Blade aerodynamic forces:', &
+            /' fx (axial)      = ', f12.6, &
+            /' fy (radial)     = ', f12.6, &
+            /' fz (tangential) = ', f12.6)
     !
-    RETURN
-END
-! STLOAD
+    return
+end
+! stload
 
 
 
-SUBROUTINE STCALC
-    USE common
-    IMPLICIT REAL (M)
+subroutine stcalc(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !------------------------------------------------------------
     !     Updates resultants and deflections along blade.
-    !     Uses current loading distributions PX,PY,PZ, MX,MY,MZ.
+    !     Uses current loading distributions px,py,pz, mx,my,mz.
     !------------------------------------------------------------
-    REAL AA(12, 12, IXP), BB(12, 12, IXP), CC(12, 12, IXP), RR(12, IXP)
-    REAL RRLIM(12), RLXR(12)
+    real aa(12, 12, ixp), bb(12, 12, ixp), cc(12, 12, ixp), rr(12, ixp)
+    real rrlim(12), rlxr(12)
     !
-    EPS = 1.0E-5
+    eps = 1.0e-5
     !
-    RRLIM(1) = 0.10
-    RRLIM(2) = 0.10
-    RRLIM(3) = 0.10
+    rrlim(1) = 0.10
+    rrlim(2) = 0.10
+    rrlim(3) = 0.10
     !
-    RRLIM(4) = 0.2 / ADV**2
-    RRLIM(5) = 0.5 / ADV**2
-    RRLIM(6) = 0.2 / ADV**2
+    rrlim(4) = 0.2 / ctxt%adv**2
+    rrlim(5) = 0.5 / ctxt%adv**2
+    rrlim(6) = 0.2 / ctxt%adv**2
     !
-    RRLIM(7) = 0.2 / ADV**2
-    RRLIM(8) = 20.0 / ADV**2
-    RRLIM(9) = 0.2 / ADV**2
+    rrlim(7) = 0.2 / ctxt%adv**2
+    rrlim(8) = 20.0 / ctxt%adv**2
+    rrlim(9) = 0.2 / ctxt%adv**2
     !
-    RRLIM(10) = 0.10
-    RRLIM(11) = 0.01
-    RRLIM(12) = 0.10
+    rrlim(10) = 0.10
+    rrlim(11) = 0.01
+    rrlim(12) = 0.10
     !
-    WRITE(*, *)
+    write(*, *)
     !
     !---- Newton iteration loop
-    do ITER = 1, 10
+    do iter = 1, 10
         !
-        CALL STLOAD
+        call stload(ctxt)
         !
-        do I = 1, II + 1
-            do K = 1, 12
-                do J = 1, 12
-                    AA(K, J, I) = 0.0
-                    BB(K, J, I) = 0.0
-                    CC(K, J, I) = 0.0
+        do i = 1, ctxt%ii + 1
+            do k = 1, 12
+                do j = 1, 12
+                    aa(k, j, i) = 0.0
+                    bb(k, j, i) = 0.0
+                    cc(k, j, i) = 0.0
                 end do
-                RR(K, I) = 0.0
+                rr(k, i) = 0.0
             end do
         end do
         !
         !
         !---- fix deflection angles at root
-        I = 1
-        AA(1, 1, I) = 1.0
-        AA(2, 2, I) = 1.0
-        AA(3, 3, I) = 1.0
+        i = 1
+        aa(1, 1, i) = 1.0
+        aa(2, 2, i) = 1.0
+        aa(3, 3, i) = 1.0
         !
-        AA(10, 10, I) = 1.0
-        AA(11, 11, I) = 1.0
-        AA(12, 12, I) = 1.0
+        aa(10, 10, i) = 1.0
+        aa(11, 11, i) = 1.0
+        aa(12, 12, i) = 1.0
         !
         !---- non-dimensionalizing factors
-        EAREF = RHO * VEL**2 * RAD**2
-        EKREF = RHO * VEL**2 * RAD**3
-        EIREF = RHO * VEL**2 * RAD**4
+        earef = ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+        ekref = ctxt%rho * ctxt%vel**2 * ctxt%rad**3
+        eiref = ctxt%rho * ctxt%vel**2 * ctxt%rad**4
         !
-        COSR = COS(RAKE)
+        cosr = cos(ctxt%rake)
         !
         !---- go over radial intervals
-        do I = 1, II
+        do i = 1, ctxt%ii
             !
-            DXII = DXI(I) / COSR
+            dxii = ctxt%dxi(i) / cosr
             !
-            SX2 = SHRX(I + 1)
-            SY2 = SHRY(I + 1)
-            SZ2 = SHRZ(I + 1)
+            sx2 = ctxt%shrx(i + 1)
+            sy2 = ctxt%shry(i + 1)
+            sz2 = ctxt%shrz(i + 1)
             !
-            SX1 = SHRX(I)
-            SY1 = SHRY(I)
-            SZ1 = SHRZ(I)
+            sx1 = ctxt%shrx(i)
+            sy1 = ctxt%shry(i)
+            sz1 = ctxt%shrz(i)
             !
-            MX2 = MOMX(I + 1)
-            MY2 = MOMY(I + 1)
-            MZ2 = MOMZ(I + 1)
+            mx2 = ctxt%momx(i + 1)
+            my2 = ctxt%momy(i + 1)
+            mz2 = ctxt%momz(i + 1)
             !
-            MX1 = MOMX(I)
-            MY1 = MOMY(I)
-            MZ1 = MOMZ(I)
+            mx1 = ctxt%momx(i)
+            my1 = ctxt%momy(i)
+            mz1 = ctxt%momz(i)
             !
-            TX2 = TX(I + 1)
-            TY2 = TY(I + 1)
-            TZ2 = TZ(I + 1)
+            tx2 = ctxt%tx(i + 1)
+            ty2 = ctxt%ty(i + 1)
+            tz2 = ctxt%tz(i + 1)
             !
-            TX1 = TX(I)
-            TY1 = TY(I)
-            TZ1 = TZ(I)
+            tx1 = ctxt%tx(i)
+            ty1 = ctxt%ty(i)
+            tz1 = ctxt%tz(i)
             !
-            WX2 = WX(I + 1)
-            WY2 = WY(I + 1)
-            WZ2 = WZ(I + 1)
+            wx2 = ctxt%wx(i + 1)
+            wy2 = ctxt%wy(i + 1)
+            wz2 = ctxt%wz(i + 1)
             !
-            WX1 = WX(I)
-            WY1 = WY(I)
-            WZ1 = WZ(I)
+            wx1 = ctxt%wx(i)
+            wy1 = ctxt%wy(i)
+            wz1 = ctxt%wz(i)
             !
             !
-            !        PX_TY(I) = -FLIFT_A*CI/W
-            !        PX_TZ(I) =  FCENT
-            !        PZ_TX(I) = -FCENT
-            !        PZ_TY(I) =  FLIFT_A*SI/W
-            !        PZ_WZ(I) =  FCENT/XI(I)
+            !        px_ty(i) = -flift_a*ci/w
+            !        px_tz(i) =  fcent
+            !        pz_tx(i) = -fcent
+            !        pz_ty(i) =  flift_a*si/w
+            !        pz_wz(i) =  fcent/xi(i)
             !
-            !        MY_TY(I) = MAERO_A + MPREC_B*(WZA/XI(I) - TXA)
-            !        MZ_TY(I) = MCENT_B
-            !        MZ_TX(I) =         - MPREC
-            !        MZ_WZ(I) =           MPREC/XI(I)
+            !        my_ty(i) = maero_a + mprec_b*(wza/xi(i) - txa)
+            !        mz_ty(i) = mcent_b
+            !        mz_tx(i) =         - mprec
+            !        mz_wz(i) =           mprec/xi(i)
             !
 
             !------ x-moment
-            RR(4, I) = MX2 - MX1&
-                    - (MY2 + MY1) * 0.5 * (TZ2 - TZ1)&
-                    + (MZ2 + MZ1) * 0.5 * (TY2 - TY1)&
-                    - ((SZ2 + SZ1) * 0.5 - MX(I)) * DXII
+            rr(4, i) = mx2 - mx1&
+                    - (my2 + my1) * 0.5 * (tz2 - tz1)&
+                    + (mz2 + mz1) * 0.5 * (ty2 - ty1)&
+                    - ((sz2 + sz1) * 0.5 - ctxt%mx(i)) * dxii
             !
-            AA(4, 2, I) = -(MZ2 + MZ1) * 0.5
-            AA(4, 3, I) = (MY2 + MY1) * 0.5
-            AA(4, 4, I) = -1.0
-            AA(4, 5, I) = -0.5 * (TZ2 - TZ1)
-            AA(4, 6, I) = 0.5 * (TY2 - TY1)
-            AA(4, 9, I) = -0.5 * DXII
-            CC(4, 2, I) = (MZ2 + MZ1) * 0.5
-            CC(4, 3, I) = -(MY2 + MY1) * 0.5
-            CC(4, 4, I) = 1.0
-            CC(4, 5, I) = -0.5 * (TZ2 - TZ1)
-            CC(4, 6, I) = 0.5 * (TY2 - TY1)
-            CC(4, 9, I) = -0.5 * DXII
+            aa(4, 2, i) = -(mz2 + mz1) * 0.5
+            aa(4, 3, i) = (my2 + my1) * 0.5
+            aa(4, 4, i) = -1.0
+            aa(4, 5, i) = -0.5 * (tz2 - tz1)
+            aa(4, 6, i) = 0.5 * (ty2 - ty1)
+            aa(4, 9, i) = -0.5 * dxii
+            cc(4, 2, i) = (mz2 + mz1) * 0.5
+            cc(4, 3, i) = -(my2 + my1) * 0.5
+            cc(4, 4, i) = 1.0
+            cc(4, 5, i) = -0.5 * (tz2 - tz1)
+            cc(4, 6, i) = 0.5 * (ty2 - ty1)
+            cc(4, 9, i) = -0.5 * dxii
             !
             !------ y-moment
-            RR(5, I) = MY2 - MY1&
-                    + (MX2 + MX1) * 0.5 * (TZ2 - TZ1)&
-                    - (MZ2 + MZ1) * 0.5 * (TX2 - TX1)&
-                    + (MY(I)) * DXII
-            AA(5, 1, I) = (MZ2 + MZ1) * 0.5
-            AA(5, 2, I) = MY_TY(I) * DXII * 0.5
-            AA(5, 3, I) = -(MX2 + MX1) * 0.5
-            AA(5, 4, I) = 0.5 * (TZ2 - TZ1)
-            AA(5, 5, I) = -1.0
-            AA(5, 6, I) = -0.5 * (TX2 - TX1)
-            CC(5, 1, I) = -(MZ2 + MZ1) * 0.5
-            CC(5, 2, I) = MY_TY(I) * DXII * 0.5
-            CC(5, 3, I) = (MX2 + MX1) * 0.5
-            CC(5, 4, I) = 0.5 * (TZ2 - TZ1)
-            CC(5, 5, I) = 1.0
-            CC(5, 6, I) = -0.5 * (TX2 - TX1)
+            rr(5, i) = my2 - my1&
+                    + (mx2 + mx1) * 0.5 * (tz2 - tz1)&
+                    - (mz2 + mz1) * 0.5 * (tx2 - tx1)&
+                    + (ctxt%my(i)) * dxii
+            aa(5, 1, i) = (mz2 + mz1) * 0.5
+            aa(5, 2, i) = ctxt%my_ty(i) * dxii * 0.5
+            aa(5, 3, i) = -(mx2 + mx1) * 0.5
+            aa(5, 4, i) = 0.5 * (tz2 - tz1)
+            aa(5, 5, i) = -1.0
+            aa(5, 6, i) = -0.5 * (tx2 - tx1)
+            cc(5, 1, i) = -(mz2 + mz1) * 0.5
+            cc(5, 2, i) = ctxt%my_ty(i) * dxii * 0.5
+            cc(5, 3, i) = (mx2 + mx1) * 0.5
+            cc(5, 4, i) = 0.5 * (tz2 - tz1)
+            cc(5, 5, i) = 1.0
+            cc(5, 6, i) = -0.5 * (tx2 - tx1)
             !
             !------ z-moment
-            RR(6, I) = MZ2 - MZ1&
-                    + (MY2 + MY1) * 0.5 * (TX2 - TX1)&
-                    - (MX2 + MX1) * 0.5 * (TY2 - TY1)&
-                    + ((SX2 + SX1) * 0.5 + MZ(I)) * DXII
-            AA(6, 1, I) = -(MY2 + MY1) * 0.5
-            AA(6, 2, I) = (MX2 + MX1) * 0.5 + MZ_TY(I) * DXII * 0.5
-            AA(6, 3, I) = MZ_TX(I) * DXII * 0.5
-            AA(6, 4, I) = -0.5 * (TY2 - TY1)
-            AA(6, 5, I) = 0.5 * (TX2 - TX1)
-            AA(6, 6, I) = -1.0
-            AA(6, 7, I) = 0.5 * DXII
-            AA(6, 12, I) = + MZ_WZ(I) * DXII * 0.5
-            CC(6, 1, I) = (MY2 + MY1) * 0.5
-            CC(6, 2, I) = -(MX2 + MX1) * 0.5 + MZ_TY(I) * DXII * 0.5
-            CC(6, 3, I) = MZ_TX(I) * DXII * 0.5
-            CC(6, 4, I) = -0.5 * (TY2 - TY1)
-            CC(6, 5, I) = 0.5 * (TX2 - TX1)
-            CC(6, 6, I) = 1.0
-            CC(6, 7, I) = 0.5 * DXII
-            CC(6, 12, I) = + MZ_WZ(I) * DXII * 0.5
+            rr(6, i) = mz2 - mz1&
+                    + (my2 + my1) * 0.5 * (tx2 - tx1)&
+                    - (mx2 + mx1) * 0.5 * (ty2 - ty1)&
+                    + ((sx2 + sx1) * 0.5 + ctxt%mz(i)) * dxii
+            aa(6, 1, i) = -(my2 + my1) * 0.5
+            aa(6, 2, i) = (mx2 + mx1) * 0.5 + ctxt%mz_ty(i) * dxii * 0.5
+            aa(6, 3, i) = ctxt%mz_tx(i) * dxii * 0.5
+            aa(6, 4, i) = -0.5 * (ty2 - ty1)
+            aa(6, 5, i) = 0.5 * (tx2 - tx1)
+            aa(6, 6, i) = -1.0
+            aa(6, 7, i) = 0.5 * dxii
+            aa(6, 12, i) = + ctxt%mz_wz(i) * dxii * 0.5
+            cc(6, 1, i) = (my2 + my1) * 0.5
+            cc(6, 2, i) = -(mx2 + mx1) * 0.5 + ctxt%mz_ty(i) * dxii * 0.5
+            cc(6, 3, i) = ctxt%mz_tx(i) * dxii * 0.5
+            cc(6, 4, i) = -0.5 * (ty2 - ty1)
+            cc(6, 5, i) = 0.5 * (tx2 - tx1)
+            cc(6, 6, i) = 1.0
+            cc(6, 7, i) = 0.5 * dxii
+            cc(6, 12, i) = + ctxt%mz_wz(i) * dxii * 0.5
             !
             !
             !------ x-shear
-            RR(7, I) = SX2 - SX1&
-                    + (SY2 + SY1) * 0.5 * (TZ2 - TZ1)&
-                    + (SZ2 + SZ1) * 0.5 * (TY2 - TY1) - PX(I) * DXII
+            rr(7, i) = sx2 - sx1&
+                    + (sy2 + sy1) * 0.5 * (tz2 - tz1)&
+                    + (sz2 + sz1) * 0.5 * (ty2 - ty1) - ctxt%px(i) * dxii
             !
-            AA(7, 2, I) = -(SZ2 + SZ1) * 0.5 - PX_TY(I) * DXII * 0.5
-            AA(7, 3, I) = -(SY2 + SY1) * 0.5 - PX_TZ(I) * DXII * 0.5
-            AA(7, 7, I) = -1.0
-            AA(7, 8, I) = 0.5 * (TZ2 - TZ1)
-            AA(7, 9, I) = 0.5 * (TY2 - TY1)
-            CC(7, 2, I) = (SZ2 + SZ1) * 0.5 - PX_TY(I) * DXII * 0.5
-            CC(7, 3, I) = (SY2 + SY1) * 0.5 - PX_TZ(I) * DXII * 0.5
-            CC(7, 7, I) = 1.0
-            CC(7, 8, I) = 0.5 * (TZ2 - TZ1)
-            CC(7, 9, I) = 0.5 * (TY2 - TY1)
+            aa(7, 2, i) = -(sz2 + sz1) * 0.5 - ctxt%px_ty(i) * dxii * 0.5
+            aa(7, 3, i) = -(sy2 + sy1) * 0.5 - ctxt%px_tz(i) * dxii * 0.5
+            aa(7, 7, i) = -1.0
+            aa(7, 8, i) = 0.5 * (tz2 - tz1)
+            aa(7, 9, i) = 0.5 * (ty2 - ty1)
+            cc(7, 2, i) = (sz2 + sz1) * 0.5 - ctxt%px_ty(i) * dxii * 0.5
+            cc(7, 3, i) = (sy2 + sy1) * 0.5 - ctxt%px_tz(i) * dxii * 0.5
+            cc(7, 7, i) = 1.0
+            cc(7, 8, i) = 0.5 * (tz2 - tz1)
+            cc(7, 9, i) = 0.5 * (ty2 - ty1)
             !
             !------ y-shear
-            RR(8, I) = SY2 - SY1&
-                    - (SX2 + SX1) * 0.5 * (TZ2 - TZ1)&
-                    + (SZ2 + SZ1) * 0.5 * (TX2 - TX1) + PY(I) * DXII
-            AA(8, 1, I) = (SZ2 + SZ1) * 0.5
-            AA(8, 3, I) = -(SX2 + SX1) * 0.5
-            AA(8, 7, I) = -0.5 * (TZ2 - TZ1)
-            AA(8, 8, I) = -1.0
-            AA(8, 9, I) = 0.5 * (TX2 - TX1)
-            CC(8, 1, I) = -(SZ2 + SZ1) * 0.5
-            CC(8, 3, I) = (SX2 + SX1) * 0.5
-            CC(8, 7, I) = -0.5 * (TZ2 - TZ1)
-            CC(8, 8, I) = 1.0
-            CC(8, 9, I) = 0.5 * (TX2 - TX1)
+            rr(8, i) = sy2 - sy1&
+                    - (sx2 + sx1) * 0.5 * (tz2 - tz1)&
+                    + (sz2 + sz1) * 0.5 * (tx2 - tx1) + ctxt%py(i) * dxii
+            aa(8, 1, i) = (sz2 + sz1) * 0.5
+            aa(8, 3, i) = -(sx2 + sx1) * 0.5
+            aa(8, 7, i) = -0.5 * (tz2 - tz1)
+            aa(8, 8, i) = -1.0
+            aa(8, 9, i) = 0.5 * (tx2 - tx1)
+            cc(8, 1, i) = -(sz2 + sz1) * 0.5
+            cc(8, 3, i) = (sx2 + sx1) * 0.5
+            cc(8, 7, i) = -0.5 * (tz2 - tz1)
+            cc(8, 8, i) = 1.0
+            cc(8, 9, i) = 0.5 * (tx2 - tx1)
             !
             !------ z-shear
-            RR(9, I) = SZ2 - SZ1&
-                    - (SY2 + SY1) * 0.5 * (TX2 - TX1)&
-                    - (SX2 + SX1) * 0.5 * (TY2 - TY1) - PZ(I) * DXII
+            rr(9, i) = sz2 - sz1&
+                    - (sy2 + sy1) * 0.5 * (tx2 - tx1)&
+                    - (sx2 + sx1) * 0.5 * (ty2 - ty1) - ctxt%pz(i) * dxii
             !
-            AA(9, 1, I) = (SY2 + SY1) * 0.5 - PZ_TX(I) * DXII * 0.5
-            AA(9, 2, I) = (SX2 + SX1) * 0.5 - PZ_TY(I) * DXII * 0.5
-            AA(9, 7, I) = -0.5 * (TY2 - TY1)
-            AA(9, 8, I) = -0.5 * (TX2 - TX1)
-            AA(9, 9, I) = -1.0
-            AA(9, 12, I) = - PZ_WZ(I) * DXII * 0.5
-            CC(9, 1, I) = -(SY2 + SY1) * 0.5 - PZ_TX(I) * DXII * 0.5
-            CC(9, 2, I) = -(SX2 + SX1) * 0.5 - PZ_TY(I) * DXII * 0.5
-            CC(9, 7, I) = -0.5 * (TY2 - TY1)
-            CC(9, 8, I) = -0.5 * (TX2 - TX1)
-            CC(9, 9, I) = 1.0
-            CC(9, 12, I) = - PZ_WZ(I) * DXII * 0.5
+            aa(9, 1, i) = (sy2 + sy1) * 0.5 - ctxt%pz_tx(i) * dxii * 0.5
+            aa(9, 2, i) = (sx2 + sx1) * 0.5 - ctxt%pz_ty(i) * dxii * 0.5
+            aa(9, 7, i) = -0.5 * (ty2 - ty1)
+            aa(9, 8, i) = -0.5 * (tx2 - tx1)
+            aa(9, 9, i) = -1.0
+            aa(9, 12, i) = - ctxt%pz_wz(i) * dxii * 0.5
+            cc(9, 1, i) = -(sy2 + sy1) * 0.5 - ctxt%pz_tx(i) * dxii * 0.5
+            cc(9, 2, i) = -(sx2 + sx1) * 0.5 - ctxt%pz_ty(i) * dxii * 0.5
+            cc(9, 7, i) = -0.5 * (ty2 - ty1)
+            cc(9, 8, i) = -0.5 * (tx2 - tx1)
+            cc(9, 9, i) = 1.0
+            cc(9, 12, i) = - ctxt%pz_wz(i) * dxii * 0.5
             !
             !
-            SB = SIN(BETA(I))
-            CB = COS(BETA(I))
+            sb = sin(ctxt%beta(i))
+            cb = cos(ctxt%beta(i))
             !
-            IF(LSTRUC) THEN
-                GJ = GJB(I) / EIREF
-                EK = EKB(I) / EKREF
-                EA = EAB(I) / EAREF
+            if(ctxt%lstruc) then
+                gj = ctxt%gjb(i) / eiref
+                ek = ctxt%ekb(i) / ekref
+                ea = ctxt%eab(i) / earef
                 !
-                EIZZ = (EIXXB(I) * CB**2 + EIYYB(I) * SB**2) / EIREF
-                EIXX = (EIXXB(I) * SB**2 + EIYYB(I) * CB**2) / EIREF
-                EIXZ = (EIXXB(I) * SB * CB - EIYYB(I) * SB * CB) / EIREF
+                eizz = (ctxt%eixxb(i) * cb**2 + ctxt%eiyyb(i) * sb**2) / eiref
+                eixx = (ctxt%eixxb(i) * sb**2 + ctxt%eiyyb(i) * cb**2) / eiref
+                eixz = (ctxt%eixxb(i) * sb * cb - ctxt%eiyyb(i) * sb * cb) / eiref
                 !
-                EIZZ_B = (-EIXXB(I) + EIYYB(I)) * 2.0 * SB * CB / EIREF
-                EIXX_B = (EIXXB(I) - EIYYB(I)) * 2.0 * SB * CB / EIREF
-                EIXZ_B = (EIXXB(I) - EIYYB(I)) * (CB * CB - SB * SB) / EIREF
-            ELSE
-                EIBIG = 1.0E+8
+                eizz_b = (-ctxt%eixxb(i) + ctxt%eiyyb(i)) * 2.0 * sb * cb / eiref
+                eixx_b = (ctxt%eixxb(i) - ctxt%eiyyb(i)) * 2.0 * sb * cb / eiref
+                eixz_b = (ctxt%eixxb(i) - ctxt%eiyyb(i)) * (cb * cb - sb * sb) / eiref
+            else
+                eibig = 1.0e+8
                 !
-                GJ = EIBIG
-                EK = 0.0
-                EA = EIBIG
+                gj = eibig
+                ek = 0.0
+                ea = eibig
                 !
-                EIZZ = EIBIG
-                EIXX = EIBIG
-                EIXZ = 0.0
+                eizz = eibig
+                eixx = eibig
+                eixz = 0.0
                 !
-                EIZZ_B = 0.0
-                EIXX_B = 0.0
-                EIXZ_B = 0.0
-            ENDIF
+                eizz_b = 0.0
+                eixx_b = 0.0
+                eixz_b = 0.0
+            endif
             !
-            MOMXD = (MOMX(I) + MOMX(I + 1)) * 0.5 * DXII
-            MOMYD = (MOMY(I) + MOMY(I + 1)) * 0.5 * DXII
-            MOMZD = (MOMZ(I) + MOMZ(I + 1)) * 0.5 * DXII
+            momxd = (ctxt%momx(i) + ctxt%momx(i + 1)) * 0.5 * dxii
+            momyd = (ctxt%momy(i) + ctxt%momy(i + 1)) * 0.5 * dxii
+            momzd = (ctxt%momz(i) + ctxt%momz(i + 1)) * 0.5 * dxii
             !
             !
             !------ x-deflection angle
-            RR(1, I + 1) = EIZZ * (TX2 - TX1)&
-                    - EIXZ * (TZ2 - TZ1) - (MX2 + MX1) * 0.5 * DXII
+            rr(1, i + 1) = eizz * (tx2 - tx1)&
+                    - eixz * (tz2 - tz1) - (mx2 + mx1) * 0.5 * dxii
             !
-            BB(1, 1, I + 1) = -EIZZ
-            BB(1, 2, I + 1) = EIZZ_B * (TX2 - TX1) * 0.5&
-                    - EIXZ_B * (TZ2 - TZ1) * 0.5
-            BB(1, 3, I + 1) = EIXZ
-            BB(1, 4, I + 1) = -0.5 * DXII
-            AA(1, 1, I + 1) = EIZZ
-            AA(1, 2, I + 1) = EIZZ_B * (TX2 - TX1) * 0.5&
-                    - EIXZ_B * (TZ2 - TZ1) * 0.5
-            AA(1, 3, I + 1) = -EIXZ
-            AA(1, 4, I + 1) = -0.5 * DXII
+            bb(1, 1, i + 1) = -eizz
+            bb(1, 2, i + 1) = eizz_b * (tx2 - tx1) * 0.5&
+                    - eixz_b * (tz2 - tz1) * 0.5
+            bb(1, 3, i + 1) = eixz
+            bb(1, 4, i + 1) = -0.5 * dxii
+            aa(1, 1, i + 1) = eizz
+            aa(1, 2, i + 1) = eizz_b * (tx2 - tx1) * 0.5&
+                    - eixz_b * (tz2 - tz1) * 0.5
+            aa(1, 3, i + 1) = -eixz
+            aa(1, 4, i + 1) = -0.5 * dxii
             !
             !------ y-deflection angle (twist)
-            RR(2, I + 1) = GJ * (TY2 - TY1) - (MY2 + MY1) * 0.5 * DXII&
-                    - EK * (WY2 - WY1)
+            rr(2, i + 1) = gj * (ty2 - ty1) - (my2 + my1) * 0.5 * dxii&
+                    - ek * (wy2 - wy1)
             !
-            BB(2, 2, I + 1) = -GJ
-            BB(2, 5, I + 1) = -0.5 * DXII
-            BB(2, 11, I + 1) = EK
-            AA(2, 2, I + 1) = GJ
-            AA(2, 5, I + 1) = -0.5 * DXII
-            AA(2, 11, I + 1) = -EK
+            bb(2, 2, i + 1) = -gj
+            bb(2, 5, i + 1) = -0.5 * dxii
+            bb(2, 11, i + 1) = ek
+            aa(2, 2, i + 1) = gj
+            aa(2, 5, i + 1) = -0.5 * dxii
+            aa(2, 11, i + 1) = -ek
             !
             !------ z-deflection angle
-            RR(3, I + 1) = EIXX * (TZ2 - TZ1)&
-                    - EIXZ * (TX2 - TX1) - (MZ2 + MZ1) * 0.5 * DXII
+            rr(3, i + 1) = eixx * (tz2 - tz1)&
+                    - eixz * (tx2 - tx1) - (mz2 + mz1) * 0.5 * dxii
             !
-            BB(3, 1, I + 1) = EIXZ
-            BB(3, 2, I + 1) = EIXX_B * (TZ2 - TZ1)&
-                    - EIXZ_B * (TX2 - TX1)
-            BB(3, 3, I + 1) = -EIXX
-            BB(3, 6, I + 1) = -0.5 * DXII
-            AA(3, 1, I + 1) = -EIXZ
-            AA(3, 2, I + 1) = EIXX_B * (TZ2 - TZ1)&
-                    - EIXZ_B * (TX2 - TX1)
-            AA(3, 3, I + 1) = EIXX
-            AA(3, 6, I + 1) = -0.5 * DXII
+            bb(3, 1, i + 1) = eixz
+            bb(3, 2, i + 1) = eixx_b * (tz2 - tz1)&
+                    - eixz_b * (tx2 - tx1)
+            bb(3, 3, i + 1) = -eixx
+            bb(3, 6, i + 1) = -0.5 * dxii
+            aa(3, 1, i + 1) = -eixz
+            aa(3, 2, i + 1) = eixx_b * (tz2 - tz1)&
+                    - eixz_b * (tx2 - tx1)
+            aa(3, 3, i + 1) = eixx
+            aa(3, 6, i + 1) = -0.5 * dxii
             !
             !
             !------ x-deflection
-            RR(10, I + 1) = -WX2 + WX1 + (TZ2 + TZ1) * 0.5 * DXII
-            BB(10, 3, I + 1) = 0.5 * DXII
-            BB(10, 10, I + 1) = 1.0
-            AA(10, 3, I + 1) = 0.5 * DXII
-            AA(10, 10, I + 1) = -1.0
+            rr(10, i + 1) = -wx2 + wx1 + (tz2 + tz1) * 0.5 * dxii
+            bb(10, 3, i + 1) = 0.5 * dxii
+            bb(10, 10, i + 1) = 1.0
+            aa(10, 3, i + 1) = 0.5 * dxii
+            aa(10, 10, i + 1) = -1.0
             !
             !------ y-deflection
-            RR(11, I + 1) = -WY2 + WY1 + (SY2 + SY1) * 0.5 * DXII / EA
-            BB(11, 5, I + 1) = 0.5 * DXII / EA
-            BB(11, 11, I + 1) = 1.0
-            AA(11, 5, I + 1) = 0.5 * DXII / EA
-            AA(11, 11, I + 1) = -1.0
+            rr(11, i + 1) = -wy2 + wy1 + (sy2 + sy1) * 0.5 * dxii / ea
+            bb(11, 5, i + 1) = 0.5 * dxii / ea
+            bb(11, 11, i + 1) = 1.0
+            aa(11, 5, i + 1) = 0.5 * dxii / ea
+            aa(11, 11, i + 1) = -1.0
             !
             !------ z-deflection
-            RR(12, I + 1) = -WZ2 + WZ1 + (TX2 + TX1) * 0.5 * DXII
-            BB(12, 1, I + 1) = 0.5 * DXII
-            BB(12, 12, I + 1) = 1.0
-            AA(12, 1, I + 1) = 0.5 * DXII
-            AA(12, 12, I + 1) = -1.0
+            rr(12, i + 1) = -wz2 + wz1 + (tx2 + tx1) * 0.5 * dxii
+            bb(12, 1, i + 1) = 0.5 * dxii
+            bb(12, 12, i + 1) = 1.0
+            aa(12, 1, i + 1) = 0.5 * dxii
+            aa(12, 12, i + 1) = -1.0
             !
         end do
         !
-        !---- set tip  M,S  to zero
-        I = II + 1
-        AA(4, 4, I) = 1.0
-        AA(5, 5, I) = 1.0
-        AA(6, 6, I) = 1.0
-        AA(7, 7, I) = 1.0
-        AA(8, 8, I) = 1.0
-        AA(9, 9, I) = 1.0
+        !---- set tip  m,s  to zero
+        i = ctxt%ii + 1
+        aa(4, 4, i) = 1.0
+        aa(5, 5, i) = 1.0
+        aa(6, 6, i) = 1.0
+        aa(7, 7, i) = 1.0
+        aa(8, 8, i) = 1.0
+        aa(9, 9, i) = 1.0
         !
         !
-        CALL B12SOL(AA, BB, CC, RR, II + 1)
+        call b12sol(aa, bb, cc, rr, ctxt%ii + 1)
         !
         !      do i=1, ii+1
         !        write(*,6666) i, (rr(k,i),k=1, 9)
         ! 6666   format(1x,i2,9f8.3)
         ! end do
         !
-        RMAX = 0.0
-        RMS = 0.0
+        rmax = 0.0
+        ctxt%rms = 0.0
         !
         !---- set under-relaxation factors
-        do K = 1, 12
-            RLXR(K) = 1.0
+        do k = 1, 12
+            rlxr(k) = 1.0
         end do
         !
-        do I = 1, II + 1
-            do K = 1, 12
-                IF(RLXR(K) * RR(K, I) > RRLIM(K)) RLXR(K) = RRLIM(K) / RR(K, I)
-                IF(RLXR(K) * RR(K, I) < -RRLIM(K)) RLXR(K) = -RRLIM(K) / RR(K, I)
+        do i = 1, ctxt%ii + 1
+            do k = 1, 12
+                if(rlxr(k) * rr(k, i) > rrlim(k)) rlxr(k) = rrlim(k) / rr(k, i)
+                if(rlxr(k) * rr(k, i) < -rrlim(k)) rlxr(k) = -rrlim(k) / rr(k, i)
                 !
-                RMAX = MAX(RMAX, ABS(RR(K, I) / RRLIM(K)))
-                RMS = RMS + (RR(K, I) / RRLIM(K))**2
+                rmax = max(rmax, abs(rr(k, i) / rrlim(k)))
+                ctxt%rms = ctxt%rms + (rr(k, i) / rrlim(k))**2
             end do
         end do
         !
-        RMS = SQRT(RMS / FLOAT(9 * II))
+        ctxt%rms = sqrt(ctxt%rms / float(9 * ctxt%ii))
         !
         !---- set minimum under-relaxation factor over all variables
-        RLX = 1.0
-        do K = 1, 12
-            RLX = AMIN1(RLX, RLXR(K))
+        ctxt%rlx = 1.0
+        do k = 1, 12
+            ctxt%rlx = amin1(ctxt%rlx, rlxr(k))
         end do
         !
         !---- update solution
-        do I = 1, II + 1
-            TX(I) = TX(I) - RLX * RR(1, I)
-            TY(I) = TY(I) - RLX * RR(2, I)
-            TZ(I) = TZ(I) - RLX * RR(3, I)
-            MOMX(I) = MOMX(I) - RLX * RR(4, I)
-            MOMY(I) = MOMY(I) - RLX * RR(5, I)
-            MOMZ(I) = MOMZ(I) - RLX * RR(6, I)
-            SHRX(I) = SHRX(I) - RLX * RR(7, I)
-            SHRY(I) = SHRY(I) - RLX * RR(8, I)
-            SHRZ(I) = SHRZ(I) - RLX * RR(9, I)
-            WX(I) = WX(I) - RLX * RR(10, I)
-            WY(I) = WY(I) - RLX * RR(11, I)
-            WZ(I) = WZ(I) - RLX * RR(12, I)
-            !        WRITE(*,*)
-            !        WRITE(*,*) I
-            !        WRITE(*,1200) (RR(K,I),K=1,12)
-            ! 1200   FORMAT( 4(1X, 3E12.4 /) )
+        do i = 1, ctxt%ii + 1
+            ctxt%tx(i) = ctxt%tx(i) - ctxt%rlx * rr(1, i)
+            ctxt%ty(i) = ctxt%ty(i) - ctxt%rlx * rr(2, i)
+            ctxt%tz(i) = ctxt%tz(i) - ctxt%rlx * rr(3, i)
+            ctxt%momx(i) = ctxt%momx(i) - ctxt%rlx * rr(4, i)
+            ctxt%momy(i) = ctxt%momy(i) - ctxt%rlx * rr(5, i)
+            ctxt%momz(i) = ctxt%momz(i) - ctxt%rlx * rr(6, i)
+            ctxt%shrx(i) = ctxt%shrx(i) - ctxt%rlx * rr(7, i)
+            ctxt%shry(i) = ctxt%shry(i) - ctxt%rlx * rr(8, i)
+            ctxt%shrz(i) = ctxt%shrz(i) - ctxt%rlx * rr(9, i)
+            ctxt%wx(i) = ctxt%wx(i) - ctxt%rlx * rr(10, i)
+            ctxt%wy(i) = ctxt%wy(i) - ctxt%rlx * rr(11, i)
+            ctxt%wz(i) = ctxt%wz(i) - ctxt%rlx * rr(12, i)
+            !        write(*,*)
+            !        write(*,*) i
+            !        write(*,1200) (rr(k,i),k=1,12)
+            ! 1200   format( 4(1x, 3e12.4 /) )
         end do
         !
         !
-        !c      WRITE(*,1250) (RLXR(K), K=1, 12)
-        !c 1250 FORMAT(1X, 11F8.3)
+        !c      write(*,1250) (rlxr(k), k=1, 12)
+        !c 1250 format(1x, 11f8.3)
         !
-        WRITE(*, 1800) ITER, RMAX, RMS, RLX
-        1800 FORMAT(1X, I3, '   max:', E9.3, '   rms:', E9.3, '   RLX =', F7.4)
+        write(*, 1800) iter, rmax, ctxt%rms, ctxt%rlx
+        1800 format(1x, i3, '   max:', e9.3, '   rms:', e9.3, '   rlx =', f7.4)
         !
-        IF(RMAX <= EPS) GO TO 101
+        if(rmax <= eps) go to 101
         !
     end do
-    WRITE(*, *) 'STCALC: Convergence failed.  Continuing ...'
+    write(*, *) 'stcalc: Convergence failed.  Continuing ...'
     !
-    101  CONTINUE
+    101  continue
     !
-    !---- integrate towards tip for X displacements
-    !      I = 1
-    !      WX(I) = 0.0
-    !      do I=1, II
-    !        WX(I+1) =  WX(I)  -  (  TZ(I) +   TZ(I+1))*0.5 * DXII
+    !---- integrate towards tip for x displacements
+    !      i = 1
+    !      wx(i) = 0.0
+    !      do i=1, ii
+    !        wx(i+1) =  wx(i)  -  (  tz(i) +   tz(i+1))*0.5 * dxii
     ! end do
     !
-    RETURN
-END
-! STCALC
+    return
+end
+! stcalc
 
 
 
-SUBROUTINE STADD
-    USE common
-    IMPLICIT REAL (M)
+subroutine stadd(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !------------------------------------------------------
     !     Adds on structural twist to static blade angles
     !------------------------------------------------------
     !
-    do I = 1, II
-        BETA(I) = BETA0(I) + (TY(I) + TY(I + 1)) * 0.5
+    do i = 1, ctxt%ii
+        ctxt%beta(i) = ctxt%beta0(i) + (ctxt%ty(i) + ctxt%ty(i + 1)) * 0.5
     end do
     !
-    WRITE(*, 1000) (BETA(II) - BETA0(II)) * 180.0 / PI
+    write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
     !
-    CONV = .FALSE.
-    RETURN
+    ctxt%conv = .false.
+    return
     !
-    1000 FORMAT(/' New working blade angles set.'&
-            /' Tip angle deflection =', F8.3, '  deg.')
-END
-! STADD
+    1000 format(/' New working blade angles set.'&
+            /' Tip angle deflection =', f8.3, '  deg.')
+end
+! stadd
 
 
-SUBROUTINE STSET
-    USE common
-    IMPLICIT REAL (M)
+subroutine stset(ctxt)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !------------------------------------------------------
     !     Removes structural twist to get static blade angles
     !------------------------------------------------------
     !
-    do I = 1, II
-        BETA0(I) = BETA(I) - (TY(I) + TY(I + 1)) * 0.5
+    do i = 1, ctxt%ii
+        ctxt%beta0(i) = ctxt%beta(i) - (ctxt%ty(i) + ctxt%ty(i + 1)) * 0.5
     end do
     !
-    WRITE(*, 1000) (BETA(II) - BETA0(II)) * 180.0 / PI
+    write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
     !
-    CONV = .FALSE.
-    RETURN
+    ctxt%conv = .false.
+    return
     !
-    1000 FORMAT(/' New static blade angles set.'&
-            /' Tip angle deflection =', F8.3, '  deg.')
-END
-! STSET
+    1000 format(/' New static blade angles set.'&
+            /' Tip angle deflection =', f8.3, '  deg.')
+end
+! stset
 
 
 
-SUBROUTINE STWRIT(LU)
-    USE common
-    IMPLICIT REAL (M)
+subroutine stwrit(ctxt, lu)
+    use mod_common
+    implicit real (m)
+    type(Common), intent(inout) :: ctxt
     !---------------------------------------------
-    !     Dumps blade force output to unit LU
+    !     Dumps blade force output to unit lu
     !---------------------------------------------
     !
-    RTD = 180.0 / PI
+    rtd = 180.0 / pi
     !
-    IADD = 1
-    IF(LU == LUWRIT) IADD = INCR
+    iadd = 1
+    if(lu == ctxt%luwrit) iadd = ctxt%incr
     !
-    WRITE(LU, 1020)
+    write(lu, 1020)
     !
-    MOMREF = RHO * VEL**2 * RAD**3
+    momref = ctxt%rho * ctxt%vel**2 * ctxt%rad**3
     !
     !--- Deflections, moments and forces on blade beam
-    do I = 1, II, IADD
+    do i = 1, ctxt%ii, iadd
         !
         !********* still need to be averaged to i+1/2
         !
         !--- deflections
-        WXA = WX(I)
-        WYA = WY(I)
-        WZA = WZ(I)
+        wxa = ctxt%wx(i)
+        wya = ctxt%wy(i)
+        wza = ctxt%wz(i)
         !--- angular deflections (deg)
-        TXA = TX(I) * RTD
-        TYA = TY(I) * RTD
-        TZA = TZ(I) * RTD
+        txa = ctxt%tx(i) * rtd
+        tya = ctxt%ty(i) * rtd
+        tza = ctxt%tz(i) * rtd
         !--- bending moments
-        MXA = MOMX(I) * RHO * VEL**2 * RAD**3
-        MYA = MOMY(I) * RHO * VEL**2 * RAD**3
-        MZA = MOMZ(I) * RHO * VEL**2 * RAD**3
+        mxa = ctxt%momx(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
+        mya = ctxt%momy(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
+        mza = ctxt%momz(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
         !--- shear forces
-        SXA = SHRX(I) * RHO * VEL**2 * RAD**2
-        SYA = SHRY(I) * RHO * VEL**2 * RAD**2
-        SZA = SHRZ(I) * RHO * VEL**2 * RAD**2
+        sxa = ctxt%shrx(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+        sya = ctxt%shry(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+        sza = ctxt%shrz(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
         !
-        WRITE(LU, 1035) I, XI(I), WXA, WZA, TYA, MZA, MXA, MYA, SYA, SXA, SZA
+        write(lu, 1035) i, ctxt%xi(i), wxa, wza, tya, mza, mxa, mya, sya, sxa, sza
     end do
     !
     !....................................................................
     !
-    1020 FORMAT(&
-            /'  i    r/R     u/R     w/R     t         Mz          Mx'&
-            '           T            P            Sx           Sz'&
-            /'                             (deg)      (N-m)       (N-m)'&
-            '       (N-m)         (N)          (N)          (N)')
+    1020 format(&
+            /'  i    r/r     u/r     w/r     t         Mz          Mx'&
+            '           t            p            Sx           Sz'&
+            /'                             (deg)      (n-m)       (n-m)'&
+            '       (n-m)         (n)          (n)          (n)')
     !
-    1035 FORMAT(1X, &
-            I2, F7.3, F8.4, F8.4, F7.2, 6(1X, G12.4))
+    1035 format(1x, &
+            i2, f7.3, f8.4, f8.4, f7.2, 6(1x, g12.4))
     !
-    !c  i    r/R     u/R     w/R     t         Mz          Mx           T            P            Sx           Sz
-    !c                            (deg)      (N-m)       (N-m)       (N-m)         (N)          (N)          (N)
-    !c  1  0.307  0.0000  0.0000   0.00   0.1338       0.5678E-01  -0.1882        529.7        3.883       -1.804
-    !cXiifffffffFFFFFFFFffffffffFFFFFFFXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGGXGGGGGGGGGGGG
+    !c  i    r/r     u/r     w/r     t         Mz          Mx           t            p            Sx           Sz
+    !c                            (deg)      (n-m)       (n-m)       (n-m)         (n)          (n)          (n)
+    !c  1  0.307  0.0000  0.0000   0.00   0.1338       0.5678e-01  -0.1882        529.7        3.883       -1.804
+    !cXiiffffffffffffffFfffffffffffffffxggggggggggggxggggggggggggxggggggggggggxggggggggggggxggggggggggggxgggggggggggg
     !
     !
     !--- Display the strain components on the blade beam
-    COSR = COS(RAKE)
-    WRITE(LU, 2020)
+    cosr = cos(ctxt%rake)
+    write(lu, 2020)
     !
-    do I = 1, II, IADD
+    do i = 1, ctxt%ii, iadd
         !
-        RST = RSTB(I) / RAD
-        DXII = DXI(I) / COSR
+        rst = ctxt%rstb(i) / ctxt%rad
+        dxii = ctxt%dxi(i) / cosr
         !
         !------ bending strains
-        EX = RST * (TZ(I + 1) - TZ(I)) / DXII * 1000.0
-        EZ = -RST * (TX(I + 1) - TX(I)) / DXII * 1000.0
+        ex = rst * (ctxt%tz(i + 1) - ctxt%tz(i)) / dxii * 1000.0
+        ez = -rst * (ctxt%tx(i + 1) - ctxt%tx(i)) / dxii * 1000.0
         !
         !------ extensional strain
-        EY = (WY(I + 1) - WY(I)) / DXII * 1000.0
+        ey = (ctxt%wy(i + 1) - ctxt%wy(i)) / dxii * 1000.0
         !------ torsional shear
-        GT = RST * (TY(I + 1) - TY(I)) / DXII * 1000.0
+        gt = rst * (ctxt%ty(i + 1) - ctxt%ty(i)) / dxii * 1000.0
         !------ max normal strain
-        EMAX = SQRT(EX**2 + EZ**2) + EY
+        emax = sqrt(ex**2 + ez**2) + ey
         !
-        WRITE(LU, 2030) I, XI(I), EX, EZ, EY, EMAX, GT
+        write(lu, 2030) i, ctxt%xi(i), ex, ez, ey, emax, gt
     end do
     !
-    RETURN
+    return
 
     !
-    2020 FORMAT(&
-            /' i    r/R      Ex       Ez       Ey      Emax'&
+    2020 format(&
+            /' i    r/r      Ex       Ez       Ey      Emax'&
             '      g     x 1000')
     !          10  0.425   10.002   14.002   20.203   12.000   13.450
-    2030 FORMAT(1X, &
-            I2, F7.3, 5F9.4)
+    2030 format(1x, &
+            i2, f7.3, 5f9.4)
     !
-END
-! STWRIT
+end
+! stwrit
 
 
 
-SUBROUTINE B12SOL(A, B, C, R, II)
-    DIMENSION A(12, 12, II), B(12, 12, II), C(12, 12, II)
-    DIMENSION R(12, 1, II)
+subroutine b12sol(a, b, c, r, ii)
+    dimension a(12, 12, ii), b(12, 12, ii), c(12, 12, ii)
+    dimension r(12, 1, ii)
     !-------------------------------------------------------
     !      Solves the 12x12 block-tridiagonal Newton system
     !      by a standard block elimination scheme.
-    !      The solutions are returned in the R vectors.
+    !      The solutions are returned in the r vectors.
     !
-    !      |A C      ||d|   |R..|
-    !      |B A C    ||d|   |R..|
-    !      |  B . .  ||.| = |R..|
-    !      |    . . C||.|   |R..|
-    !      |      B A||d|   |R..|
+    !      |a c      ||d|   |r..|
+    !      |b a c    ||d|   |r..|
+    !      |  b . .  ||.| = |r..|
+    !      |    . . c||.|   |r..|
+    !      |      b a||d|   |r..|
     !-------------------------------------------------------
     !
-    NRHS = 1
+    nrhs = 1
     !
-    !CC** Forward sweep: Elimination of lower block diagonal (B's).
-    do I = 1, II
+    !cc** Forward sweep: Elimination of lower block diagonal (b's).
+    do i = 1, ii
         !
-        IM = I - 1
+        im = i - 1
         !
-        !------ don't eliminate first B block because it doesn't exist
-        IF(I == 1) GO TO 12
+        !------ don't eliminate first b block because it doesn't exist
+        if(i == 1) go to 12
         !
         !------ eliminate Bi block, thus modifying Ai and Ci blocks
-        do K = 1, 12
-            do L = 1, 12
-                A(K, L, I) = A(K, L, I)&
-                        - (B(K, 1, I) * C(1, L, IM)&
-                                + B(K, 2, I) * C(2, L, IM)&
-                                + B(K, 3, I) * C(3, L, IM)&
-                                + B(K, 4, I) * C(4, L, IM)&
-                                + B(K, 5, I) * C(5, L, IM)&
-                                + B(K, 6, I) * C(6, L, IM)&
-                                + B(K, 7, I) * C(7, L, IM)&
-                                + B(K, 8, I) * C(8, L, IM)&
-                                + B(K, 9, I) * C(9, L, IM)&
-                                + B(K, 10, I) * C(10, L, IM)&
-                                + B(K, 11, I) * C(11, L, IM)&
-                                + B(K, 12, I) * C(12, L, IM))
+        do k = 1, 12
+            do l = 1, 12
+                a(k, l, i) = a(k, l, i)&
+                        - (b(k, 1, i) * c(1, l, im)&
+                                + b(k, 2, i) * c(2, l, im)&
+                                + b(k, 3, i) * c(3, l, im)&
+                                + b(k, 4, i) * c(4, l, im)&
+                                + b(k, 5, i) * c(5, l, im)&
+                                + b(k, 6, i) * c(6, l, im)&
+                                + b(k, 7, i) * c(7, l, im)&
+                                + b(k, 8, i) * c(8, l, im)&
+                                + b(k, 9, i) * c(9, l, im)&
+                                + b(k, 10, i) * c(10, l, im)&
+                                + b(k, 11, i) * c(11, l, im)&
+                                + b(k, 12, i) * c(12, l, im))
             end do
-            do L = 1, NRHS
-                R(K, L, I) = R(K, L, I)&
-                        - (B(K, 1, I) * R(1, L, IM)&
-                                + B(K, 2, I) * R(2, L, IM)&
-                                + B(K, 3, I) * R(3, L, IM)&
-                                + B(K, 4, I) * R(4, L, IM)&
-                                + B(K, 5, I) * R(5, L, IM)&
-                                + B(K, 6, I) * R(6, L, IM)&
-                                + B(K, 7, I) * R(7, L, IM)&
-                                + B(K, 8, I) * R(8, L, IM)&
-                                + B(K, 9, I) * R(9, L, IM)&
-                                + B(K, 10, I) * R(10, L, IM)&
-                                + B(K, 11, I) * R(11, L, IM)&
-                                + B(K, 12, I) * R(12, L, IM))
+            do l = 1, nrhs
+                r(k, l, i) = r(k, l, i)&
+                        - (b(k, 1, i) * r(1, l, im)&
+                                + b(k, 2, i) * r(2, l, im)&
+                                + b(k, 3, i) * r(3, l, im)&
+                                + b(k, 4, i) * r(4, l, im)&
+                                + b(k, 5, i) * r(5, l, im)&
+                                + b(k, 6, i) * r(6, l, im)&
+                                + b(k, 7, i) * r(7, l, im)&
+                                + b(k, 8, i) * r(8, l, im)&
+                                + b(k, 9, i) * r(9, l, im)&
+                                + b(k, 10, i) * r(10, l, im)&
+                                + b(k, 11, i) * r(11, l, im)&
+                                + b(k, 12, i) * r(12, l, im))
             end do
         end do
         !
         !                                                              -1
-        !CC---- multiply Ci block and righthand side Ri vectors by (Ai)
+        !cc---- multiply Ci block and righthand side Ri vectors by (Ai)
         !       using Gaussian elimination.
         !
-        !cc        CALL SHOBLK(12,I,A(1,1,I))
+        !cc        call shoblk(12,i,a(1,1,i))
         !
-        12   do KPIV = 1, 11
-            KP1 = KPIV + 1
+        12   do kpiv = 1, 11
+            kp1 = kpiv + 1
             !
-            !-------- find max pivot index KX
-            KX = KPIV
-            do K = KP1, 12
-                IF(ABS(A(K, KPIV, I)) - ABS(A(KX, KPIV, I))) 131, 131, 1311
-                1311        KX = K
+            !-------- find max pivot index kx
+            kx = kpiv
+            do k = kp1, 12
+                if(abs(a(k, kpiv, i)) - abs(a(kx, kpiv, i))) 131, 131, 1311
+                1311        kx = k
             131 end do
             !
-            IF(A(KX, KPIV, I) == 0.0) THEN
-                WRITE(*, *) 'Singular A block, i = ', I
-                STOP
-            ENDIF
+            if(a(kx, kpiv, i) == 0.0) then
+                write(*, *) 'Singular a block, i = ', i
+                stop
+            endif
             !
-            PIVOT = 1.0 / A(KX, KPIV, I)
+            pivot = 1.0 / a(kx, kpiv, i)
             !
             !-------- switch pivots
-            A(KX, KPIV, I) = A(KPIV, KPIV, I)
+            a(kx, kpiv, i) = a(kpiv, kpiv, i)
             !
             !-------- switch rows & normalize pivot row
-            do L = KP1, 12
-                TEMP = A(KX, L, I) * PIVOT
-                A(KX, L, I) = A(KPIV, L, I)
-                A(KPIV, L, I) = TEMP
+            do l = kp1, 12
+                temp = a(kx, l, i) * pivot
+                a(kx, l, i) = a(kpiv, l, i)
+                a(kpiv, l, i) = temp
             end do
             !
-            do L = 1, 12
-                TEMP = C(KX, L, I) * PIVOT
-                C(KX, L, I) = C(KPIV, L, I)
-                C(KPIV, L, I) = TEMP
+            do l = 1, 12
+                temp = c(kx, l, i) * pivot
+                c(kx, l, i) = c(kpiv, l, i)
+                c(kpiv, l, i) = temp
             end do
             !
-            do L = 1, NRHS
-                TEMP = R(KX, L, I) * PIVOT
-                R(KX, L, I) = R(KPIV, L, I)
-                R(KPIV, L, I) = TEMP
+            do l = 1, nrhs
+                temp = r(kx, l, i) * pivot
+                r(kx, l, i) = r(kpiv, l, i)
+                r(kpiv, l, i) = temp
             end do
             !
             !-------- forward eliminate everything
-            do K = KP1, 12
-                ATMP = -A(K, KPIV, I)
-                IF(ATMP == 0.0) GO TO 135
-                do L = KP1, 12
-                    A(K, L, I) = A(K, L, I) + ATMP * A(KPIV, L, I)
+            do k = kp1, 12
+                atmp = -a(k, kpiv, i)
+                if(atmp == 0.0) go to 135
+                do l = kp1, 12
+                    a(k, l, i) = a(k, l, i) + atmp * a(kpiv, l, i)
                 end do
-                C(K, 1, I) = C(K, 1, I) + ATMP * C(KPIV, 1, I)
-                C(K, 2, I) = C(K, 2, I) + ATMP * C(KPIV, 2, I)
-                C(K, 3, I) = C(K, 3, I) + ATMP * C(KPIV, 3, I)
-                C(K, 4, I) = C(K, 4, I) + ATMP * C(KPIV, 4, I)
-                C(K, 5, I) = C(K, 5, I) + ATMP * C(KPIV, 5, I)
-                C(K, 6, I) = C(K, 6, I) + ATMP * C(KPIV, 6, I)
-                C(K, 7, I) = C(K, 7, I) + ATMP * C(KPIV, 7, I)
-                C(K, 8, I) = C(K, 8, I) + ATMP * C(KPIV, 8, I)
-                C(K, 9, I) = C(K, 9, I) + ATMP * C(KPIV, 9, I)
-                C(K, 10, I) = C(K, 10, I) + ATMP * C(KPIV, 10, I)
-                C(K, 11, I) = C(K, 11, I) + ATMP * C(KPIV, 11, I)
-                C(K, 12, I) = C(K, 12, I) + ATMP * C(KPIV, 12, I)
-                do L = 1, NRHS
-                    R(K, L, I) = R(K, L, I) + ATMP * R(KPIV, L, I)
+                c(k, 1, i) = c(k, 1, i) + atmp * c(kpiv, 1, i)
+                c(k, 2, i) = c(k, 2, i) + atmp * c(kpiv, 2, i)
+                c(k, 3, i) = c(k, 3, i) + atmp * c(kpiv, 3, i)
+                c(k, 4, i) = c(k, 4, i) + atmp * c(kpiv, 4, i)
+                c(k, 5, i) = c(k, 5, i) + atmp * c(kpiv, 5, i)
+                c(k, 6, i) = c(k, 6, i) + atmp * c(kpiv, 6, i)
+                c(k, 7, i) = c(k, 7, i) + atmp * c(kpiv, 7, i)
+                c(k, 8, i) = c(k, 8, i) + atmp * c(kpiv, 8, i)
+                c(k, 9, i) = c(k, 9, i) + atmp * c(kpiv, 9, i)
+                c(k, 10, i) = c(k, 10, i) + atmp * c(kpiv, 10, i)
+                c(k, 11, i) = c(k, 11, i) + atmp * c(kpiv, 11, i)
+                c(k, 12, i) = c(k, 12, i) + atmp * c(kpiv, 12, i)
+                do l = 1, nrhs
+                    r(k, l, i) = r(k, l, i) + atmp * r(kpiv, l, i)
                 end do
             135 end do
             !
         end do
         !
         !------ solve for last row
-        IF(A(12, 12, I) == 0.0) THEN
-            WRITE(*, *) 'Singular A block, i = ', I
-            STOP
-        ENDIF
-        PIVOT = 1.0 / A(12, 12, I)
-        C(12, 1, I) = C(12, 1, I) * PIVOT
-        C(12, 2, I) = C(12, 2, I) * PIVOT
-        C(12, 3, I) = C(12, 3, I) * PIVOT
-        C(12, 4, I) = C(12, 4, I) * PIVOT
-        C(12, 5, I) = C(12, 5, I) * PIVOT
-        C(12, 6, I) = C(12, 6, I) * PIVOT
-        C(12, 7, I) = C(12, 7, I) * PIVOT
-        C(12, 8, I) = C(12, 8, I) * PIVOT
-        C(12, 9, I) = C(12, 9, I) * PIVOT
-        C(12, 10, I) = C(12, 10, I) * PIVOT
-        C(12, 11, I) = C(12, 11, I) * PIVOT
-        C(12, 12, I) = C(12, 12, I) * PIVOT
-        do L = 1, NRHS
-            R(12, L, I) = R(12, L, I) * PIVOT
+        if(a(12, 12, i) == 0.0) then
+            write(*, *) 'Singular a block, i = ', i
+            stop
+        endif
+        pivot = 1.0 / a(12, 12, i)
+        c(12, 1, i) = c(12, 1, i) * pivot
+        c(12, 2, i) = c(12, 2, i) * pivot
+        c(12, 3, i) = c(12, 3, i) * pivot
+        c(12, 4, i) = c(12, 4, i) * pivot
+        c(12, 5, i) = c(12, 5, i) * pivot
+        c(12, 6, i) = c(12, 6, i) * pivot
+        c(12, 7, i) = c(12, 7, i) * pivot
+        c(12, 8, i) = c(12, 8, i) * pivot
+        c(12, 9, i) = c(12, 9, i) * pivot
+        c(12, 10, i) = c(12, 10, i) * pivot
+        c(12, 11, i) = c(12, 11, i) * pivot
+        c(12, 12, i) = c(12, 12, i) * pivot
+        do l = 1, nrhs
+            r(12, l, i) = r(12, l, i) * pivot
         end do
         !
         !------ back substitute everything
-        do KPIV = 10, 1, -1
-            KP1 = KPIV + 1
-            do K = KP1, 12
-                C(KPIV, 1, I) = C(KPIV, 1, I) - A(KPIV, K, I) * C(K, 1, I)
-                C(KPIV, 2, I) = C(KPIV, 2, I) - A(KPIV, K, I) * C(K, 2, I)
-                C(KPIV, 3, I) = C(KPIV, 3, I) - A(KPIV, K, I) * C(K, 3, I)
-                C(KPIV, 4, I) = C(KPIV, 4, I) - A(KPIV, K, I) * C(K, 4, I)
-                C(KPIV, 5, I) = C(KPIV, 5, I) - A(KPIV, K, I) * C(K, 5, I)
-                C(KPIV, 6, I) = C(KPIV, 6, I) - A(KPIV, K, I) * C(K, 6, I)
-                C(KPIV, 7, I) = C(KPIV, 7, I) - A(KPIV, K, I) * C(K, 7, I)
-                C(KPIV, 8, I) = C(KPIV, 8, I) - A(KPIV, K, I) * C(K, 8, I)
-                C(KPIV, 9, I) = C(KPIV, 9, I) - A(KPIV, K, I) * C(K, 9, I)
-                C(KPIV, 10, I) = C(KPIV, 10, I) - A(KPIV, K, I) * C(K, 10, I)
-                C(KPIV, 11, I) = C(KPIV, 11, I) - A(KPIV, K, I) * C(K, 11, I)
-                C(KPIV, 12, I) = C(KPIV, 12, I) - A(KPIV, K, I) * C(K, 12, I)
-                do L = 1, NRHS
-                    R(KPIV, L, I) = R(KPIV, L, I) - A(KPIV, K, I) * R(K, L, I)
+        do kpiv = 10, 1, -1
+            kp1 = kpiv + 1
+            do k = kp1, 12
+                c(kpiv, 1, i) = c(kpiv, 1, i) - a(kpiv, k, i) * c(k, 1, i)
+                c(kpiv, 2, i) = c(kpiv, 2, i) - a(kpiv, k, i) * c(k, 2, i)
+                c(kpiv, 3, i) = c(kpiv, 3, i) - a(kpiv, k, i) * c(k, 3, i)
+                c(kpiv, 4, i) = c(kpiv, 4, i) - a(kpiv, k, i) * c(k, 4, i)
+                c(kpiv, 5, i) = c(kpiv, 5, i) - a(kpiv, k, i) * c(k, 5, i)
+                c(kpiv, 6, i) = c(kpiv, 6, i) - a(kpiv, k, i) * c(k, 6, i)
+                c(kpiv, 7, i) = c(kpiv, 7, i) - a(kpiv, k, i) * c(k, 7, i)
+                c(kpiv, 8, i) = c(kpiv, 8, i) - a(kpiv, k, i) * c(k, 8, i)
+                c(kpiv, 9, i) = c(kpiv, 9, i) - a(kpiv, k, i) * c(k, 9, i)
+                c(kpiv, 10, i) = c(kpiv, 10, i) - a(kpiv, k, i) * c(k, 10, i)
+                c(kpiv, 11, i) = c(kpiv, 11, i) - a(kpiv, k, i) * c(k, 11, i)
+                c(kpiv, 12, i) = c(kpiv, 12, i) - a(kpiv, k, i) * c(k, 12, i)
+                do l = 1, nrhs
+                    r(kpiv, l, i) = r(kpiv, l, i) - a(kpiv, k, i) * r(k, l, i)
                 end do
             end do
         end do
     end do
     !
-    !CC** Backward sweep: Back substitution using upper block diagonal (Ci's).
-    do I = II - 1, 1, -1
-        IP = I + 1
-        do L = 1, NRHS
-            do K = 1, 12
-                R(K, L, I) = R(K, L, I)&
-                        - (R(1, L, IP) * C(K, 1, I)&
-                                + R(2, L, IP) * C(K, 2, I)&
-                                + R(3, L, IP) * C(K, 3, I)&
-                                + R(4, L, IP) * C(K, 4, I)&
-                                + R(5, L, IP) * C(K, 5, I)&
-                                + R(6, L, IP) * C(K, 6, I)&
-                                + R(7, L, IP) * C(K, 7, I)&
-                                + R(8, L, IP) * C(K, 8, I)&
-                                + R(9, L, IP) * C(K, 9, I)&
-                                + R(10, L, IP) * C(K, 10, I)&
-                                + R(11, L, IP) * C(K, 11, I)&
-                                + R(12, L, IP) * C(K, 12, I))
+    !cc** Backward sweep: Back substitution using upper block diagonal (Ci's).
+    do i = ii - 1, 1, -1
+        ip = i + 1
+        do l = 1, nrhs
+            do k = 1, 12
+                r(k, l, i) = r(k, l, i)&
+                        - (r(1, l, ip) * c(k, 1, i)&
+                                + r(2, l, ip) * c(k, 2, i)&
+                                + r(3, l, ip) * c(k, 3, i)&
+                                + r(4, l, ip) * c(k, 4, i)&
+                                + r(5, l, ip) * c(k, 5, i)&
+                                + r(6, l, ip) * c(k, 6, i)&
+                                + r(7, l, ip) * c(k, 7, i)&
+                                + r(8, l, ip) * c(k, 8, i)&
+                                + r(9, l, ip) * c(k, 9, i)&
+                                + r(10, l, ip) * c(k, 10, i)&
+                                + r(11, l, ip) * c(k, 11, i)&
+                                + r(12, l, ip) * c(k, 12, i))
             end do
         end do
     end do
     !
-    RETURN
-END
-! B12SOL
+    return
+end
+! b12sol
