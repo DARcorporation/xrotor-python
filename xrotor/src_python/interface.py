@@ -27,12 +27,14 @@ def test():
 
     n_blds = c_int(2)
 
-    aerodata = np.array([[0, -4.5, 1, -.1, 6, 1.2, 0.14, .018, .57, .16, -.08, .6, 5e6, -.5]], dtype=c_float)
+    aerodata = np.array([[0, -4.5, 1, -.1, 6, 1.2, 0.14, .018, .57, .16, -.08, .6, 5e6, -.5]],
+                        dtype=c_float, order='F')
 
     geomdata = np.array([[0.15, 0.30, 0.45, 0.60, 0.75, 0.90],
                          [0.15, 0.16, 0.17, 0.16, 0.13, 0.09],
                          [50.0, 30.7, 21.6, 16.5, 13.4, 11.3],
-                         [0.00, 0.00, 0.00, 0.00, 0.00, 0.00]], dtype=c_float)
+                         [0.00, 0.00, 0.00, 0.00, 0.00, 0.00]],
+                        dtype=c_float, order='F')
 
     n_aero = c_int(1)
     n_geom = c_int(6)
@@ -51,9 +53,6 @@ def test():
         aerodata.ctypes.data_as(dptr), geomdata.ctypes.data_as(dptr),
         byref(free), byref(duct), byref(wind)
      )
-
-    lib.save_prop(handle)
-    exit(0)
 
     lib.operate(
         handle,
