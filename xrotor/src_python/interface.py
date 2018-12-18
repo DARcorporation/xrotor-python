@@ -2,66 +2,101 @@ import ctypes
 import numpy as np
 import os
 
-from ctypes import c_bool, c_int, c_double, c_void_p, byref, POINTER, c_float
+from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float
 
 
 here = os.path.dirname(__file__)
 lib_file = os.path.abspath(os.path.join(here, '..', '..', 'lib', 'xrotor.so'))
 lib = ctypes.cdll.LoadLibrary(lib_file)
+fptr = POINTER(c_float)
 
 
-def test():
+def init():
     handle = c_void_p()
     lib.init(byref(handle))
+    return handle
 
-    rho = c_float(1.225)
-    vso = c_float(340)
-    rmu = c_float(1.789e-5)
-    alt = c_float(1)
-    vel = c_float(27)
-    adv = c_float(.15)
 
-    r_tip = c_float(.83)
-    r_hub = c_float(.06)
-    rake = c_float(0)
+def set_case(handle, case):
 
-    n_blds = c_int(2)
+    conditions = case['conditions']
+    rho = c_float(conditions['rho'])
+    vso = c_float(conditions['vso'])
+    rmu = c_float(conditions['mu'])
+    alt = c_float(conditions['alt'])
+    vel = c_float(conditions['vel'])
+    adv = c_float(conditions['adv'])
 
-    aerodata = np.array([[0, -4.5, 1, -.1, 6, 1.2, 0.14, .018, .57, .16, -.08, .6, 5e6, -.5]],
-                        dtype=c_float, order='F')
+    disk = case['disk']
+    r_hub = c_float(disk['r_hub'])
+    r_tip = c_float(disk['r_tip'])
+    r_wake = c_float(disk['r_wake'])
+    rake = c_float(disk['rake'])
 
-    geomdata = np.array([[0.15, 0.30, 0.45, 0.60, 0.75, 0.90],
-                         [0.15, 0.16, 0.17, 0.16, 0.13, 0.09],
-                         [50.0, 30.7, 21.6, 16.5, 13.4, 11.3],
-                         [0.00, 0.00, 0.00, 0.00, 0.00, 0.00]],
-                        dtype=c_float, order='F')
+    nblds = c_int(disk['nblds'])
 
-    n_aero = c_int(1)
-    n_geom = c_int(6)
+    blade = disk['blade']
+    sections = blade['sections']
+    naero = c_int(len(sections))
+    aerodata = np.zeros((14, naero.value), dtype=c_float, order='F')
+    for i, key in enumerate(sorted(sections.keys())):
+        sec = sections[key]
+        aerodata[0][i] = c_float(float(key))
+        aerodata[1][i] = c_float(sec['a0'])
+        aerodata[2][i] = c_float(sec['clmax'])
+        aerodata[3][i] = c_float(sec['clmin'])
+        aerodata[4][i] = c_float(sec['dclda'])
+        aerodata[5][i] = c_float(sec['dclda_stall'])
+        aerodata[6][i] = c_float(sec['dcl_stall'])
+        aerodata[7][i] = c_float(sec['cdmin'])
+        aerodata[8][i] = c_float(sec['clcdmin'])
+        aerodata[9][i] = c_float(sec['dcddcl2'])
+        aerodata[10][i] = c_float(sec['cm'])
+        aerodata[11][i] = c_float(sec['mcrit'])
+        aerodata[12][i] = c_float(sec['re'])
+        aerodata[13][i] = c_float(sec['reexp'])
 
-    free = c_bool(True)
-    duct = c_bool(False)
-    wind = c_bool(False)
+    geom = blade['geom']
+    geomdata = np.array([geom['radii'], geom['chord'], geom['twist'], geom['ubody']], dtype=c_float, order='F')
+    ngeom = geomdata.size[1]
 
-    dptr = POINTER(c_double)
+    free = c_bool(case['free'])
+    duct = c_bool(case['duct'])
+    wind = c_bool(case['wind'])
 
     lib.set_case(
         handle,
         byref(rho), byref(vso), byref(rmu), byref(alt), byref(vel), byref(adv),
-        byref(r_tip), byref(r_hub), byref(rake),
-        byref(n_blds), byref(n_aero), byref(n_geom),
-        aerodata.ctypes.data_as(dptr), geomdata.ctypes.data_as(dptr),
+        byref(r_hub), byref(r_tip), byref(r_wake), byref(rake),
+        byref(nblds), byref(naero), byref(ngeom),
+        aerodata.ctypes.data_as(fptr), geomdata.ctypes.data_as(fptr),
         byref(free), byref(duct), byref(wind)
-     )
-
-    lib.operate(
-        handle,
-        byref(c_int(1)),
-        byref(c_float(2000))
     )
 
+
+def operate(handle, specify, value):
+    lib.operate(
+        handle,
+        byref(c_int(specify)),
+        byref(c_float(value))
+    )
+
+
+def print_case(handle):
     lib.show(handle)
 
 
-if __name__ == '__main__':
-    test()
+def get_performance(handle):
+    rpm = c_float()
+    thrust = c_float()
+    torque = c_float()
+    power = c_float()
+    efficiency = c_float()
+
+    lib.get_performance(handle, byref(rpm), byref(thrust), byref(torque), byref(power), byref(efficiency))
+
+    return {'rpm': rpm.value,
+            'thrust': thrust.value,
+            'torque': torque.value,
+            'power': power.value,
+            'efficiency': efficiency.value}

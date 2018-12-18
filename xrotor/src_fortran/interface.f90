@@ -22,13 +22,13 @@ contains
 
     subroutine set_case(handle, &
             rho, vso, rmu, alt, vel, adv, &
-            r_tip, r_hub, rake, &
+            r_hub, r_tip, r_wake, rake, &
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
             free, duct, wind) bind(c, name='set_case')
         type    (c_ptr),    intent(in), value   :: handle
         real    (c_float),  intent(in)          :: rho, vso, rmu, alt, vel, adv
-        real    (c_float),  intent(in)          :: r_tip, r_hub, rake
+        real    (c_float),  intent(in)          :: r_hub, r_tip, r_wake, rake
         integer (c_int),    intent(in)          :: n_blds, n_aero, n_geom
         real    (c_float),  intent(in)          :: aerodata(14, n_aero), geomdata(4, n_geom)
         logical (c_bool),   intent(in)          :: free, duct, wind
@@ -47,6 +47,7 @@ contains
 
         ctxt%rad    = r_tip
         ctxt%xi0    = r_hub / r_tip
+        ctxt%xw0    = r_wake / r_tip
         ctxt%rake   = rake
 
         ctxt%nblds  = n_blds
@@ -109,5 +110,20 @@ contains
 
         call save(ctxt, 'output.prop')
     end subroutine save_prop
+
+    subroutine get_performance(handle, rpm, thrust, torque, power, efficiency) bind(c, name='get_performance')
+        type(c_ptr), intent(in), value :: handle
+        real(c_float), intent(out) :: rpm, thrust, torque, power, efficiency
+
+        type(Common), pointer :: ctxt
+        call c_f_pointer(handle, ctxt)
+
+        thrust = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+        torque = ctxt%qtot * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
+        power  = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
+
+        efficiency = ctxt%ttot / ctxt%ptot
+        rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 180.)
+    end subroutine get_performance
 
 end module interface
