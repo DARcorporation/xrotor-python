@@ -62,7 +62,7 @@ subroutine rotor()    !
     !
     write(*, 1000) ctxt%version
     !
-    call init(ctxt)
+    call init_(ctxt)
     !
     ctxt%fname = ' '
     !--- Get command line args (if present)
@@ -140,7 +140,7 @@ end
 ! rotor
 
 
-subroutine init(ctxt)
+subroutine init_(ctxt)
     use mod_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
