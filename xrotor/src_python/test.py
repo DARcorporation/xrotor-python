@@ -21,19 +21,19 @@ case = {
             'sections': {
                 0: {
                     # NACA 6412 at Re = 500,000
-                    'a0'            : -4.500,
-                    'cl_max'        :  1.000,
-                    'cl_min'        : -0.100,
-                    'dcl_da'        :  6.000,
-                    'dcl_da_stall'  :  1.200,
-                    'dcl_stall'     :  0.140,
-                    'cm_const'      : -0.080,
-                    'm_crit'        :  0.600,
-                    'cd_min'        :  0.018,
-                    'cl_cd_min'     :  0.570,
-                    'dcd_dcl2'      :  0.160,
-                    're_ref'        :  5.0e6,
-                    're_exp'        : -0.500
+                    'a_0'        : -4.500,
+                    'Cl_max'     :  1.000,
+                    'Cl_min'     : -0.100,
+                    'dClda'      :  6.000,
+                    'dClda_stall':  1.200,
+                    'dCl_stall'  :  0.140,
+                    'Cm_const'   : -0.080,
+                    'M_crit'     :  0.600,
+                    'Cd_min'     :  0.018,
+                    'Cl_Cd_min'  :  0.570,
+                    'dCddCl2'    :  0.160,
+                    'Re'         :  5.0e6,
+                    'Re_exp'     : -0.500
                 }
             },
             'geometry': {
