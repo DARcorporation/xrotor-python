@@ -1,3 +1,4 @@
-*.pyd
-cmake-build-debug/
 build/
+dist/
+*.egg-info/
+venv/

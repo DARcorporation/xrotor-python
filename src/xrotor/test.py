@@ -1,7 +1,7 @@
 import numpy as np
 import unittest
-from model import Case
-from xrotor import XRotor
+from .model import Case
+from .xrotor import XRotor
 
 case = {
     'conditions': {

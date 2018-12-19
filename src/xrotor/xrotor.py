@@ -1,14 +1,13 @@
-import ctypes
 import numpy as np
 import os
 
 from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float
 
-from model import Case, Performance
+from .model import Case, Performance
 
 
 here = os.path.dirname(__file__)
-lib_file = os.path.abspath(os.path.join(here, '..', '..', 'lib', 'xrotor.so'))
+lib_dir = os.path.abspath(os.path.join(here, '..'))
 fptr = POINTER(c_float)
 
 
@@ -22,7 +21,7 @@ class XRotor(object):
     """
 
     def __init__(self):
-        self._lib = ctypes.cdll.LoadLibrary(lib_file)
+        self._lib = np.ctypeslib.load_library('libxrotor', lib_dir)
         self._handle = c_void_p()
         self._lib.init(byref(self._handle))
         self._case: Case = None
