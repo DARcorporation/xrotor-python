@@ -81,7 +81,7 @@ contains
         call c_f_pointer(handle, ctxt)
 
         if (spec == 1) then
-            ctxt%adv = ctxt%vel / (ctxt%rad * val * pi / 30._dp)
+            ctxt%adv = ctxt%vel / (ctxt%rad * val * pi / 30.)
             ctxt%conv = .false.
             call aper(ctxt, 4, 2, ctxt%loprini)
         elseif (spec == 2) then
@@ -123,7 +123,7 @@ contains
         power  = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
 
         efficiency = ctxt%ttot / ctxt%ptot
-        rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 180.)
+        rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
     end subroutine get_performance
 
 end module interface

@@ -1,4 +1,5 @@
 import ctypes
+import numpy as np
 import os
 
 from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float
@@ -41,8 +42,8 @@ class XRotor(object):
             byref(c_int(case.disk.n_blds)),
             byref(c_int(case.disk.blade.n_aero)),
             byref(c_int(case.disk.blade.geometry.n_geom)),
-            case.disk.blade.aerodata.ctypes.data_as(fptr),
-            case.disk.blade.geomdata.ctypes.data_as(fptr),
+            np.asfortranarray(case.disk.blade.aerodata).ctypes.data_as(fptr),
+            np.asfortranarray(case.disk.blade.geomdata).ctypes.data_as(fptr),
             byref(c_bool(case.settings.free)),
             byref(c_bool(case.settings.duct)),
             byref(c_bool(case.settings.wind))

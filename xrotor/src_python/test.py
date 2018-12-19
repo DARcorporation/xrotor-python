@@ -75,7 +75,6 @@ class TestXRotor(unittest.TestCase):
         """
         xrotor = XRotor()
         xrotor.case = Case.from_dict(case)
-        xrotor.save_file()
         xrotor.operate(1, 2000)
         perf = xrotor.performance
 
@@ -87,27 +86,27 @@ class TestXRotor(unittest.TestCase):
         self.assertAlmostEqual(perf.power/1000, 21.9, 1)
         self.assertAlmostEqual(perf.efficiency, 0.593, 3)
 
-    # def test_solve_for_thrust(self):
-    #     """Run the test case at a thrust of 500 N and make sure the performance results match the expected values.
-    #
-    #     Expected performance for a thrust of 500 N:
-    #         - RPM        : Ω ≈  2019   rev/min
-    #         - Torque     : Q ≈   107   Nm
-    #         - Power      : P ≈    22.7 kW
-    #         - Efficiency : η ≈     0.5962
-    #     """
-    #     handle = interface.init()
-    #     interface.set_case(handle, case)
-    #     interface.operate(handle, 2, 500)
-    #     perf = interface.get_performance(handle)
-    #
-    #     print_perf(perf)
-    #
-    #     self.assertAlmostEqual(perf['rpm'], 2019, 0)
-    #     self.assertAlmostEqual(perf['thrust'], 500, 0)
-    #     self.assertAlmostEqual(perf['torque'], 107, 0)
-    #     self.assertAlmostEqual(perf['power']/1000, 22.7, 1)
-    #     self.assertAlmostEqual(perf['efficiency'], 0.596, 3)
+    def test_solve_for_thrust(self):
+        """Run the test case at a thrust of 500 N and make sure the performance results match the expected values.
+
+        Expected performance for a thrust of 500 N:
+            - RPM        : Ω ≈  2019   rev/min
+            - Torque     : Q ≈   107   Nm
+            - Power      : P ≈    22.7 kW
+            - Efficiency : η ≈     0.5962
+        """
+        xrotor = XRotor()
+        xrotor.case = Case.from_dict(case)
+        xrotor.operate(2, 500)
+        perf = xrotor.performance
+
+        print_perf(perf)
+
+        self.assertAlmostEqual(perf.rpm, 2019, 0)
+        self.assertAlmostEqual(perf.thrust, 500, 0)
+        self.assertAlmostEqual(perf.torque, 107, 0)
+        self.assertAlmostEqual(perf.power/1000, 22.7, 1)
+        self.assertAlmostEqual(perf.efficiency, 0.596, 3)
 
 
 if __name__ == '__main__':

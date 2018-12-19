@@ -26,7 +26,7 @@ class Geometry(object):
         self.r_tip = 1
         self.r_wake = 0
         self.rake = 0
-        self.geomdata: np.ndarray = np.zeros((4, 0), dtype=c_float, order='F')
+        self.geomdata = np.zeros((4, 0), dtype=c_float)
 
     @property
     def n_geom(self):
