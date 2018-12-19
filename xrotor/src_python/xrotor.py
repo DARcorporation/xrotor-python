@@ -13,6 +13,13 @@ fptr = POINTER(c_float)
 
 
 class XRotor(object):
+    """Interface to the XRotor Fortran routines.
+
+    Attributes
+    ----------
+    case
+    performance
+    """
 
     def __init__(self):
         self._lib = ctypes.cdll.LoadLibrary(lib_file)
@@ -22,6 +29,7 @@ class XRotor(object):
 
     @property
     def case(self) -> Case:
+        """Case: XRotor run case specification"""
         return self._case
 
     @case.setter
@@ -49,10 +57,26 @@ class XRotor(object):
             byref(c_bool(case.settings.wind))
         )
 
-    def save_file(self):
-        self._lib.save_prop(self._handle)
+    @property
+    def performance(self) -> Performance:
+        """Performance: Propeller performance specification"""
+        perf = Performance()
+        self._lib.get_performance(
+            self._handle,
+            byref(perf._rpm), byref(perf._thrust), byref(perf._torque), byref(perf._power), byref(perf._efficiency)
+        )
+        return perf
 
     def operate(self, specify, value):
+        """Operate the propeller at a specified RPM or thrust.
+
+        Parameters
+        ----------
+        specify : int
+            1 to specify RPM, 2 to specify thrust
+        value : float
+            Specified RPM in rev/min or thrust in N
+        """
         self._lib.operate(
             self._handle,
             byref(c_int(specify)),
@@ -60,13 +84,6 @@ class XRotor(object):
         )
 
     def print_case(self):
+        """Print the characteristics of the run case at the last operating point to the terminal."""
         self._lib.show(self._handle)
 
-    @property
-    def performance(self) -> Performance:
-        perf = Performance()
-        self._lib.get_performance(
-            self._handle,
-            byref(perf._rpm), byref(perf._thrust), byref(perf._torque), byref(perf._power), byref(perf._efficiency)
-        )
-        return perf
