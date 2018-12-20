@@ -106,8 +106,33 @@ class CMakeBuild(build_ext):
                                   cwd=self.build_temp)
 
 
+def readme():
+    with open('README.md') as f:
+        return f.read()
+
+
 setup(
     name='xrotor',
+    version='0.0.1',
+    description='Stripped down version of XROTOR as compiled python module ',
+    long_description=readme(),
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+        'Natural Language :: English',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows',
+        'Programming Language :: Fortran',
+        'Programming Language :: Python :: 3 :: Only',
+        'Topic :: Scientific/Engineering',
+    ],
+    keywords='xrotor propeller performance analysis',
+    url='https://github.com/daniel-de-vries/xrotor-python',
+    author='Daniël de Vries',
+    author_email='contact@daniel-de-vries.com',
+    license='GNU General Public License v3 or later (GPLv3+)',
     packages=['xrotor'],
     package_dir={'': 'src'},
     ext_modules=[CMakeExtension('xrotor.xrotor')],
