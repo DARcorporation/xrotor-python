@@ -67,6 +67,14 @@ module. To run it in XRotor, execute the following commands in the same python c
    6    0.412E-03   29   0.179E-04    0.1553    0.1825     9.966    1.0000
    7    0.227E-05   29   0.742E-07    0.1553    0.1825     9.966    0.2000
 
+```
+
+These commands initialize a sample propeller definition in XRotor and operate it at a fixed RPM of 2000 rev/min. The 
+output from the last function should be familiar to anyone who has used the original XRotor console application before:
+it is the convergence history of the OPER command. The familiar solution results can also be printed to the screen with
+the following command:
+
+```pycon
 >>>  xr.print_case()
 
  ===========================================================================
@@ -117,8 +125,7 @@ module. To run it in XRotor, execute the following commands in the same python c
  30 0.999 0.0629   9.97  0.125   0.1467   0.63  0.518  0.642 0.123   0.000
 ```
 
-These commands load a sample propeller definition, run it at a fixed RPM of 2000 rev/min, and print the results to the 
-screen. The output should be the same as that which is shown above.
+If the module is working as it should, the output should match with the output shown above.
 
 See the documentation for more detailed explanation of how to use the API.
 
