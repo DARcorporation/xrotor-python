@@ -29,7 +29,7 @@ Or, from the root of the downloaded repository:
 pip install .
 ```
 
-On Windows, you may have to force the system to use MinGW. To do so, create a file called `distutils.cfg` in 
+On Windows, you may have to force the system to use MinGW. To do so, create a file named `distutils.cfg` in 
 `PYTHONPATH\Lib\distutils` with the following contents:
 
 ```INI
