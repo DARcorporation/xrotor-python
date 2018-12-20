@@ -12,35 +12,37 @@ been removed. The only main menu options that are available in this stripped dow
 
 Building and Installing the Python Module
 -----------------------------------------
-To successfully build and install the Python module a few prerequisites have to be installed first. First of all, a 
-working installation of Python is required, of course. The module targets Python 3, and does NOT support Python 2. 
+To successfully build and install the Python module a few prerequisites have to be present on your system. First of all,
+a working installation of Python is required, of course. The module targets Python 3, and does NOT support Python 2. 
 Furthermore, working compilers for C and Fortran have to be installed and on the PATH. On Windows, the build and
-installation have been tested with MinGW, using gcc and gfortran. To force the system to use MinGW, you may have to
-create a file called `setup.cfg` in the root of the repo before building/installing with the following contents:
+installation have ONLY been tested with MinGW, using gcc and gfortran. 
+
+Then, installing XRotor should be as simple as running:
+
+```bash
+pip install xrotor
+```
+
+Or, from the root of the downloaded repository:
+
+```bash
+pip install .
+```
+
+On Windows, you may have to force the system to use MinGW. To do so, create a file called `distutils.cfg` in 
+`PYTHONPATH\Lib\distutils` with the following contents:
 
 ```INI
 [build]
 compiler=mingw32
 ```
 
-A few packages have to be installed within the Python environment before building/installing too. The `setup.py` script
-depends on these directly, so they have to be installed manually before invoking it. These packages are listed in the
-`requirements.txt` file in the root of this repo. Install them simply by running:
+If you are not able to create this file for your Python environment, it is also possible to force the use of MinGW 
+directly when invoking `pip` by calling:
 
 ```bash
-pip install -r requirements.txt
+pip install --global-option build_ext --global-option --compiler=mingw32 xrotor
 ```
-
-Any other dependencies used by the Python packages will be installed automatically by the `setupy.py` script.
-
-Next, the XRotor Python module can be installed simply by running the following command from the root of the repo:
-
-```bash
-pip install .
-```
-
-This should automatically build the Fortran shared object for your system and install the package for the active Python
-environment.
 
 Using the Module
 ----------------
