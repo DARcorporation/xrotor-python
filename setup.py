@@ -24,6 +24,8 @@ from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 
+version = '0.0.1'
+
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
 for flag in options.keys():
     if flag in sys.argv:
@@ -130,6 +132,7 @@ setup(
     ],
     keywords='xrotor propeller performance analysis',
     url='https://github.com/daniel-de-vries/xrotor-python',
+    download_url='https://github.com/daniel-de-vries/xrotor-python/tarball/' + version,
     author='Daniël de Vries',
     author_email='contact@daniel-de-vries.com',
     license='GNU General Public License v3 or later (GPLv3+)',
