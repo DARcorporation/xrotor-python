@@ -95,5 +95,6 @@ setup(
     package_dir={'': 'src'},
     ext_modules=[CMakeExtension('xrotor')],
     cmdclass={'build_ext': CMakeBuild},
-    zip_safe=False
+    install_requires=['numpy', 'scipy'],
+    zip_save=False
 )

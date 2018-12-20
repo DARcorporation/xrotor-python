@@ -11,24 +11,60 @@ been removed. The only main menu options that are available in this stripped dow
 * DISP, which displays the current propeller characteristics data onscreen.
 
 Installing the Python Module
---------------------------
-Make sure a working version of python is installed and on the path. Make sure Numpy is installed for this python 
-environment. Then run the following command from the root of this repo:
-```
-python setup.py install
-```
-The package will then be build and installed for the active python environment.
+----------------------------
+To successfully build and install the Python module a few prerequisites have to be installed first. First of all, a 
+working installation of Python is required, of course. The module targets Python 3, and does NOT support Python 2. 
+Furthermore, working compilers for C and Fortran have to be installed and on the PATH. On Windows, the build and
+installation have been tested with MinGW, using gcc and gfortran. To force the system to use MinGW, you may have to
+create a file called `setup.cfg` in the root of the repo before building/installing with the following contents:
 
-Note: by default, the repo is setup to compile on a Windows machine, using the MinGW system. If you want to compile it
-as such, make sure MinGW's `bin` directory is on the path (while building AND to before using the installed python module).
-If you want to use a different toolchain, edit `setup.cfg` accordingly.
+```
+[build]
+compiler=mingw32
+```
 
-The Python module includes the ability to present the user with a console interface, so it XROTOR can be used interactively
-like the original application. To invoke this interface, run the following code in python:
+A few packages have to be installed within the Python environment before building/installing too. The `setup.py` script
+depends on these directly, so they have to be installed manually before invoking it. These packages are listed in the
+`requirements.txt` file in the root of this repo. Install them simply by running:
+
+```bash
+pip install -r requirements.txt
+```
+
+Any other dependencies used by the Python packages will be installed automatically by the `setupy.py` script.
+
+Next, the XRotor Python module can be installed simply by running the following command from the root of the repo:
+
+```bash
+pip install .
+```
+
+This should automatically build the Fortran shared object for your system and install the package for the active Python
+environment.
+
+To test that installation run the following commands in the python console:
+
 ```python
-import xrotor
-xrotor.flib.rotor()
+>>>  from xrotor import XRotor
+>>>  xr = XRotor()
 ```
+
+If this does not produce any errors, the shared object is functioning properly. A test case is installed along with the
+module. To run it in XRotor, execute the following commands in the same python console:
+
+```python
+>>>  from xrotor.model import Case
+>>>  from xrotor.test import case
+>>>  xr.case = Case.from_dict(case)
+>>>  xr.operate(1, 2000)
+>>>  xr.print_case()
+```
+
+These commands load a sample propeller definition, run it at a fixed RPM of 2000 rev/min, and print the results to the 
+screen. 
+
+See the documentation for more detailed explanation of how to use the API.
+
 
 Building a Console Application
 ------------------------------
