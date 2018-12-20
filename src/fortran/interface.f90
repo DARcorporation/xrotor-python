@@ -126,4 +126,33 @@ contains
         rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
     end subroutine get_performance
 
+    subroutine get_number_of_stations(handle, n_stations) bind(c, name='get_number_of_stations')
+        type(c_ptr), intent(in), value :: handle
+        integer(c_int), intent(out) :: n_stations
+
+        type(Common), pointer :: ctxt
+        call c_f_pointer(handle, ctxt)
+
+        n_stations = ctxt%ii
+    end subroutine get_number_of_stations
+
+    subroutine get_station_conditions(handle, n, xi, Re) bind(c, name='get_station_conditions')
+        type(c_ptr), intent(in), value :: handle
+        integer(c_int), intent(in) :: n
+        real(c_float), intent(out) :: xi(n), Re(n)
+
+        type(Common), pointer :: ctxt
+        integer :: i
+
+        print *, n
+
+        call c_f_pointer(handle, ctxt)
+
+        do i=1, n
+            xi(i) = ctxt%xi(i)
+            Re(i) = ctxt%re(i)
+            print *, xi(i), re(i)
+        end do
+    end subroutine get_station_conditions
+
 end module interface

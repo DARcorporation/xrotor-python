@@ -21,6 +21,7 @@ class XRotor(object):
     """
 
     def __init__(self):
+        print(lib_dir)
         self._lib = np.ctypeslib.load_library('libxrotor', lib_dir)
         self._handle = c_void_p()
         self._lib.init(byref(self._handle))
@@ -65,6 +66,16 @@ class XRotor(object):
             byref(perf._rpm), byref(perf._thrust), byref(perf._torque), byref(perf._power), byref(perf._efficiency)
         )
         return perf
+
+    @property
+    def station_conditions(self):
+        """(np.ndarray, np.ndarray): Normalized radial coordinates and corresponding local Reynolds numbers."""
+        n = c_int()
+        self._lib.get_number_of_stations(self._handle, byref(n))
+        xi = np.zeros(n.value, dtype=c_float, order='F')
+        re = np.zeros(n.value, dtype=c_float, order='F')
+        self._lib.get_station_conditions(self._handle, byref(n), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
+        return xi, re
 
     def operate(self, specify, value):
         """Operate the propeller at a specified RPM or thrust.
