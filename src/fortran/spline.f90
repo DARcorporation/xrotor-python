@@ -1,21 +1,21 @@
 !***********************************************************************
-!    Module:  spline.f
-! 
-!    Copyright (c) 2011 Mark Drela 
-! 
-!    This program is free software; you can redistribute it and/or modify
-!    it under the terms of the gnu General Public License as published by
-!    the Free Software Foundation; either version 2 of the License, or
-!    (at your option) any later version.
+!   Copyright (c) 2018 D. de Vries
+!   Original Copyright (c) 2011 Mark Drela
 !
-!    This program is distributed in the hope that it will be useful,
-!    but without any warranty; without even the implied warranty of
-!    merchantability or fitness for a particular purpose.  See the
-!    gnu General Public License for more details.
+!   This file is part of XRotor.
 !
-!    You should have received a copy of the gnu General Public License
-!    along with this program; if not, write to the Free Software
-!    Foundation, Inc., 675 Mass Ave, Cambridge, ma 02139, usa.
+!   XRotor is free software: you can redistribute it and/or modify
+!   it under the terms of the GNU General Public License as published by
+!   the Free Software Foundation, either version 3 of the License, or
+!   (at your option) any later version.
+!
+!   XRotor is distributed in the hope that it will be useful,
+!   but WITHOUT ANY WARRANTY; without even the implied warranty of
+!   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!   GNU General Public License for more details.
+!
+!   You should have received a copy of the GNU General Public License
+!   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 !***********************************************************************
 
 module mod_spline
