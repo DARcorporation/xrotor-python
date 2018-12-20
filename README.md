@@ -44,15 +44,17 @@ environment.
 
 Using the Module
 ----------------
-To test that installation run the following commands in the python console:
+All XRotor operations are performed using the `XRotor` class. So the first step when using this module is to create an
+instance of this class:
 
 ```pycon
 >>>  from xrotor import XRotor
 >>>  xr = XRotor()
 ```
 
-If this does not produce any errors, the shared object is functioning properly. A test case is installed along with the
-module. To run it in XRotor, execute the following commands in the same python console:
+If this does not produce any errors, the installtion should be functioning properly. 
+A test case is installed along with the module. To run it in XRotor, execute the following commands in the same python
+console:
 
 ```pycon
 >>>  from xrotor.model import Case
