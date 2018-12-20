@@ -1,7 +1,9 @@
+import multiprocessing
 import numpy as np
 import unittest
-from .model import Case
+
 from .xrotor import XRotor
+from .model import Case
 
 case = {
     'conditions': {
@@ -107,6 +109,19 @@ class TestXRotor(unittest.TestCase):
         self.assertAlmostEqual(perf.torque, 107, 0)
         self.assertAlmostEqual(perf.power/1000, 22.7, 1)
         self.assertAlmostEqual(perf.efficiency, 0.596, 3)
+
+
+class TestXRotorConcurrently(unittest.TestCase):
+    """Test whether the tests can be run properly in parallel."""
+
+    def test_concurrently(self):
+        """Run both test cases contained in the TestXRotor test case in parallel."""
+        test_xrotor = TestXRotor()
+
+        ps = [multiprocessing.Process(target=test_xrotor.test_solve_for_rpm),
+              multiprocessing.Process(target=test_xrotor.test_solve_for_thrust)]
+        [p.start() for p in ps]
+        [p.join() for p in ps]
 
 
 if __name__ == '__main__':
