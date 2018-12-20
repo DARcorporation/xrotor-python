@@ -18,7 +18,7 @@ Furthermore, working compilers for C and Fortran have to be installed and on the
 installation have been tested with MinGW, using gcc and gfortran. To force the system to use MinGW, you may have to
 create a file called `setup.cfg` in the root of the repo before building/installing with the following contents:
 
-```
+```INI
 [build]
 compiler=mingw32
 ```
@@ -44,7 +44,7 @@ environment.
 
 To test that installation run the following commands in the python console:
 
-```python
+```Python console
 >>>  from xrotor import XRotor
 >>>  xr = XRotor()
 ```
@@ -52,7 +52,7 @@ To test that installation run the following commands in the python console:
 If this does not produce any errors, the shared object is functioning properly. A test case is installed along with the
 module. To run it in XRotor, execute the following commands in the same python console:
 
-```python
+```Python console
 >>>  from xrotor.model import Case
 >>>  from xrotor.test import case
 >>>  xr.case = Case.from_dict(case)
