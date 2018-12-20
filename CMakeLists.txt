@@ -15,6 +15,3 @@ add_library(xrotor SHARED
         src/fortran/xrotor.f90
         src/fortran/xutils.f90
         src/fortran/interface.f90)
-add_custom_command(TARGET xrotor POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:xrotor> ../lib/xrotor.so
-)
