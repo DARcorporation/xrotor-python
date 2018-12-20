@@ -10,8 +10,8 @@ been removed. The only main menu options that are available in this stripped dow
 * SAVE, which saves a propeller definition file to the disk; and
 * DISP, which displays the current propeller characteristics data onscreen.
 
-Installing the Python Module
-----------------------------
+Building and Installing the Python Module
+-----------------------------------------
 To successfully build and install the Python module a few prerequisites have to be installed first. First of all, a 
 working installation of Python is required, of course. The module targets Python 3, and does NOT support Python 2. 
 Furthermore, working compilers for C and Fortran have to be installed and on the PATH. On Windows, the build and
@@ -42,6 +42,8 @@ pip install .
 This should automatically build the Fortran shared object for your system and install the package for the active Python
 environment.
 
+Using the Module
+----------------
 To test that installation run the following commands in the python console:
 
 ```pycon
@@ -125,14 +127,12 @@ the following command:
  30 0.999 0.0629   9.97  0.125   0.1467   0.63  0.518  0.642 0.123   0.000
 ```
 
-If the module is working as it should, the output should match with the output shown above.
+If the module is working as it should, the output should match the output shown above.
+
+At the time of writing, the only the two operating modes available are fixed RPM and fixed thrust with fixed blade pitch.
+Both can be invoked by calling the `operate` member function on an instance of the `XRotor` class. The first argument
+to this function specifies which mode is used: 1 for fixed RPM, as was demonstrated above; 2 for fixed thrust at fixed
+blade pitch. The second argument to the function specifies the value for the RPM/thrust. 
 
 See the documentation for more detailed explanation of how to use the API.
-
-
-Building a Console Application
-------------------------------
-With this codebase it is also still possible to build a console application, like the original XROTOR. CMake is used to
-accomplish this. Make sure it is installed, and that its aware of the appropriate compilers. Then the project can be 
-build using the `CMakeLists.txt` stored in the root of the repo.
  
