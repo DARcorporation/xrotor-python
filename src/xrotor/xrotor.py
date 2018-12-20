@@ -5,9 +5,7 @@ from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float
 
 from .model import Case, Performance
 
-
-here = os.path.dirname(__file__)
-lib_dir = os.path.abspath(os.path.join(here, '..'))
+here = os.path.abspath(os.path.dirname(__file__))
 fptr = POINTER(c_float)
 
 
@@ -21,8 +19,7 @@ class XRotor(object):
     """
 
     def __init__(self):
-        print(lib_dir)
-        self._lib = np.ctypeslib.load_library('libxrotor', lib_dir)
+        self._lib = np.ctypeslib.load_library('libxrotor', here)
         self._handle = c_void_p()
         self._lib.init(byref(self._handle))
         self._case: Case = None
