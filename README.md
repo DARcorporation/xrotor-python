@@ -44,7 +44,7 @@ environment.
 
 To test that installation run the following commands in the python console:
 
-```Python console
+```pycon
 >>>  from xrotor import XRotor
 >>>  xr = XRotor()
 ```
@@ -52,7 +52,7 @@ To test that installation run the following commands in the python console:
 If this does not produce any errors, the shared object is functioning properly. A test case is installed along with the
 module. To run it in XRotor, execute the following commands in the same python console:
 
-```Python console
+```pycon
 >>>  from xrotor.model import Case
 >>>  from xrotor.test import case
 >>>  xr.case = Case.from_dict(case)
