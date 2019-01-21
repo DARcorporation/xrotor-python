@@ -208,7 +208,7 @@ class Section(object):
         return sec
 
     @staticmethod
-    def fit_polar(a: np.ndarray, cl: np.ndarray, cd: np.ndarray, cm: np.ndarray, cp: Optional[np.ndarray]=None) -> Section:
+    def fit_polar(a: np.ndarray, cl: np.ndarray, cd: np.ndarray, cm: np.ndarray, cp: Optional[np.ndarray]=None):
         """Fit the aerodynamic Section properties to a given polar.
 
         Parameters
