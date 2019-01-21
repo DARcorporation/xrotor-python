@@ -26,7 +26,7 @@ from tempfile import NamedTemporaryFile
 from .model import Case, Performance
 
 here = os.path.abspath(os.path.dirname(__file__))
-lib_path = glob.glob(os.path.join(here, 'libxfoil.*'))[0]
+lib_path = glob.glob(os.path.join(here, 'libxrotor.*'))[0]
 lib_ext = lib_path[lib_path.rfind('.'):]
 fptr = POINTER(c_float)
 
