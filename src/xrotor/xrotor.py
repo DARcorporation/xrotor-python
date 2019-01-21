@@ -18,8 +18,9 @@
 import numpy as np
 import os
 import glob
+import ctypes
 
-from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float
+from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float, cdll
 from shutil import copy2
 from tempfile import NamedTemporaryFile
 

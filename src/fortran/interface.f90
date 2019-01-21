@@ -175,14 +175,11 @@ contains
         type(Common), pointer :: ctxt
         integer :: i
 
-        print *, n
-
         call c_f_pointer(handle, ctxt)
 
         do i=1, n
             xi(i) = ctxt%xi(i)
             Re(i) = ctxt%re(i)
-            print *, xi(i), re(i)
         end do
     end subroutine get_station_conditions
 
