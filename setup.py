@@ -115,7 +115,7 @@ def readme():
 
 setup(
     name='xrotor',
-    version='0.0.1',
+    version=version,
     description='Stripped down version of XROTOR as compiled python module ',
     long_description=readme(),
     classifiers=[
