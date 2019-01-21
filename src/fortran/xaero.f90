@@ -73,7 +73,7 @@ subroutine getaero(ctxt, n, xisect, a0, clmax, clmin, &
     type(Common), intent(inout) :: ctxt
     !
     if(n < 1 .or. n > ctxt%naero) then
-        write(*, *) 'Error: index of aero section out of bounds'
+         if (show_output) write(*, *) 'Error: index of aero section out of bounds'
         return
     endif
     !
@@ -106,7 +106,7 @@ subroutine putaero(ctxt, n, xisect, a0, clmax, clmin, &
     type(Common), intent(inout) :: ctxt
     !
     if(n > nax) then
-        write(*, *) 'Too many aero sections defined...'
+         if (show_output) write(*, *) 'Too many aero sections defined...'
         return
     endif
     !
@@ -165,7 +165,7 @@ subroutine getclcdcm(ctxt, is, alf, w, rey, &
                     go to 10
                 endif
             end do
-            write(*, *) 'aero section not found for station ', ctxt%xi(is)
+             if (show_output) write(*, *) 'aero section not found for station ', ctxt%xi(is)
         endif
         !
         n = 1
@@ -280,7 +280,7 @@ subroutine getalf(ctxt, is, clift, w, alf, alf_cl, alf_w, stallf)
         if(abs(dalf) < eps) return
     end do
     !
-    20 write(*, *) 'getalf: alpha(ctxt%cl) function inversion failed'
+    if (show_output) write(*, *) 'getalf: alpha(ctxt%cl) function inversion failed'
     !      write(*,*) 'is,clift  ',is,clift
     !      write(*,*) 'abs(dalf) ',abs(dalf)
     !      write(*,*) 'cl_alf    ',cl_alf
@@ -346,8 +346,7 @@ subroutine clcdcm(ctxt, alf, w, rey, &
     msq = w * w * ctxt%vel**2 / ctxt%vso**2
     msq_w = 2.0 * w * ctxt%vel**2 / ctxt%vso**2
     if(msq >= 1.0) then
-        write(*, *)&
-                'clfunc: Local Mach number limited to 0.99, was ', msq
+         if (show_output) write(*, *) 'clfunc: Local Mach number limited to 0.99, was ', msq
         msq = 0.99
         msq_w = 0.
     endif

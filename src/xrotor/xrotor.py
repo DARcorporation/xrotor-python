@@ -17,12 +17,17 @@
 #   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
 import os
+import glob
 
 from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float
+from shutil import copy2
+from tempfile import NamedTemporaryFile
 
 from .model import Case, Performance
 
 here = os.path.abspath(os.path.dirname(__file__))
+lib_path = glob.glob(os.path.join(here, 'libxfoil.*'))[0]
+lib_ext = lib_path[lib_path.rfind('.'):]
 fptr = POINTER(c_float)
 
 
@@ -36,10 +41,33 @@ class XRotor(object):
     """
 
     def __init__(self):
-        self._lib = np.ctypeslib.load_library('libxrotor', here)
+        super().__init__()
+        tmp = NamedTemporaryFile(mode='wb', delete=False, suffix=lib_ext)
+        tmp.close()
+        self._lib_path = tmp.name
+        copy2(lib_path, self._lib_path)
+        self._lib = cdll.LoadLibrary(self._lib_path)
+
         self._handle = c_void_p()
         self._lib.init(byref(self._handle))
         self._case: Case = None
+
+    def __del__(self):
+        handle = self._lib._handle
+        del self._lib
+        try:
+            ctypes.windll.kernel32.FreeLibrary(handle)
+        finally:
+            os.remove(self._lib_path)
+
+    @property
+    def print(self):
+        """bool: True if console output should be shown."""
+        return self._lib.get_print().value
+
+    @print.setter
+    def print(self, value):
+        self._lib.set_print(byref(c_bool(value)))
 
     @property
     def case(self) -> Case:

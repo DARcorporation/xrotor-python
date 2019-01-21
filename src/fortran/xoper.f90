@@ -57,7 +57,7 @@ subroutine oper(ctxt)
     if(comand == '    ') then
         return
     endif
-    if(comand == '?   ') write(*, 1100)
+    if (comand == '?   ' .and. show_output) write(*, 1100)
     if(comand == '?   ') go to 900
     if(comand == 'form') go to 2
     if(comand == 'ters') go to 4
@@ -92,18 +92,18 @@ subroutine oper(ctxt)
     !
     !--- Hack to check adw equation sensitivity, get rid of this later... hhy
     if(comand == 'adw') then
-        write(*, *) 'current ctxt%adw factor =', ctxt%adwfctr
+         if (show_output) write(*, *) 'current ctxt%adw factor =', ctxt%adwfctr
         call askr('enter new ctxt%adw factor^', ctxt%adwfctr)
         go to 900
     endif
     !
-    write(*, 1050) comand
+     if (show_output) write(*, 1050) comand
     go to 900
     !
     !---------------------------------------------------------------------
     !--- Select options for slipstream and velocity calculation
     2    continue
-    write(*, 3)
+     if (show_output) write(*, 3)
     call askc('.form^', comand, comarg)
     !
     if(comand == 'grad') then
@@ -121,19 +121,19 @@ subroutine oper(ctxt)
     endif
     !
     if(ctxt%vrtx) then
-        write(*, *)'Discrete Vortex Formulation selected'
+         if (show_output) write(*, *)'Discrete Vortex Formulation selected'
     else
         if(ctxt%fast) then
-            write(*, *) 'Graded Momentum Formulation selected'
+             if (show_output) write(*, *) 'Graded Momentum Formulation selected'
         else
-            write(*, *)'Potential Formulation selected'
+             if (show_output) write(*, *)'Potential Formulation selected'
         endif
     endif
     !
     if(ctxt%free) then
-        write(*, *)'Self-deforming wake selected'
+         if (show_output) write(*, *)'Self-deforming wake selected'
     else
-        write(*, *)'Rigid wake selected'
+         if (show_output) write(*, *)'Rigid wake selected'
     endif
     go to 2
     !
@@ -148,8 +148,8 @@ subroutine oper(ctxt)
     !---------------------------------------------------------------------
     !--- Output data on blade stations with each case (verbose)
     4 ctxt%terse = .not.ctxt%terse
-    if(ctxt%terse)      write(*, *)'terse output selected'
-    if(.not.ctxt%terse) write(*, *)'verbose output selected'
+    if (ctxt%terse .and. show_output) write(*, *)'terse output selected'
+    if (.not.ctxt%terse .and. show_output) write(*, *)'verbose output selected'
     go to 900
     !
     !---------------------------------------------------------------------
@@ -176,14 +176,14 @@ subroutine oper(ctxt)
     !--------------------------------------------------------------
     22   ctxt%duct = .not.ctxt%duct
     if(ctxt%duct) then
-        write(*, *) 'duct option selected'
+         if (show_output) write(*, *) 'duct option selected'
         if(ninput >= 1) then
             ctxt%urduct = rinput(1)
         else
             call askr('enter aexit/aprop for ctxt%duct^', ctxt%urduct)
         endif
     else
-        write(*, *) 'free-tip option selected'
+         if (show_output) write(*, *) 'free-tip option selected'
         ctxt%urduct = 1.0
     endif
     go to 900
@@ -196,7 +196,7 @@ subroutine oper(ctxt)
             call askr('enter aexit/aprop for ctxt%duct^', ctxt%urduct)
         endif
     else
-        write(*, *) '*** select ctxt%duct option first'
+         if (show_output) write(*, *) '*** select ctxt%duct option first'
     endif
     go to 900
     !
@@ -280,7 +280,7 @@ subroutine oper(ctxt)
         call askr('thrust (n)        ^', ctxt%tspec)
     endif
     rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.0)
-    write(*, 1530) rpm
+     if (show_output) write(*, 1530) rpm
     51 call askc('fix Pitch / fix Rpm ( p/r )?^', &
             ans, ansarg)
     if(ans /= 'r' .and. ans /= 'p') go to 51
@@ -299,7 +299,7 @@ subroutine oper(ctxt)
     if(ans /= 'p') then
         if(ctxt%conv) then
             !----- convergence was achieved: show blade angle change incurred
-            write(*, 1550) ctxt%dbeta * 180.0 / pi
+             if (show_output) write(*, 1550) ctxt%dbeta * 180.0 / pi
         else
             !----- convergence failed: restore clobbered blade angles
             do i = 1, ctxt%ii
@@ -319,7 +319,7 @@ subroutine oper(ctxt)
         call askr('torque (n-m)      ^', ctxt%qspec)
     endif
     rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.0)
-    write(*, 1530) rpm
+     if (show_output) write(*, 1530) rpm
     61 call askc('fix Pitch / fix Rpm ( p/r )?^', &
             ans, ansarg)
     if(ans /= 'r' .and. ans /= 'p') go to 61
@@ -337,7 +337,7 @@ subroutine oper(ctxt)
     if(ans /= 'p') then
         if(ctxt%conv) then
             !----- convergence was achieved: show blade angle change incurred
-            write(*, 1550) ctxt%dbeta * 180.0 / pi
+             if (show_output) write(*, 1550) ctxt%dbeta * 180.0 / pi
         else
             !----- convergence failed: restore clobbered blade angles
             do i = 1, ctxt%ii
@@ -357,7 +357,7 @@ subroutine oper(ctxt)
         call askr('power (w)         ^', ctxt%pspec)
     endif
     rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.0)
-    write(*, 1530) rpm
+     if (show_output) write(*, 1530) rpm
     71 call askc('fix pitch / fix rpm ( p/r )?^', &
             ans, ansarg)
     if(ans /= 'r' .and. ans /= 'p') go to 71
@@ -375,7 +375,7 @@ subroutine oper(ctxt)
     if(ans /= 'p') then
         if(ctxt%conv) then
             !----- convergence was achieved: show blade angle change incurred
-            write(*, 1550) ctxt%dbeta * 180.0 / pi
+             if (show_output) write(*, 1550) ctxt%dbeta * 180.0 / pi
         else
             !----- convergence failed: restore clobbered blade angles
             do i = 1, ctxt%ii
@@ -406,8 +406,8 @@ subroutine oper(ctxt)
     !
     73   call aski('enter new number of radial points^', ctxt%ii)
     if(ctxt%ii > ix) then
-        write(*, *)
-        write(*, *) 'Maximum number is', ix
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'Maximum number is', ix
         go to 73
     endif
     !
@@ -437,9 +437,9 @@ subroutine oper(ctxt)
     !--- Toggle initialization flag
     76   ctxt%loprini = .not.ctxt%loprini
     if(ctxt%loprini) then
-        write(*, *) 'Analysis case will be initialized'
+         if (show_output) write(*, *) 'Analysis case will be initialized'
     else
-        write(*, *) 'Analysis case will not be initialized'
+         if (show_output) write(*, *) 'Analysis case will not be initialized'
     endif
     go to 900
     !
@@ -451,12 +451,12 @@ subroutine oper(ctxt)
     !---------------------------------------------------------------------
     !--- Read or use engine rpm/power line file
     79   if(ctxt%lpwrvar .and. ctxt%npwrvar > 0) then
-        write(*, *) ' '
-        write(*, *) 'Current rpm/Power Engine Line'
+         if (show_output) write(*, *) ' '
+         if (show_output) write(*, *) 'Current rpm/Power Engine Line'
         do l = 1, ctxt%npwrvar
-            write(*, *) l, ctxt%rpmvar(l), ctxt%pwrvar(l)
+             if (show_output) write(*, *) l, ctxt%rpmvar(l), ctxt%pwrvar(l)
         end do
-        write(*, *) ' '
+         if (show_output) write(*, *) ' '
     endif
     !
     lu = 12
@@ -467,13 +467,13 @@ subroutine oper(ctxt)
     if(ctxt%fname(1:1) /= ' ') then
         open(lu, file = ctxt%fname, status = 'old', err = 795)
         call getpvar(lu, ix, ctxt%npwrvar, ctxt%rpmvar, ctxt%pwrvar)
-        write(*, *) ' '
-        write(*, *) 'rpm/Power Engine Line'
+         if (show_output) write(*, *) ' '
+         if (show_output) write(*, *) 'rpm/Power Engine Line'
         do l = 1, ctxt%npwrvar
-            write(*, *) l, ctxt%rpmvar(l), ctxt%pwrvar(l)
+             if (show_output) write(*, *) l, ctxt%rpmvar(l), ctxt%pwrvar(l)
             ctxt%pwrvar(l) = ctxt%pwrvar(l)
         end do
-        write(*, *) ' '
+         if (show_output) write(*, *) ' '
         ctxt%xpwrvar = splina(ctxt%rpmvar, ctxt%pwrvar)
         close(lu)
         ctxt%lpwrvar = .true.
@@ -505,7 +505,7 @@ subroutine oper(ctxt)
         if(ans == 'r') then
             if(ctxt%conv) then
                 !----- convergence was achieved: show blade angle change incurred
-                write(*, 1550) ctxt%dbeta * 180.0 / pi
+                 if (show_output) write(*, 1550) ctxt%dbeta * 180.0 / pi
             else
                 !----- convergence failed: restore clobbered blade angles
                 do i = 1, ctxt%ii
@@ -518,37 +518,37 @@ subroutine oper(ctxt)
     endif
     !
     795  nf = index(ctxt%fname, ' ') - 1
-    write(*, *) 'open error on file  ', ctxt%fname(1:nf)
+     if (show_output) write(*, *) 'open error on file  ', ctxt%fname(1:nf)
     go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of advance ratios
-    81   write(*, *) ' '
-    write(*, *) 'Sequence of advance ratios...'
+    81    if (show_output) write(*, *) ' '
+     if (show_output) write(*, *) 'Sequence of advance ratios...'
     call setcas(ctxt, 1, ninput, rinput)
     call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
     go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of rpMs
-    82   write(*, *) ' '
-    write(*, *) 'Sequence of rpMs...'
+    82    if (show_output) write(*, *) ' '
+     if (show_output) write(*, *) 'Sequence of rpMs...'
     call setcas(ctxt, 2, ninput, rinput)
     call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
     go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of pitch angles
-    83   write(*, *) ' '
-    write(*, *) 'Sequence of blade angles...'
+    83    if (show_output) write(*, *) ' '
+     if (show_output) write(*, *) 'Sequence of blade angles...'
     call setcas(ctxt, 3, ninput, rinput)
     call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
     go to 900
     !
     !---------------------------------------------------------------------
     !--- Do sequence of velocities
-    84   write(*, *) ' '
-    write(*, *) 'Sequence of velocity with fixed pitch or rpm...'
+    84    if (show_output) write(*, *) ' '
+     if (show_output) write(*, *) 'Sequence of velocity with fixed pitch or rpm...'
     call setcas(ctxt, 4, ninput, rinput)
     call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
     go to 900
@@ -560,7 +560,7 @@ subroutine oper(ctxt)
     go to 900
     !
     92   if(ctxt%ncase >= icasx) then
-        write(*, *) 'Case arrays too small.  Increase icasx.'
+         if (show_output) write(*, *) 'Case arrays too small.  Increase icasx.'
         go to 900
     endif
     !
@@ -581,8 +581,8 @@ subroutine oper(ctxt)
     !---------------------------------------------------------------------
     !--- Write case accumulation arrays to file
     94   if(ctxt%ncase <= 0) then
-        write(*, *)
-        write(*, *) 'No cases saved'
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'No cases saved'
         go to 900
     endif
     !
@@ -590,7 +590,7 @@ subroutine oper(ctxt)
     ctxt%fname = comarg
     if(ctxt%fname(1:1) == ' ') call asks('enter case save filename^', ctxt%fname)
     open(lu, file = ctxt%fname, status = 'old', err = 945)
-    write(*, *) 'File exists.  Overwrite?  y'
+     if (show_output) write(*, *) 'File exists.  Overwrite?  y'
     read (*, 1000) chkey
     if(index('nn', chkey) /= 0) then
         close(lu)
@@ -618,14 +618,14 @@ subroutine oper(ctxt)
     go to 900
     !
     965  nf = index(ctxt%fname, ' ') - 1
-    write(*, *) 'open error on file  ', ctxt%fname(1:nf)
+     if (show_output) write(*, *) 'open error on file  ', ctxt%fname(1:nf)
     go to 900
     !
     !---------------------------------------------------------------------
     !--- Rerun case operating point
     97   if(ctxt%ncase <= 0) then
-        write(*, *)
-        write(*, *) 'No cases saved'
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'No cases saved'
         go to 900
     endif
     !
@@ -677,7 +677,7 @@ subroutine oper(ctxt)
     !--- List rotor dimensional data ?
     98   continue
     do i = 1, ctxt%ii
-        write(*, *) ctxt%xi(i), ctxt%nblds * ctxt%gam(i) * ctxt%rad * ctxt%vel, ctxt%vind(3, i) * ctxt%vel, &
+         if (show_output) write(*, *) ctxt%xi(i), ctxt%nblds * ctxt%gam(i) * ctxt%rad * ctxt%vel, ctxt%vind(3, i) * ctxt%vel, &
                 ctxt%nblds * ctxt%gam(i) / (4.0 * pi * ctxt%vind(3, i) * ctxt%xi(i))
     enddo
     go to 900
@@ -724,6 +724,7 @@ end
 
 
 subroutine getpvar(lu, ndim, n, xrpm, xpwr)
+    use mod_common, only: show_output
     dimension xpwr(ndim), xrpm(ndim)
     character*1 dummy
     !
@@ -739,18 +740,19 @@ subroutine getpvar(lu, ndim, n, xrpm, xpwr)
     n = i - 1
     return
     !
-    99   write(*, *) 'File read error'
+    99    if (show_output) write(*, *) 'File read error'
     n = 0
     return
 end
 
 
 subroutine shocas(lu, ndim, n, par, rad, name)
+    use mod_common, only: show_output
     dimension par(0:ndim, *)
     character name*(*)
     !
     if(ndim < 11) then
-        write(*, *) 'Error in shocas: ndim too small for par array'
+         if (show_output) write(*, *) 'Error in shocas: ndim too small for par array'
         return
     endif
     !
@@ -855,12 +857,13 @@ end
 
 
 subroutine getcas(lu, ndim, ncas, par)
+    use mod_common, only: show_output
     dimension par(0:ndim, *), a(16)
     character dummy*1, line*128, cname*32
     logical error
     !
     if(ndim < 11) then
-        write(*, *) 'Error in getcas: ndim too small for par array'
+         if (show_output) write(*, *) 'Error in getcas: ndim too small for par array'
         return
     endif
     !
@@ -913,7 +916,7 @@ subroutine getcas(lu, ndim, ncas, par)
     ncas = i - 1
     return
     !
-    99   write(*, *) 'File read error'
+    99    if (show_output) write(*, *) 'File read error'
     ncas = 0
     return
 end
@@ -945,8 +948,8 @@ subroutine setcas(ctxt, itype, ninput, rinput)
     !
     !
     if(ctxt%ncase > 0) then
-        write(*, *)
-        write(*, *) 'Appending to current case accumulator...'
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'Appending to current case accumulator...'
     endif
     !
     ctxt%kcase = 0
@@ -992,7 +995,7 @@ subroutine setcas(ctxt, itype, ninput, rinput)
         if(yes) xans = 100.0
         !
         if(ctxt%ncase + np > icasx) then
-            write(*, *) 'Limiting number of cases to array limit:', icasx
+             if (show_output) write(*, *) 'Limiting number of cases to array limit:', icasx
             np = icasx - ctxt%ncase
         endif
         !
@@ -1060,7 +1063,7 @@ subroutine setcas(ctxt, itype, ninput, rinput)
         if(ans == 'p') xans = xans + 3000.0
         !
         if(ctxt%ncase + np > icasx) then
-            write(*, *) 'Limiting number of cases to array limit:', icasx
+             if (show_output) write(*, *) 'Limiting number of cases to array limit:', icasx
             np = icasx - ctxt%ncase
         endif
         !
@@ -1122,7 +1125,7 @@ subroutine setcas(ctxt, itype, ninput, rinput)
         if(yes) xans = 100.0
         !
         if(ctxt%ncase + np > icasx) then
-            write(*, *) 'Limiting number of cases to array limit:', icasx
+             if (show_output) write(*, *) 'Limiting number of cases to array limit:', icasx
             np = icasx - ctxt%ncase
         endif
         !
@@ -1201,7 +1204,7 @@ subroutine setcas(ctxt, itype, ninput, rinput)
         endif
         !
         if(ctxt%ncase + np > icasx) then
-            write(*, *) 'Limiting number of cases to array limit:', icasx
+             if (show_output) write(*, *) 'Limiting number of cases to array limit:', icasx
             np = icasx - ctxt%ncase
         endif
         !
@@ -1262,9 +1265,9 @@ subroutine aper(ctxt, ispec, icon, linit)
     call apiter(ctxt, ispec, icon)
     !
     if(.not.ctxt%conv) then
-        write(*, *)
-        write(*, *) 'Iteration limit exceeded'
-        write(*, *) 'gres fres ares =', ctxt%gresmx, ctxt%fresmx, ctxt%aresmx
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'Iteration limit exceeded'
+         if (show_output) write(*, *) 'gres fres ares =', ctxt%gresmx, ctxt%fresmx, ctxt%aresmx
     endif
     !
     return
@@ -1465,7 +1468,7 @@ subroutine apinit(ctxt)
         rez = ctxt%adw - ctxt%adv * 0.5 * (1.0 + sqrt(1.0 + 4.0 * vhsq))
         z_adw = 1.0 - ctxt%adv / sqrt(1.0 + 4.0 * vhsq) * vhsq_t * t_adw
         !c      z_adw = 1.0
-        if(z_adw == 0.0) write(*, *) 'apinit z_adw ', z_adw
+        if (z_adw == 0.0 .and. show_output) write(*, *) 'apinit z_adw ', z_adw
         !
         ctxt%dadw = -rez / z_adw
         ctxt%dadw = min(ctxt%dadw, 10.0 * ctxt%adw)
@@ -1517,7 +1520,7 @@ subroutine apiter(ctxt, ispec, icon)
     k1 = ctxt%ii + 1
     k2 = ctxt%ii + 2
     k3 = ctxt%ii + 3
-    write(*, 2000)
+     if (show_output) write(*, 2000)
     !
     do iter = 1, max(ctxt%nitera, 1)
         !
@@ -1820,7 +1823,7 @@ subroutine apiter(ctxt, ispec, icon)
         ctxt%rms = sqrt(ctxt%rms / float(ctxt%ii))
         !
         !---- display iteration history
-        write(*, 2100) iter, gmx, imx, ctxt%rms, &
+         if (show_output) write(*, 2100) iter, gmx, imx, ctxt%rms, &
                 ctxt%adv, ctxt%adw, ctxt%beta(ctxt%ii) * 180.0 / pi, ctxt%rlx
         !
         2000 format(/' Iter     dGmax  @Imax    gGrms       Av        ', &
@@ -1833,7 +1836,7 @@ subroutine apiter(ctxt, ispec, icon)
         !
         !---- Smooth filter the gam for low relaxation factors
         if(ctxt%rlx < 0.2) then
-            write(*, *) 'apiter filtering ctxt%gam'
+             if (show_output) write(*, *) 'apiter filtering ctxt%gam'
             call filter(ctxt%gam, 0.2 * ctxt%ii, ctxt%ii)
         endif
         !
@@ -2054,7 +2057,7 @@ subroutine setxw(ctxt)
             if(abs(delxwo) < 1.0e-6) go to 101
             !
         end do
-        write(*, 990) 'setxw: ctxt%xw convergence failed.  i, r/r, ctxt%dxw :', &
+         if (show_output) write(*, 990) 'setxw: ctxt%xw convergence failed.  i, r/r, ctxt%dxw :', &
                 i, ctxt%xi(i), delxwo
         990    format(a, i5, 2(1x, f12.6))
         !
@@ -2759,6 +2762,7 @@ end
 
 subroutine helico(imax, ii, nblds, lduct, rake, &
         xi, xv, gam, adw, vind_gam, vind_adw)
+    use mod_common, only: show_output
     dimension xi(imax), xv(imax), gam(imax)
     dimension vind_adw(3, imax), vind_gam(3, imax, imax)
     !
@@ -2837,7 +2841,7 @@ subroutine helico(imax, ii, nblds, lduct, rake, &
             if(x(i) >= xinf) go to 5
             dx = dx * xfac
         enddo
-        write(*, *) 'helico: Local array too small. Increase idim.'
+         if (show_output) write(*, *) 'helico: Local array too small. Increase idim.'
         5      continue
         iimax = i
     endif
@@ -3036,6 +3040,7 @@ end
 
 
 subroutine filter(q, smlen, n)
+    use mod_common, only: show_output
     !-----------------------------------------
     !     Smooths array q.
     !     smlen is the number of points over
@@ -3049,7 +3054,7 @@ subroutine filter(q, smlen, n)
     dimension a(nmax), b(nmax), c(nmax)
     !
     if(n > nmax) then
-        write(*, *) 'filter:  Array overflow.  No action taken'
+         if (show_output) write(*, *) 'filter:  Array overflow.  No action taken'
         return
     endif
     !

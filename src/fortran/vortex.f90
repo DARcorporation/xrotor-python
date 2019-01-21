@@ -20,6 +20,7 @@
 
 subroutine vrtxco(imax, ii, nblds, lduct, rake, &
         xi, xv, gam, adw, vind_gam, vind_adw)
+    use mod_common, only: show_output
     !
     parameter (ntdim = 5000)
     dimension xi(imax), xv(imax), gam(imax)
@@ -105,7 +106,7 @@ subroutine vrtxco(imax, ii, nblds, lduct, rake, &
             go to 100
         endif
     end do
-    write(*, *) 'Too many vortex segments for spacing array'
+     if (show_output) write(*, *) 'Too many vortex segments for spacing array'
     nthet = ntdim
     100  continue
     !
@@ -128,7 +129,7 @@ subroutine vrtxco(imax, ii, nblds, lduct, rake, &
         !
         !----- Do a discrete vortex integration of slipstream vortices
         dtbld = 2.0 * pi / float(nblds)
-        write(*, 20) nblds * nthet
+         if (show_output) write(*, 20) nblds * nthet
         20    format(/'Vortex points/radial station = ', i6)
         !
         !--- velocity influences for point - r0

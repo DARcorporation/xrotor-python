@@ -36,11 +36,11 @@ subroutine bend(ctxt)
     ctxt%greek = .false.
     !
     if(ctxt%lstruc) then
-        write(*, *)
-        write(*, *) 'Structural properties available'
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'Structural properties available'
     else
-        write(*, *)
-        write(*, *) 'Structural properties not available'
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'Structural properties not available'
     endif
     !
     900  call askc('.bend^', comand, comarg)
@@ -55,7 +55,7 @@ subroutine bend(ctxt)
     call getflt(comarg, rinput, ninput, error)
     !
     if(comand == '    ') return
-    if(comand == '?   ') write(*, 1100)
+    if (comand == '?   ' .and. show_output) write(*, 1100)
     if(comand == '?   ') go to 900
     if(comand == 'read') go to 10
     if(comand == 'clr ') go to 20
@@ -68,7 +68,7 @@ subroutine bend(ctxt)
     if(comand == 'help') go to 100
     !
     !-------------------------------------------------------------
-    write(*, 1000) comand
+     if (show_output) write(*, 1000) comand
     go to 900
     !
     !-------------------------------------------------------------
@@ -81,8 +81,8 @@ subroutine bend(ctxt)
     !
     !-------------------------------------------------------------
     30   if(.not.ctxt%lstruc) then
-        write(*, *) 'Structural properties not available'
-        write(*, *) 'Assuming zero mass, infinite stiffness...'
+         if (show_output) write(*, *) 'Structural properties not available'
+         if (show_output) write(*, *) 'Assuming zero mass, infinite stiffness...'
     endif
     !cc      call stload(ctxt)
     call stcalc(ctxt)
@@ -116,7 +116,7 @@ subroutine bend(ctxt)
     go to 900
     !
     !-------------------------------------------------------------
-    100  write(*, 3000)
+    100   if (show_output) write(*, 3000)
     go to 900
     !
     !.......................................................................
@@ -207,7 +207,7 @@ subroutine eiload(ctxt, fname1)
                 ctxt%w5(it), ctxt%w6(it), ctxt%w7(it), ctxt%w8(it), ctxt%w9(it)
         xt(it) = xt(it) / ctxt%rad
     end do
-    write(*, *) 'eiload: Array overflow.  Too many radial stations.'
+     if (show_output) write(*, *) 'eiload: Array overflow.  Too many radial stations.'
     11   continue
     nt = it - 1
     close(lu)
@@ -247,15 +247,15 @@ subroutine eiload(ctxt, fname1)
         maxx = maxx + ctxt%mxxb(i) * ctxt%rad * ctxt%dxi(i)
     end do
     !
-    write(*, 3100) mass, maxx, mrsq
+     if (show_output) write(*, 3100) mass, maxx, mrsq
     !
     ctxt%lstruc = .true.
     return
     !
-    200 write(*, 1010) ctxt%fname(1:32)
+    200  if (show_output) write(*, 1010) ctxt%fname(1:32)
     return
     !
-    210 write(*, 1020) ctxt%fname(1:32)
+    210  if (show_output) write(*, 1020) ctxt%fname(1:32)
     close(lu)
     ctxt%conv = .false.
     return
@@ -438,13 +438,15 @@ subroutine stload(ctxt)
     end do
     !
     !--- Print the blade aerodynamic forces
-    write(*, 20) fx * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
-            fy * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
-            fz * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
-    20   format(/'Blade aerodynamic forces:', &
-            /' fx (axial)      = ', f12.6, &
-            /' fy (radial)     = ', f12.6, &
-            /' fz (tangential) = ', f12.6)
+     if (show_output)then
+         write(*, 20) fx * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
+                 fy * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
+                 fz * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+         20   format(/'Blade aerodynamic forces:', &
+                 /' fx (axial)      = ', f12.6, &
+                 /' fy (radial)     = ', f12.6, &
+                 /' fz (tangential) = ', f12.6)
+    end if
     !
     return
 end
@@ -481,7 +483,7 @@ subroutine stcalc(ctxt)
     rrlim(11) = 0.01
     rrlim(12) = 0.10
     !
-    write(*, *)
+     if (show_output) write(*, *)
     !
     !---- Newton iteration loop
     do iter = 1, 10
@@ -845,13 +847,15 @@ subroutine stcalc(ctxt)
         !c      write(*,1250) (rlxr(k), k=1, 12)
         !c 1250 format(1x, 11f8.3)
         !
-        write(*, 1800) iter, rmax, ctxt%rms, ctxt%rlx
-        1800 format(1x, i3, '   max:', e9.3, '   rms:', e9.3, '   rlx =', f7.4)
+         if (show_output) then
+             write(*, 1800) iter, rmax, ctxt%rms, ctxt%rlx
+             1800 format(1x, i3, '   max:', e9.3, '   rms:', e9.3, '   rlx =', f7.4)
+        end if
         !
         if(rmax <= eps) go to 101
         !
     end do
-    write(*, *) 'stcalc: Convergence failed.  Continuing ...'
+     if (show_output) write(*, *) 'stcalc: Convergence failed.  Continuing ...'
     !
     101  continue
     !
@@ -880,7 +884,7 @@ subroutine stadd(ctxt)
         ctxt%beta(i) = ctxt%beta0(i) + (ctxt%ty(i) + ctxt%ty(i + 1)) * 0.5
     end do
     !
-    write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
+     if (show_output) write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
     !
     ctxt%conv = .false.
     return
@@ -903,7 +907,7 @@ subroutine stset(ctxt)
         ctxt%beta0(i) = ctxt%beta(i) - (ctxt%ty(i) + ctxt%ty(i + 1)) * 0.5
     end do
     !
-    write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
+     if (show_output) write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
     !
     ctxt%conv = .false.
     return
@@ -1013,6 +1017,7 @@ end
 
 
 subroutine b12sol(a, b, c, r, ii)
+    use mod_common, only: show_output
     dimension a(12, 12, ii), b(12, 12, ii), c(12, 12, ii)
     dimension r(12, 1, ii)
     !-------------------------------------------------------
@@ -1088,7 +1093,7 @@ subroutine b12sol(a, b, c, r, ii)
             131 end do
             !
             if(a(kx, kpiv, i) == 0.0) then
-                write(*, *) 'Singular a block, i = ', i
+                 if (show_output) write(*, *) 'Singular a block, i = ', i
                 stop
             endif
             !
@@ -1144,7 +1149,7 @@ subroutine b12sol(a, b, c, r, ii)
         !
         !------ solve for last row
         if(a(12, 12, i) == 0.0) then
-            write(*, *) 'Singular a block, i = ', i
+             if (show_output) write(*, *) 'Singular a block, i = ', i
             stop
         endif
         pivot = 1.0 / a(12, 12, i)

@@ -47,6 +47,8 @@ module mod_common
     real, private, parameter :: r3ix(3, ix) = reshape((/ (0., i=1, 3*ix) /), (/3, ix/))
     real, private, parameter :: riq(iq) = (/(0., i=1, iq)/)
 
+    logical, public :: show_output = .true.
+
     type, public :: Common
         real :: q(iq, iq) = reshape((/ (0, i=1, iq*iq) /), (/iq, iq/))
 

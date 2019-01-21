@@ -44,13 +44,13 @@ subroutine save(ctxt, fname1)
     !
     if(ctxt%fname(1:1) == ' ') call asks('enter filename^', ctxt%fname)
     open(lu, file = ctxt%fname, status = 'old', err = 5)
-    write(*, *)
-    write(*, *) 'Output file exists.  Overwrite?  y'
+     if (show_output) write(*, *)
+     if (show_output) write(*, *) 'Output file exists.  Overwrite?  y'
     read (*, 1000) ans
     if(index('nn', ans) == 0) go to 6
     !
     close(lu)
-    write(*, *) 'Current rotor not saved.'
+     if (show_output) write(*, *) 'Current rotor not saved.'
     return
     !
     5    open(lu, file = ctxt%fname, status = 'new', err = 90)
@@ -108,14 +108,14 @@ subroutine save(ctxt, fname1)
         do i = 1, ctxt%nadd
             write(lu, 1200) ctxt%radd(i), ctxt%uadd(i), ctxt%vadd(i)
         end do
-        write(*, *) 'External slipstream included in save file'
+         if (show_output) write(*, *) 'External slipstream included in save file'
     endif
     !
     close(lu)
     return
     !
-    90   write(*, *) 'Bad filename.'
-    write(*, *) 'Current rotor not saved.'
+    90    if (show_output) write(*, *) 'Bad filename.'
+     if (show_output) write(*, *) 'Current rotor not saved.'
     return
     !
     !...................................................................
@@ -168,7 +168,7 @@ subroutine load(ctxt, fname1)
     call rdline(lu, line)
     if(line == 'end' .or. line == 'err') go to 210
     read(line(17:22), *) filevers
-    write(*, 1005) filevers
+     if (show_output) write(*, 1005) filevers
     !
     !
     !--- Case title
@@ -207,15 +207,15 @@ subroutine load(ctxt, fname1)
     call rdline(lu, line)
     read(line, *, err = 210) ctxt%free, ctxt%duct, ctxt%wind
     !
-    write(*, *)
-    if(ctxt%free) write(*, *) 'self-deforming wake option set'
-    if(.not.ctxt%free) write(*, *) 'rigid wake option set'
-    if(ctxt%duct) write(*, *) 'duct option set'
-    if(.not.ctxt%duct) write(*, *) 'free-tip option set'
-    if(ctxt%wind) write(*, *) 'windmill plotting mode set'
-    if(.not.ctxt%wind) write(*, *) 'propeller plotting mode set'
+     if (show_output) write(*, *)
+    if (ctxt%free .and. show_output) write(*, *) 'self-deforming wake option set'
+    if (.not.ctxt%free .and. show_output) write(*, *) 'rigid wake option set'
+    if (ctxt%duct .and. show_output) write(*, *) 'duct option set'
+    if (.not.ctxt%duct .and. show_output) write(*, *) 'free-tip option set'
+    if (ctxt%wind .and. show_output) write(*, *) 'windmill plotting mode set'
+    if (.not.ctxt%wind .and. show_output) write(*, *) 'propeller plotting mode set'
     !
-    write(*, *) ' '
+     if (show_output) write(*, *) ' '
     call rdline(lu, line)
     if(line == 'end' .or. line == 'err') go to 210
     read(line, *, err = 210) iix, ctxt%nblds
@@ -240,7 +240,7 @@ subroutine load(ctxt, fname1)
     read(line, *, end = 21) ctxt%nadd
     if(ctxt%nadd > ix) then
         ctxt%nadd = ix
-        write(*, *) 'Warning, slipstream data terminated at ', ix
+         if (show_output) write(*, *) 'Warning, slipstream data terminated at ', ix
     endif
     do i = 1, ctxt%nadd
         call rdline(lu, line)
@@ -249,7 +249,7 @@ subroutine load(ctxt, fname1)
     end do
     if(i < ctxt%nadd) then
         ctxt%nadd = i - 1
-        write(*, *) 'warning, slipstream data terminated at ', ctxt%nadd
+         if (show_output) write(*, *) 'warning, slipstream data terminated at ', ctxt%nadd
     endif
     go to 21
     !
@@ -259,15 +259,15 @@ subroutine load(ctxt, fname1)
     !
     21   close(lu)
     if(ctxt%nadd > 1) then
-        write(*, *)
-        write(*, *) 'slipstream profiles read with #points ', ctxt%nadd
+         if (show_output) write(*, *)
+         if (show_output) write(*, *) 'slipstream profiles read with #points ', ctxt%nadd
     endif
     !
     ctxt%conv = .false.
     !
     !--- Check for number of analysis stations to use
     if(iix /= ctxt%ii) then
-        22     write(*, 23) iix, ctxt%ii, ctxt%ii
+        22      if (show_output) write(*, 23) iix, ctxt%ii, ctxt%ii
         read(*, 24) line
         if(line /= ' ') then
             read(line, *, err = 22) ctxt%ii
@@ -283,10 +283,10 @@ subroutine load(ctxt, fname1)
     ctxt%lrotor = .true.
     return
     !
-    200 write(*, 1010) ctxt%fname(1:32)
+    200  if (show_output) write(*, 1010) ctxt%fname(1:32)
     return
     !
-    210 write(*, 1020) ctxt%fname(1:32)
+    210  if (show_output) write(*, 1020) ctxt%fname(1:32)
     close(lu)
     ctxt%conv = .false.
     return

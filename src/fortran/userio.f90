@@ -23,6 +23,7 @@
 !
 !
 subroutine aski(prompt, iinput)
+    use mod_common, only: show_output
     !
     !---- integer input
     !
@@ -32,8 +33,8 @@ subroutine aski(prompt, iinput)
     np = index(prompt, '^') - 1
     if(np == 0) np = len(prompt)
     !
-    if(iinput /= 999)  write(*, 1001) iinput
-    10   write(*, 1000) prompt(1:np)
+    if (iinput /= 999 .and. show_output) write(*, 1001) iinput
+    10    if (show_output) write(*, 1000) prompt(1:np)
     read (*, 1002, err = 10) line
     if(line /= ' ') read (line, *, err = 10) iinput
     return
@@ -46,6 +47,7 @@ end
 
 
 subroutine askr(prompt, rinput)
+    use mod_common, only: show_output
     !
     !---- real input
     !
@@ -55,8 +57,8 @@ subroutine askr(prompt, rinput)
     np = index(prompt, '^') - 1
     if(np == 0) np = len(prompt)
     !
-    if(rinput /= 999.)  write(*, 1001) rinput
-    10   write(*, 1000) prompt(1:np)
+    if (rinput /= 999. .and. show_output) write(*, 1001) rinput
+    10    if (show_output) write(*, 1000) prompt(1:np)
     read (*, 1002, err = 10) line
     if(line /= ' ') read (line, *, err = 10) rinput
     return
@@ -69,6 +71,7 @@ end
 
 
 subroutine askl(prompt, linput)
+    use mod_common, only: show_output
     !
     !---- logical input
     !
@@ -79,7 +82,7 @@ subroutine askl(prompt, linput)
     np = index(prompt, '^') - 1
     if(np == 0) np = len(prompt)
     !
-    10   write(*, 1000) prompt(1:np)
+    10    if (show_output) write(*, 1000) prompt(1:np)
     read (*, 1010) char
     if(char == 'y') char = 'y'
     if(char == 'n') char = 'n'
@@ -95,6 +98,7 @@ end
 
 
 subroutine asks(prompt, input)
+    use mod_common, only: show_output
     !
     !---- string of arbitrary length input
     !
@@ -104,7 +108,7 @@ subroutine asks(prompt, input)
     np = index(prompt, '^') - 1
     if(np == 0) np = len(prompt)
     !
-    write(*, 1000) prompt(1:np)
+     if (show_output) write(*, 1000) prompt(1:np)
     read (*, 1010) input
     !
     return
@@ -117,6 +121,7 @@ end
 
 
 subroutine askc(prompt, comand, cargs)
+    use mod_common, only: show_output
     !
     !---- returns 4-byte character string input converted to uppercase
     !---- also returns rest of input characters in cargs string
@@ -132,7 +137,7 @@ subroutine askc(prompt, comand, cargs)
     np = index(prompt, '^') - 1
     if(np == 0) np = len(prompt)
     !
-    write(*, 1000) prompt(1:np)
+     if (show_output) write(*, 1000) prompt(1:np)
     read (*, 1020) line
     !
     !---- strip off leading blanks

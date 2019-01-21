@@ -89,13 +89,13 @@ subroutine noise(ctxt)
     endif
     !
     if(ulnam == '(m) ') then
-        write(*, *) 'Coordinates currently specified in meters'
+         if (show_output) write(*, *) 'Coordinates currently specified in meters'
     else
-        write(*, *) 'Coordinates currently specified in feet'
+         if (show_output) write(*, *) 'Coordinates currently specified in feet'
     endif
     !
     !
-    write(*, 8100)
+     if (show_output) write(*, 8100)
     8000 format(1x, a4, ' command not recognized.' //&
             '  Type "?" for list, <Return> to exit menu.')
     8100 format(&
@@ -119,7 +119,7 @@ subroutine noise(ctxt)
     call getflt(comarg, rinput, ninput, error)
     !
     if(comand == '    ') return
-    if(comand == '?   ') write(*, 8100)
+    if (comand == '?   ' .and. show_output) write(*, 8100)
     if(comand == '?   ') go to 900
     if(comand == 'p   ') go to 10
     if(comand == 'foot') go to 20
@@ -128,7 +128,7 @@ subroutine noise(ctxt)
     if(comand == 'aoc ') go to 40
     if(comand == 'afil') go to 45
 
-    write(*, 8000) comand
+     if (show_output) write(*, 8000) comand
     go to 900
     !
     !===========================================================================
@@ -138,7 +138,7 @@ subroutine noise(ctxt)
         xyzobs(2) = rinput(2)
         xyzobs(3) = rinput(3)
     else
-        write(*, 1050)
+         if (show_output) write(*, 1050)
         1050  format(/' Cartesian system fixed to airplane.'&
                 /'  (x forward, y left, z up):       '&
                 /'  '&
@@ -157,7 +157,7 @@ subroutine noise(ctxt)
         !
         !cc              123456789012345678901234567890123     4567      890
         105  prompt = 'Enter observer x,y,z coordinates (' // ulnam // '):  '
-        write(*, 1100) prompt(1:40), (xyzobs(k), k = 1, 3)
+         if (show_output) write(*, 1100) prompt(1:40), (xyzobs(k), k = 1, 3)
         1100  format(1x, a, 3f12.2)
         call readr(3, xyzobs, error)
         if(error) go to 105
@@ -185,25 +185,25 @@ subroutine noise(ctxt)
     ylim(1) = -1.0 * galt
     ylim(2) = 1.0 * galt
     !
-    write(*, *)
+     if (show_output) write(*, *)
     1210 format(1x, a, 2f10.0)
     !cc             1234567890123456789012345     6789      012
     201  prompt = 'Enter footprint x limits (' // ulnam // '):  '
-    write(*, 1210) prompt(1:32), xlim(1), xlim(2)
+     if (show_output) write(*, 1210) prompt(1:32), xlim(1), xlim(2)
     call readr(2, xlim, error)
     if(error) go to 201
     !
     202  prompt = 'Enter footprint y limits (' // ulnam // '):  '
-    write(*, 1210) prompt(1:32), ylim(1), ylim(2)
+     if (show_output) write(*, 1210) prompt(1:32), ylim(1), ylim(2)
     call readr(2, ylim, error)
     if(error) go to 202
     !
-    204  write(*, 1250) 'Enter footprint grid size: ', ndbsiz(1), ndbsiz(2)
+    204   if (show_output) write(*, 1250) 'Enter footprint grid size: ', ndbsiz(1), ndbsiz(2)
     1250 format(1x, a, 2i6)
     call readi(2, ndbsiz, error)
     if(error) go to 204
     if(ndbsiz(1) > nxdim .or. ndbsiz(2) > nydim) then
-        write(*, *) 'Array dimension limits are:', nxdim, nydim
+         if (show_output) write(*, *) 'Array dimension limits are:', nxdim, nydim
         ndbsiz(1) = min(ndbsiz(1), nxdim)
         ndbsiz(2) = min(ndbsiz(2), nydim)
         go to 204
@@ -223,8 +223,8 @@ subroutine noise(ctxt)
         enddo
     enddo
     !
-    write(*, *)
-    write(*, *) 'Calculating db footprint...'
+     if (show_output) write(*, *)
+     if (show_output) write(*, *) 'Calculating db footprint...'
     nt1 = nt
     call dbfoot(ctxt%nblds, ctxt%ii, ctxt%xi(1), ctxt%dxi, aoci, ctxt%ch, ctxt%gam, &
             ctxt%adv, ctxt%rad, ctxt%vel, ctxt%vso, ctxt%rho, &
@@ -237,7 +237,7 @@ subroutine noise(ctxt)
     if(ninput >= 1) then
         nt = iinput(1)
     else
-        251    write(*, 1251) nt
+        251     if (show_output) write(*, 1251) nt
         1251   format(/1x, ' Enter number of p(t) samples/revolution:', i7)
         call readi(1, nt, error)
         if(error) go to 251
@@ -245,7 +245,7 @@ subroutine noise(ctxt)
     !
     if(nt > ntx) then
         nt = ntx
-        write(*, *) 'Number of samples limited to array limit:', ntx
+         if (show_output) write(*, *) 'Number of samples limited to array limit:', ntx
     endif
     !
     nharm = nt / 2
@@ -255,11 +255,11 @@ subroutine noise(ctxt)
     30   if(ulnam == 'ft') then
         ulnam = 'm '
         unitl = 1.0
-        write(*, *) 'Coordinates now specified in meters'
+         if (show_output) write(*, *) 'Coordinates now specified in meters'
     else
         ulnam = 'ft'
         unitl = 3.28084
-        write(*, *) 'Coordinates now specified in feet'
+         if (show_output) write(*, *) 'Coordinates now specified in feet'
     endif
     go to 900
     !
@@ -305,7 +305,7 @@ subroutine noise(ctxt)
     do ia = 1, ix
         read(lu, *, end = 455, err = 458) xa(ia), aoc(ia)
     enddo
-    write(*, *) 'Array size limited.  Not all points read in.'
+     if (show_output) write(*, *) 'Array size limited.  Not all points read in.'
     ia = ix + 1
     455  continue
     na = ia - 1
@@ -322,11 +322,11 @@ subroutine noise(ctxt)
     if(lptrac) go to 100
     go to 900
     !
-    458  write(*, *) 'File read error'
+    458   if (show_output) write(*, *) 'File read error'
     close(lu)
     go to 900
     !
-    459  write(*, *) 'File open error'
+    459   if (show_output) write(*, *) 'File open error'
     go to 900
     !
     !===========================================================================
@@ -368,8 +368,8 @@ subroutine noise(ctxt)
     decib(0) = 20.0 * alog10(prms / 20.0e-6)
     !
     !---- print out decibel spectrum
-    write(*, 5000)  0, decib(0)
-    write(*, 5010) (k, decib(k), k = 1, nharm)
+     if (show_output) write(*, 5000)  0, decib(0)
+     if (show_output) write(*, 5010) (k, decib(k), k = 1, nharm)
     5000 format(&
             /' Sound level for each multiple of blade-passing frequency'&
             //'      n      db', &
@@ -416,6 +416,7 @@ subroutine ptrace(xobs, yobs, zobs, &
     !                  (over one blade-passing period, non-uniformly spaced)
     !
     !------------------------------------------------------------------------
+    use mod_common, only: show_output
     use mod_spline
 
     implicit real(a-h, m, o-z)
@@ -518,7 +519,7 @@ subroutine ptrace(xobs, yobs, zobs, &
             mr = (x * max + y * may + z * maz) / r
             !
             if(mr >= 1.0) then
-                write(*, 5500) mr, xi(i), (th * 180.0 / pi)
+                 if (show_output) write(*, 5500) mr, xi(i), (th * 180.0 / pi)
                 5500      format(/' warning.  Relative approach Mach number =', f6.3, &
                         '  at r/r =', f6.3, '    theta =', f6.1, ' deg.')
                 mr = 0.995
@@ -625,8 +626,8 @@ subroutine ptrace(xobs, yobs, zobs, &
                     if(toff < tel0) toff = toff + (teln - tel0)
                     !
                     if(toff < tel0 .or. toff > teln) then
-                        write(*, *) '? ptrace: Time out of spline range.'
-                        write(*, *) 't   t0   tn', toff, tel0, teln
+                         if (show_output) write(*, *) '? ptrace: Time out of spline range.'
+                         if (show_output) write(*, *) 't   t0   tn', toff, tel0, teln
                     endif
                     !
                     ! todo: test this
@@ -796,6 +797,7 @@ subroutine dbfoot(nblds, ii, xi, dxi, aoc, ch, gam, &
         adv, rad, vel, vso, rho, &
         galt, dclimb, unitl, nt, &
         nxdim, nydim, nx, ny, x, y, d)
+    use mod_common, only: show_output
     !--------------------------------------------------------
     !     Calculates db noise levels on a ground plane grid.
     !
@@ -850,7 +852,7 @@ subroutine dbfoot(nblds, ii, xi, dxi, aoc, ch, gam, &
     5    continue
     !
     do i = 1, nx
-        write(*, 1300) i, nx
+         if (show_output) write(*, 1300) i, nx
         1300   format(5x, i3, ' /', i3)
         !
         do j = j0, ny

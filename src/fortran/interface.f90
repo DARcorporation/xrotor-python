@@ -28,6 +28,18 @@ module interface
 
 contains
 
+    subroutine set_print(setting) bind(c, name='set_print')
+        use mod_common, only: show_output
+        logical(c_bool), intent(in) :: setting
+        show_output = setting
+    end subroutine set_print
+
+    function get_print() bind(c, name='get_print')
+        use mod_common, only: show_output
+        logical(c_bool) :: get_print
+        get_print = show_output
+    end function get_print
+
     subroutine init(handle) bind(c, name='init')
         type(c_ptr), intent(inout) :: handle
 
