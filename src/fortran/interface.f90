@@ -18,13 +18,15 @@
 !***********************************************************************
 
 module interface
-    use, intrinsic :: iso_c_binding, only: c_float, c_double, c_int, c_ptr, c_loc, c_f_pointer, c_bool, c_char
+    use, intrinsic :: iso_c_binding, only: c_float, c_double, c_int, c_bool, c_char
     use :: mod_common, only: Common, pi, ix, nax
     implicit none
     private
     public init, set_case, operate, dp
 
     integer, parameter :: dp = kind(0.d0)
+
+    type(Common), private :: ctxt
 
 contains
 
@@ -40,24 +42,17 @@ contains
         get_print = show_output
     end function get_print
 
-    subroutine init(handle) bind(c, name='init')
-        type(c_ptr), intent(inout) :: handle
-
-        type(Common), pointer :: ctxt
-        allocate(ctxt)
-
+    subroutine init() bind(c, name='init')
+        ctxt = Common()
         call init_(ctxt)
-
-        handle = c_loc(ctxt)
     end subroutine init
 
-    subroutine set_case(handle, &
+    subroutine set_case(&
             rho, vso, rmu, alt, vel, adv, &
             r_hub, r_tip, r_wake, rake, &
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
             free, duct, wind) bind(c, name='set_case')
-        type    (c_ptr),    intent(in), value   :: handle
         real    (c_float),  intent(in)          :: rho, vso, rmu, alt, vel, adv
         real    (c_float),  intent(in)          :: r_hub, r_tip, r_wake, rake
         integer (c_int),    intent(in)          :: n_blds, n_aero, n_geom
@@ -65,9 +60,6 @@ contains
         logical (c_bool),   intent(in)          :: free, duct, wind
 
         integer :: i
-
-        type(Common), pointer :: ctxt
-        call c_f_pointer(handle, ctxt)
 
         ctxt%rho    = rho
         ctxt%vso    = vso
@@ -103,13 +95,10 @@ contains
         call initcase(ctxt, n_geom, .false.)
     end subroutine set_case
 
-    subroutine operate(handle, spec, val) bind(c, name='operate')
-        type(c_ptr), intent(in), value :: handle
+    function operate(spec, val) bind(c, name='operate')
+        logical(c_bool) :: operate
         integer(c_int), intent(in) :: spec
         real(c_float),  intent(in) :: val
-
-        type(Common), pointer :: ctxt
-        call c_f_pointer(handle, ctxt)
 
         if (spec == 1) then
             ctxt%adv = ctxt%vel / (ctxt%rad * val * pi / 30.)
@@ -121,33 +110,23 @@ contains
             call aper(ctxt, 1, 2, ctxt%loprini)
         else
             print *, 'Unknown value for spec. Should be 1 to specify rpm, or 2 to specify thrust.'
+            operate = .false.
+            return
         end if
-    end subroutine operate
 
-    subroutine show(handle) bind(c, name='show')
-        type(c_ptr), intent(in), value :: handle
+        operate = ctxt%conv
+    end function operate
 
-        type(Common), pointer :: ctxt
-        call c_f_pointer(handle, ctxt)
-
+    subroutine show() bind(c, name='show')
         call output(ctxt, 6)
     end subroutine show
 
-    subroutine save_prop(handle) bind(c, name='save_prop')
-        type(c_ptr), intent(in), value :: handle
-
-        type(Common), pointer :: ctxt
-        call c_f_pointer(handle, ctxt)
-
+    subroutine save_prop() bind(c, name='save_prop')
         call save(ctxt, 'output.prop')
     end subroutine save_prop
 
-    subroutine get_performance(handle, rpm, thrust, torque, power, efficiency) bind(c, name='get_performance')
-        type(c_ptr), intent(in), value :: handle
+    subroutine get_performance(rpm, thrust, torque, power, efficiency) bind(c, name='get_performance')
         real(c_float), intent(out) :: rpm, thrust, torque, power, efficiency
-
-        type(Common), pointer :: ctxt
-        call c_f_pointer(handle, ctxt)
 
         thrust = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
         torque = ctxt%qtot * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
@@ -157,25 +136,15 @@ contains
         rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
     end subroutine get_performance
 
-    subroutine get_number_of_stations(handle, n_stations) bind(c, name='get_number_of_stations')
-        type(c_ptr), intent(in), value :: handle
-        integer(c_int), intent(out) :: n_stations
+    function get_number_of_stations() bind(c, name='get_number_of_stations')
+        integer(c_int) :: get_number_of_stations
+        get_number_of_stations = ctxt%ii
+    end function get_number_of_stations
 
-        type(Common), pointer :: ctxt
-        call c_f_pointer(handle, ctxt)
-
-        n_stations = ctxt%ii
-    end subroutine get_number_of_stations
-
-    subroutine get_station_conditions(handle, n, xi, Re) bind(c, name='get_station_conditions')
-        type(c_ptr), intent(in), value :: handle
+    subroutine get_station_conditions(n, xi, Re) bind(c, name='get_station_conditions')
         integer(c_int), intent(in) :: n
         real(c_float), intent(out) :: xi(n), Re(n)
-
-        type(Common), pointer :: ctxt
         integer :: i
-
-        call c_f_pointer(handle, ctxt)
 
         do i=1, n
             xi(i) = ctxt%xi(i)

@@ -20,7 +20,7 @@ import os
 import glob
 import ctypes
 
-from ctypes import c_bool, c_int, c_void_p, byref, POINTER, c_float, cdll
+from ctypes import c_bool, c_int, byref, POINTER, c_float, cdll
 from shutil import copy2
 from tempfile import NamedTemporaryFile
 
@@ -49,8 +49,10 @@ class XRotor(object):
         copy2(lib_path, self._lib_path)
         self._lib = cdll.LoadLibrary(self._lib_path)
 
-        self._handle = c_void_p()
-        self._lib.init(byref(self._handle))
+        self._lib.get_print.restype = c_bool
+        self._lib.operate.restype = c_bool
+
+        self._lib.init()
         self._case: Case = None
 
     def __del__(self):
@@ -58,13 +60,15 @@ class XRotor(object):
         del self._lib
         try:
             ctypes.windll.kernel32.FreeLibrary(handle)
+        except AttributeError:
+            pass
         finally:
             os.remove(self._lib_path)
 
     @property
     def print(self):
         """bool: True if console output should be shown."""
-        return self._lib.get_print().value
+        return self._lib.get_print()
 
     @print.setter
     def print(self, value):
@@ -79,7 +83,6 @@ class XRotor(object):
     def case(self, case: Case):
         self._case = case
         self._lib.set_case(
-            self._handle,
             byref(c_float(case.conditions.rho)),
             byref(c_float(case.conditions.vso)),
             byref(c_float(case.conditions.rmu)),
@@ -105,7 +108,6 @@ class XRotor(object):
         """Performance: Propeller performance specification"""
         perf = Performance()
         self._lib.get_performance(
-            self._handle,
             byref(perf._rpm), byref(perf._thrust), byref(perf._torque), byref(perf._power), byref(perf._efficiency)
         )
         return perf
@@ -113,11 +115,10 @@ class XRotor(object):
     @property
     def station_conditions(self):
         """(np.ndarray, np.ndarray): Normalized radial coordinates and corresponding local Reynolds numbers."""
-        n = c_int()
-        self._lib.get_number_of_stations(self._handle, byref(n))
+        n = self._lib.get_number_of_stations()
         xi = np.zeros(n.value, dtype=c_float, order='F')
         re = np.zeros(n.value, dtype=c_float, order='F')
-        self._lib.get_station_conditions(self._handle, byref(n), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
+        self._lib.get_station_conditions(byref(n), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
         return xi, re
 
     def operate(self, specify, value):
@@ -129,14 +130,15 @@ class XRotor(object):
             1 to specify RPM, 2 to specify thrust
         value : float
             Specified RPM in rev/min or thrust in N
+
+        Returns
+        -------
+        conv : bool
+            True is XRotor converged.
         """
-        self._lib.operate(
-            self._handle,
-            byref(c_int(specify)),
-            byref(c_float(value))
-        )
+        return self._lib.operate(byref(c_int(specify)), byref(c_float(value)))
 
     def print_case(self):
         """Print the characteristics of the run case at the last operating point to the terminal."""
-        self._lib.show(self._handle)
+        self._lib.show()
 

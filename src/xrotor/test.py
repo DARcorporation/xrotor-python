@@ -92,13 +92,14 @@ class TestXRotor(unittest.TestCase):
              - Power      : P ≈  21.9 kW
              - Efficiency : η ≈   0.5933
         """
-        xrotor = XRotor()
-        xrotor.case = Case.from_dict(case)
-        xrotor.operate(1, 2000)
-        perf = xrotor.performance
+        xr = XRotor()
+        xr.case = Case.from_dict(case)
+        conv = xr.operate(1, 2000)
+        perf = xr.performance
 
         print_perf(perf)
 
+        self.assertTrue(conv)
         self.assertAlmostEqual(perf.rpm, 2000, 0)
         self.assertAlmostEqual(perf.thrust, 481, 0)
         self.assertAlmostEqual(perf.torque, 105, 0)
@@ -114,13 +115,14 @@ class TestXRotor(unittest.TestCase):
             - Power      : P ≈    22.7 kW
             - Efficiency : η ≈     0.5962
         """
-        xrotor = XRotor()
-        xrotor.case = Case.from_dict(case)
-        xrotor.operate(2, 500)
-        perf = xrotor.performance
+        xr = XRotor()
+        xr.case = Case.from_dict(case)
+        conv = xr.operate(2, 500)
+        perf = xr.performance
 
         print_perf(perf)
 
+        self.assertTrue(conv)
         self.assertAlmostEqual(perf.rpm, 2019, 0)
         self.assertAlmostEqual(perf.thrust, 500, 0)
         self.assertAlmostEqual(perf.torque, 107, 0)
