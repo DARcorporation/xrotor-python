@@ -116,9 +116,9 @@ class XRotor(object):
     def station_conditions(self):
         """(np.ndarray, np.ndarray): Normalized radial coordinates and corresponding local Reynolds numbers."""
         n = self._lib.get_number_of_stations()
-        xi = np.zeros(n.value, dtype=c_float, order='F')
-        re = np.zeros(n.value, dtype=c_float, order='F')
-        self._lib.get_station_conditions(byref(n), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
+        xi = np.zeros(n, dtype=c_float, order='F')
+        re = np.zeros(n, dtype=c_float, order='F')
+        self._lib.get_station_conditions(byref(c_int(n)), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
         return xi, re
 
     def operate(self, specify, value):
