@@ -50,7 +50,8 @@ class XRotor(object):
         self._lib = cdll.LoadLibrary(self._lib_path)
 
         self._lib.get_print.restype = c_bool
-        self._lib.operate.restype = c_float
+        self._lib.operate.restype = c_bool
+        self._lib.get_rms.restype = c_float
 
         self._lib.init()
         self._case: Case = None
@@ -121,6 +122,11 @@ class XRotor(object):
         self._lib.get_station_conditions(byref(c_int(n)), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
         return xi, re
 
+    @property
+    def rms(self):
+        """float: The root-mean-squared error of the last XRotor analysis."""
+        return float(self._lib.get_rms())
+
     def operate(self, specify, value):
         """Operate the propeller at a specified RPM or thrust.
 
@@ -133,10 +139,10 @@ class XRotor(object):
 
         Returns
         -------
-        rms : float
-            Root-mean-squared error of XRotor's convergence. XRotor considers itself converged if rms < 1.0e-7.
+        conv : bool
+            True is XRotor converged.
         """
-        return float(self._lib.operate(byref(c_int(specify)), byref(c_float(value))))
+        return self._lib.operate(byref(c_int(specify)), byref(c_float(value)))
 
     def print_case(self):
         """Print the characteristics of the run case at the last operating point to the terminal."""

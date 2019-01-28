@@ -125,6 +125,11 @@ contains
         call save(ctxt, 'output.prop')
     end subroutine save_prop
 
+    function get_rms() bind(c, name='get_rms')
+        real(c_float) :: get_rms
+        get_rms = ctxt%rms
+    end function get_rms
+
     subroutine get_performance(rpm, thrust, torque, power, efficiency) bind(c, name='get_performance')
         real(c_float), intent(out) :: rpm, thrust, torque, power, efficiency
 
