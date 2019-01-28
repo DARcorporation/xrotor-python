@@ -96,7 +96,7 @@ contains
     end subroutine set_case
 
     function operate(spec, val) bind(c, name='operate')
-        logical(c_bool) :: operate
+        real(c_float) :: operate
         integer(c_int), intent(in) :: spec
         real(c_float),  intent(in) :: val
 
@@ -110,11 +110,11 @@ contains
             call aper(ctxt, 1, 2, ctxt%loprini)
         else
             print *, 'Unknown value for spec. Should be 1 to specify rpm, or 2 to specify thrust.'
-            operate = .false.
+            operate = 1.0
             return
         end if
 
-        operate = ctxt%conv
+        operate = ctxt%rms
     end function operate
 
     subroutine show() bind(c, name='show')

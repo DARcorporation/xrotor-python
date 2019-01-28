@@ -94,12 +94,12 @@ class TestXRotor(unittest.TestCase):
         """
         xr = XRotor()
         xr.case = Case.from_dict(case)
-        conv = xr.operate(1, 2000)
+        rms = xr.operate(1, 2000)
         perf = xr.performance
 
         print_perf(perf)
 
-        self.assertTrue(conv)
+        self.assertTrue(rms < 1.0e-7)
         self.assertAlmostEqual(perf.rpm, 2000, 0)
         self.assertAlmostEqual(perf.thrust, 481, 0)
         self.assertAlmostEqual(perf.torque, 105, 0)
@@ -117,12 +117,12 @@ class TestXRotor(unittest.TestCase):
         """
         xr = XRotor()
         xr.case = Case.from_dict(case)
-        conv = xr.operate(2, 500)
+        rms = xr.operate(2, 500)
         perf = xr.performance
 
         print_perf(perf)
 
-        self.assertTrue(conv)
+        self.assertTrue(rms < 1.0e-7)
         self.assertAlmostEqual(perf.rpm, 2019, 0)
         self.assertAlmostEqual(perf.thrust, 500, 0)
         self.assertAlmostEqual(perf.torque, 107, 0)

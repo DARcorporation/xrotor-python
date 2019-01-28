@@ -50,7 +50,7 @@ class XRotor(object):
         self._lib = cdll.LoadLibrary(self._lib_path)
 
         self._lib.get_print.restype = c_bool
-        self._lib.operate.restype = c_bool
+        self._lib.operate.restype = c_float
 
         self._lib.init()
         self._case: Case = None
@@ -133,10 +133,10 @@ class XRotor(object):
 
         Returns
         -------
-        conv : bool
-            True is XRotor converged.
+        rms : float
+            Root-mean-squared error of XRotor's convergence. XRotor considers itself converged if rms < 1.0e-7.
         """
-        return self._lib.operate(byref(c_int(specify)), byref(c_float(value)))
+        return float(self._lib.operate(byref(c_int(specify)), byref(c_float(value))))
 
     def print_case(self):
         """Print the characteristics of the run case at the last operating point to the terminal."""
