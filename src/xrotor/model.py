@@ -224,14 +224,37 @@ class Section(object):
             An instance of the Section class with all model parameters specified to provide the best possible
             fit to the polar data.
         """
-        def e(x):
-            return np.sqrt(np.mean((Section(*x).cl(a) - cl) ** 2)) + \
-                   np.sqrt(np.mean((Section(*x).cd(a) - cd) ** 2))
+        def gaussian(x, mu, sigma):
+            """Unweighted gaussian function."""
+            return np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
 
-        res = minimize(e, np.ones(9),
-                       bounds=[(-10., 10.), (1., 20.), (0., 3.), (-3., 0.), (-2., 2.), (0.1, 0.3),
-                               (0., 0.5), (-1., 1.), (0., 1.)])
+        # Compute mean and standard deviation of given angles of attack
+        mu_a = np.mean(a)
+        sigma_a = np.std(a)
 
+        # Weights for fitting cl based on gaussian around mu_a, but using sigma = sigma_a/2
+        weights = gaussian(a, mu_a, sigma_a/2)
+
+        def e_cl(x):
+            """Weighted root-mean-squared error of fitted cl and given cl."""
+            return np.sqrt(np.mean(weights * (Section(*x).cl(a) - cl) ** 2))
+
+        # Fit lift curve
+        res_cl = minimize(e_cl, np.ones(6),
+                          bounds=[(-10., 10.), (1., 20.), (0., 3.), (-3., 0.), (-2., 2.), (0.1, 0.3)])
+
+        # Weights for fitting cd based on gaussian around mu_a, but using sigma = sigma_a/3
+        weights = gaussian(a, mu_a, sigma_a/3)
+
+        def e_cd(x):
+            """Weighted root-mean-squared error of fitted cd and given cd."""
+            return np.sqrt(np.mean(weights * (Section(*res_cl.x, *x).cd(a) - cd) ** 2))
+
+        # Fit drag polar
+        res_cd = minimize(e_cd, np.ones(3),
+                          bounds=[(0., 0.5), (-1., 1.), (0., 1.)])
+
+        # If minimum cps are given, compute the critical Mach number
         if cp is not None:
             # Cp is included
             a_unique, indices = np.unique(a, return_index=True)
@@ -255,7 +278,7 @@ class Section(object):
         else:
             M_crit = 0.6
 
-        return Section(*res.x, Cm_const=np.average(cm), M_crit=M_crit)
+        return Section(*res_cl.x, *res_cd.x, Cm_const=np.average(cm), M_crit=M_crit)
 
     def cl_lin(self, alpha: array_like) -> array_like:
         """Calculate the lift coefficient in the linear range for a given angle of attack.
