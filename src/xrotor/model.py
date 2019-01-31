@@ -224,6 +224,9 @@ class Section(object):
             An instance of the Section class with all model parameters specified to provide the best possible
             fit to the polar data.
         """
+        if np.all(np.isnan(a)):
+            return Section(*(9*(0.,)), Cm_const=0., M_crit=0.)
+
         def gaussian(x, mu, sigma):
             """Unweighted gaussian function."""
             return np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
