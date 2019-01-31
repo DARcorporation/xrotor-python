@@ -42,6 +42,16 @@ contains
         get_print = show_output
     end function get_print
 
+    subroutine set_max_iter(setting) bind(c, name='set_max_iter')
+        integer(c_int), intent(in) :: setting
+        ctxt%nitera = ctxt%nitera
+    end subroutine set_max_iter
+
+    function get_max_iter() bind(c, name='get_max_iter')
+        integer(c_int) :: get_max_iter
+        get_max_iter = ctxt%nitera
+    end function get_max_iter
+
     subroutine init() bind(c, name='init')
         ctxt = Common()
         call init_(ctxt)

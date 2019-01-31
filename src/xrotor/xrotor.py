@@ -37,8 +37,12 @@ class XRotor(object):
 
     Attributes
     ----------
+    print
+    max_iter
     case
     performance
+    station_conditions
+    rms
     """
 
     def __init__(self):
@@ -74,6 +78,15 @@ class XRotor(object):
     @print.setter
     def print(self, value):
         self._lib.set_print(byref(c_bool(value)))
+
+    @property
+    def max_iter(self):
+        """integer: Maximum number of iterations."""
+        return self._lib.get_max_iter()
+
+    @max_iter.setter
+    def max_iter(self, value):
+        self._lib.set_max_iter(byref(c_int(value)))
 
     @property
     def case(self) -> Case:
