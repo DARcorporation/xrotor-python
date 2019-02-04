@@ -256,8 +256,8 @@ class Section(object):
             return np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
 
         # Compute mean and standard deviation of given angles of attack
-        mu_a = np.mean(a)
-        sigma_a = np.std(a)
+        sigma_a = (np.max(a) - np.min(a)) / 2
+        mu_a = np.min(a) + sigma_a
 
         # Weights for fitting cl based on gaussian around mu_a, but using sigma = sigma_a/2
         weights = gaussian(a, mu_a, sigma_a/2)
@@ -280,8 +280,8 @@ class Section(object):
         cd = cd[i]
 
         # Recompute mean and standard deviation in reduced range of angles of attack
-        mu_a = np.mean(a)
-        sigma_a = np.std(a)
+        sigma_a = (np.max(a) - np.min(a)) / 2
+        mu_a = np.min(a) + sigma_a
 
         # Weights for fitting cd based on gaussian around mu_a, but using sigma = sigma_a/2
         weights = gaussian(a, mu_a, sigma_a/2)
