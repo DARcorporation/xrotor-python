@@ -18,7 +18,7 @@
 import numpy as np
 
 from ctypes import c_float
-from scipy.optimize import minimize, newton
+from scipy.optimize import minimize, newton, minimize_scalar
 from typing import Dict, Union, Iterable, Optional
 
 array_like = Union[float, Iterable[float], np.ndarray]
@@ -263,9 +263,10 @@ class Section(object):
 
         # Cut off polar at Cl_min and Cl_max to improve drag polar fit
         inter_model = Section(*res_cl.x)
-        a_cl_max = newton(lambda a_cl_max: inter_model.cl(a_cl_max) - res_cl.x[2], 0)
-        a_cl_min = newton(lambda a_cl_min: inter_model.cl(a_cl_min) - res_cl.x[3], 0)
-        i = np.logical_and(a > a_cl_min, a < a_cl_max)
+        bounds = (np.min(a), np.max(a))
+        res_a_cl_max = minimize_scalar(lambda a_cl_max: (inter_model.cl(a_cl_max) - res_cl.x[2])**2, bounds=bounds)
+        res_a_cl_min = minimize_scalar(lambda a_cl_min: (inter_model.cl(a_cl_min) - res_cl.x[3])**2, bounds=bounds)
+        i = np.logical_and(a > res_a_cl_min.x[0], a < res_a_cl_max.x[0])
         a = a[i]
         cd = cd[i]
 
