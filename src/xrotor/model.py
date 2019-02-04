@@ -224,8 +224,23 @@ class Section(object):
             An instance of the Section class with all model parameters specified to provide the best possible
             fit to the polar data.
         """
-        if np.all(np.isnan(a)):
+        # If any of the polar arrays are all nans return a dummy instance of Section
+        if np.all(np.isnan(a)) or np.all(np.isnan(cl)) or np.all(np.isnan(cd)) or np.all(np.isnan(cm)) or \
+                (cp is not None and np.all(np.isnan(cp))):
             return Section(*(9*(0.,)), Cm_const=0., M_crit=0.)
+
+        # Remove any polar points with nans in any of its values
+        i_valid = np.isnan(a) + np.isnan(cl) + np.isnan(cd) + np.isnan(cm)
+        if cp is not None:
+            i_valid += np.isnan(cp)
+        i_valid = np.logical_not(i_valid)
+
+        a = a[i_valid]
+        cl = cl[i_valid]
+        cd = cd[i_valid]
+        cm = cm[i_valid]
+        if cp is not None:
+            cp = cp[i_valid]
 
         def gaussian(x, mu, sigma):
             """Unweighted gaussian function."""
