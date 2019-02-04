@@ -242,6 +242,15 @@ class Section(object):
         if cp is not None:
             cp = cp[i_valid]
 
+        # Sort polar points by angle of attack
+        i_sorted = np.argsort(a)
+        a = a[i_sorted]
+        cl = cl[i_sorted]
+        cd = cd[i_sorted]
+        cm = cm[i_sorted]
+        if cp is not None:
+            cp = cp[i_sorted]
+
         def gaussian(x, mu, sigma):
             """Unweighted gaussian function."""
             return np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
@@ -266,7 +275,7 @@ class Section(object):
         bounds = (np.min(a), np.max(a))
         res_a_cl_max = minimize_scalar(lambda a_cl_max: (inter_model.cl(a_cl_max) - res_cl.x[2])**2, bounds=bounds)
         res_a_cl_min = minimize_scalar(lambda a_cl_min: (inter_model.cl(a_cl_min) - res_cl.x[3])**2, bounds=bounds)
-        i = np.logical_and(a > res_a_cl_min.x[0], a < res_a_cl_max.x[0])
+        i = np.logical_and(a > res_a_cl_min.x, a < res_a_cl_max.x)
         a = a[i]
         cd = cd[i]
 
