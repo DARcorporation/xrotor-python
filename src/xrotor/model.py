@@ -261,8 +261,20 @@ class Section(object):
         res_cl = minimize(e_cl, np.ones(6),
                           bounds=[(-10., 10.), (1., 20.), (0., 3.), (-3., 0.), (-2., 2.), (0.1, 0.3)])
 
-        # Weights for fitting cd based on gaussian around mu_a, but using sigma = sigma_a/3
-        weights = gaussian(a, mu_a, sigma_a/3)
+        # Cut off polar at Cl_min and Cl_max to improve drag polar fit
+        inter_model = Section(*res_cl.x)
+        a_cl_max = newton(lambda a_cl_max: inter_model.cl(a_cl_max) - res_cl.x[2], 0)
+        a_cl_min = newton(lambda a_cl_min: inter_model.cl(a_cl_min) - res_cl.x[3], 0)
+        i = np.logical_and(a > a_cl_min, a < a_cl_max)
+        a = a[i]
+        cd = cd[i]
+
+        # Recompute mean and standard deviation in reduced range of angles of attack
+        mu_a = np.mean(a)
+        sigma_a = np.std(a)
+
+        # Weights for fitting cd based on gaussian around mu_a, but using sigma = sigma_a/2
+        weights = gaussian(a, mu_a, sigma_a/2)
 
         def e_cd(x):
             """Weighted root-mean-squared error of fitted cd and given cd."""
