@@ -255,11 +255,9 @@ class Section(object):
             """Unweighted gaussian function."""
             return np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
 
-        # Compute mean and standard deviation of given angles of attack
+        # Weigh the importance of/confidence in points of the lift curve for fitting
         sigma_a = (np.max(a) - np.min(a)) / 2
         mu_a = np.min(a) + sigma_a
-
-        # Weights for fitting cl based on gaussian around mu_a, but using sigma = sigma_a/2
         weights = gaussian(a, mu_a, sigma_a/2)
 
         def e_cl(x):
@@ -267,8 +265,7 @@ class Section(object):
             return np.sqrt(np.mean(weights * (Section(*x).cl(a) - cl) ** 2))
 
         # Fit lift curve
-        res_cl = minimize(e_cl, np.ones(6),
-                          bounds=[(-10., 10.), (1., 20.), (0., 3.), (-3., 0.), (-2., 2.), (0.1, 0.3)])
+        res_cl = minimize(e_cl, np.ones(6), bounds=[(-10., 10.), (1., 20.), (0., 3.), (-3., 0.), (-2., 2.), (.01, .5)])
 
         # Cut off polar at Cl_min and Cl_max to improve drag polar fit
         inter_model = Section(*res_cl.x)
@@ -279,20 +276,17 @@ class Section(object):
         a = a[i]
         cd = cd[i]
 
-        # Recompute mean and standard deviation in reduced range of angles of attack
+        # Compute a new confidence interval for fitting the drag polar
         sigma_a = (np.max(a) - np.min(a)) / 2
         mu_a = np.min(a) + sigma_a
-
-        # Weights for fitting cd based on gaussian around mu_a, but using sigma = sigma_a/2
-        weights = gaussian(a, mu_a, sigma_a/2)
+        weights = gaussian(a, mu_a, sigma_a / 2)
 
         def e_cd(x):
             """Weighted root-mean-squared error of fitted cd and given cd."""
             return np.sqrt(np.mean(weights * (Section(*res_cl.x, *x).cd(a) - cd) ** 2))
 
         # Fit drag polar
-        res_cd = minimize(e_cd, np.ones(3),
-                          bounds=[(0., 0.5), (-1., 1.), (0., 1.)])
+        res_cd = minimize(e_cd, np.ones(3), bounds=[(0, 0.5), (-1., 1.), (0., 1.)])
 
         # If minimum cps are given, compute the critical Mach number
         if cp is not None:
