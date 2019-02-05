@@ -251,6 +251,28 @@ class Section(object):
         if cp is not None:
             cp = cp[i_sorted]
 
+            # If minimum cps are given, compute the critical Mach number
+            a_unique, indices = np.unique(a, return_index=True)
+            cp = np.interp(0., a_unique, cp[indices])
+
+            gamma = 1.4
+
+            def f(M):
+                return ((2. / (gamma * M ** 2)) *
+                        (((gamma + 1.) / (2 * (1 + .5 * (gamma - 1) * M ** 2))) ** (gamma / (1 - gamma)) - 1)) - cp
+
+            def df(M):
+                a = ((-4. / (gamma * M ** 3)) *
+                     (((gamma + 1.) / (2 * (1 + .5 * (gamma - 1) * M ** 2))) ** (gamma / (1 - gamma)) - 1))
+                b = -(2. / (gamma * M ** 2)) * (gamma / (1 - gamma)) * \
+                    ((gamma + 1.) / (2 * (1 + .5 * (gamma - 1) * M ** 2))) ** (gamma / (1 - gamma) - 1) * \
+                    ((gamma + 1) / (2 * (1 + .5 * (gamma - 1) * M ** 2)) ** 2) * 2 * (gamma - 1) * M
+                return a + b
+
+            M_crit = newton(f, 1., df)
+        else:
+            M_crit = 0.6
+
         def gaussian(x, mu, sigma):
             """Unweighted gaussian function."""
             return np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
@@ -287,30 +309,6 @@ class Section(object):
 
         # Fit drag polar
         res_cd = minimize(e_cd, np.ones(3), bounds=[(0, 0.5), (-1., 1.), (0., 1.)])
-
-        # If minimum cps are given, compute the critical Mach number
-        if cp is not None:
-            # Cp is included
-            a_unique, indices = np.unique(a, return_index=True)
-            cp = np.interp(0., a_unique, cp[indices])
-
-            gamma = 1.4
-
-            def f(M):
-                return ((2. / (gamma * M ** 2)) *
-                        (((gamma + 1.) / (2 * (1 + .5 * (gamma - 1) * M ** 2))) ** (gamma / (1 - gamma)) - 1)) - cp
-
-            def df(M):
-                a = ((-4. / (gamma * M ** 3)) *
-                     (((gamma + 1.) / (2 * (1 + .5 * (gamma - 1) * M ** 2))) ** (gamma / (1 - gamma)) - 1))
-                b = -(2. / (gamma * M ** 2)) * (gamma / (1 - gamma)) * \
-                    ((gamma + 1.) / (2 * (1 + .5 * (gamma - 1) * M ** 2))) ** (gamma / (1 - gamma) - 1) * \
-                    ((gamma + 1) / (2 * (1 + .5 * (gamma - 1) * M ** 2)) ** 2) * 2 * (gamma - 1) * M
-                return a + b
-
-            M_crit = newton(f, 1., df)
-        else:
-            M_crit = 0.6
 
         return Section(*res_cl.x, *res_cd.x, Cm_const=np.average(cm), M_crit=M_crit)
 
