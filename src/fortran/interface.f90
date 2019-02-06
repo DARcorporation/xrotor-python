@@ -105,19 +105,25 @@ contains
         call initcase(ctxt, n_geom, .false.)
     end subroutine set_case
 
-    function operate(spec, val) bind(c, name='operate')
+    function operate(spec, value, fix, fixed) bind(c, name='operate')
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
-        real(c_float),  intent(in) :: val
+        real(c_float),  intent(in) :: value
+        integer(c_int), optional, intent(in) :: fix
+        real(c_float), optional, intent(in) :: fixed
 
         if (spec == 1) then
-            ctxt%adv = ctxt%vel / (ctxt%rad * val * pi / 30.)
+            ctxt%adv = ctxt%vel / (ctxt%rad * value * pi / 30.)
             ctxt%conv = .false.
             call aper(ctxt, 4, 2, ctxt%loprini)
         elseif (spec == 2) then
-            ctxt%tspec = val
+            ctxt%tspec = value
             ctxt%conv = .false.
             call aper(ctxt, 1, 2, ctxt%loprini)
+        elseif (spec == 3) then
+            ctxt%pspec = value
+            ctxt%conv = .false.
+            call aper(ctxt, )
         else
             print *, 'Unknown value for spec. Should be 1 to specify rpm, or 2 to specify thrust.'
             operate = 1.0
