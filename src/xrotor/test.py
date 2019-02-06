@@ -83,6 +83,75 @@ def print_perf(perf):
 class TestXRotor(unittest.TestCase):
     """Test whether the XROTOR module functions properly."""
 
+    def test_solve_for_thrust(self):
+        """Run the test case at a thrust of 500 N and make sure the performance results match the expected values.
+
+        Expected performance for a thrust of 500 N:
+            - Torque     : Q ≈   107   Nm
+            - Power      : P ≈    22.7 kW
+            - RPM        : Ω ≈  2019   rev/min
+            - Efficiency : η ≈     0.596
+        """
+        xr = XRotor()
+        xr.case = Case.from_dict(case)
+        rms = xr.operate(thrust=500)
+        perf = xr.performance
+
+        print_perf(perf)
+
+        self.assertTrue(abs(rms) < 1.0e-7)
+        self.assertAlmostEqual(perf.thrust, 500, 0)
+        self.assertAlmostEqual(perf.torque, 107, 0)
+        self.assertAlmostEqual(perf.power/1000, 22.7, 1)
+        self.assertAlmostEqual(perf.rpm, 2019, 0)
+        self.assertAlmostEqual(perf.efficiency, 0.596, 3)
+
+    def test_solve_for_torque(self):
+        """Run the test case at a torque of 100 Nm and make sure the performance results match the expected values.
+
+        Expected performance for a torque of 100 Nm:
+            - Thrust     : T ≈   446   N
+            - Power      : P ≈    20.6 kW
+            - RPM        : Ω ≈  1963   rev/min
+            - Efficiency : η ≈     0.586
+        """
+        xr = XRotor()
+        xr.case = Case.from_dict(case)
+        rms = xr.operate(torque=100)
+        perf = xr.performance
+
+        print_perf(perf)
+
+        self.assertTrue(abs(rms) < 1.0e-7)
+        self.assertAlmostEqual(perf.thrust, 446, 0)
+        self.assertAlmostEqual(perf.torque, 100, 0)
+        self.assertAlmostEqual(perf.power/1000, 20.6, 1)
+        self.assertAlmostEqual(perf.rpm, 1963, 0)
+        self.assertAlmostEqual(perf.efficiency, 0.586, 3)
+
+    def test_solve_for_power(self):
+        """Run the test case at a power of 20 kW and make sure the performance results match the expected values.
+
+        Expected performance for a torque of 100 Nm:
+            - Thrust     : T ≈   431   N
+            - Torque     : Q ≈    98   Nm
+            - RPM        : Ω ≈  1947   rev/min
+            - Efficiency : η ≈     0.582
+        """
+        xr = XRotor()
+        xr.case = Case.from_dict(case)
+        rms = xr.operate(power=20e3)
+        perf = xr.performance
+
+        print_perf(perf)
+
+        self.assertTrue(abs(rms) < 1.0e-7)
+        self.assertAlmostEqual(perf.thrust, 431, 0)
+        self.assertAlmostEqual(perf.torque, 98, 0)
+        self.assertAlmostEqual(perf.power/1000, 20.0, 1)
+        self.assertAlmostEqual(perf.rpm, 1947, 0)
+        self.assertAlmostEqual(perf.efficiency, 0.582, 3)
+
     def test_solve_for_rpm(self):
         """Run the test case at an RPM of 2000 and make sure the performance results match the expected values.
 
@@ -90,57 +159,34 @@ class TestXRotor(unittest.TestCase):
              - Thrust     : T ≈ 481   N
              - Torque     : Q ≈ 105   Nm
              - Power      : P ≈  21.9 kW
-             - Efficiency : η ≈   0.5933
+             - Efficiency : η ≈   0.593
         """
         xr = XRotor()
         xr.case = Case.from_dict(case)
-        conv = xr.operate(1, 2000)
+        rms = xr.operate(rpm=2000)
         perf = xr.performance
 
         print_perf(perf)
 
-        self.assertTrue(conv)
-        self.assertTrue(xr.rms < 1.0e-7)
-        self.assertAlmostEqual(perf.rpm, 2000, 0)
+        self.assertTrue(abs(rms) < 1.0e-7)
         self.assertAlmostEqual(perf.thrust, 481, 0)
         self.assertAlmostEqual(perf.torque, 105, 0)
         self.assertAlmostEqual(perf.power/1000, 21.9, 1)
+        self.assertAlmostEqual(perf.rpm, 2000, 0)
         self.assertAlmostEqual(perf.efficiency, 0.593, 3)
-
-    def test_solve_for_thrust(self):
-        """Run the test case at a thrust of 500 N and make sure the performance results match the expected values.
-
-        Expected performance for a thrust of 500 N:
-            - RPM        : Ω ≈  2019   rev/min
-            - Torque     : Q ≈   107   Nm
-            - Power      : P ≈    22.7 kW
-            - Efficiency : η ≈     0.5962
-        """
-        xr = XRotor()
-        xr.case = Case.from_dict(case)
-        conv = xr.operate(2, 500)
-        perf = xr.performance
-
-        print_perf(perf)
-
-        self.assertTrue(conv)
-        self.assertTrue(xr.rms < 1.0e-7)
-        self.assertAlmostEqual(perf.rpm, 2019, 0)
-        self.assertAlmostEqual(perf.thrust, 500, 0)
-        self.assertAlmostEqual(perf.torque, 107, 0)
-        self.assertAlmostEqual(perf.power/1000, 22.7, 1)
-        self.assertAlmostEqual(perf.efficiency, 0.596, 3)
 
 
 class TestXRotorConcurrently(unittest.TestCase):
     """Test whether the tests can be run properly in parallel."""
 
     def test_concurrently(self):
-        """Run both test cases contained in the TestXRotor test case in parallel."""
+        """Run all test cases contained in the TestXRotor test case in parallel."""
         test_xrotor = TestXRotor()
 
-        ps = [multiprocessing.Process(target=test_xrotor.test_solve_for_rpm),
-              multiprocessing.Process(target=test_xrotor.test_solve_for_thrust)]
+        ps = [multiprocessing.Process(target=test_xrotor.test_solve_for_thrust),
+              multiprocessing.Process(target=test_xrotor.test_solve_for_torque),
+              multiprocessing.Process(target=test_xrotor.test_solve_for_power),
+              multiprocessing.Process(target=test_xrotor.test_solve_for_rpm)]
         [p.start() for p in ps]
         [p.join() for p in ps]
 

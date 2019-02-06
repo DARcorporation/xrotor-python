@@ -106,28 +106,62 @@ contains
     end subroutine set_case
 
     function operate(spec, value, fix, fixed) bind(c, name='operate')
+        use mod_common, only: show_output
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
         real(c_float),  intent(in) :: value
         integer(c_int), optional, intent(in) :: fix
         real(c_float), optional, intent(in) :: fixed
+        integer :: ifix, i
 
-        if (spec == 1) then
-            ctxt%adv = ctxt%vel / (ctxt%rad * value * pi / 30.)
-            ctxt%conv = .false.
-            call aper(ctxt, 4, 2, ctxt%loprini)
-        elseif (spec == 2) then
-            ctxt%tspec = value
-            ctxt%conv = .false.
-            call aper(ctxt, 1, 2, ctxt%loprini)
-        elseif (spec == 3) then
-            ctxt%pspec = value
-            ctxt%conv = .false.
-            call aper(ctxt, )
+        operate = 1.0
+
+        if (present(fix)) then
+            if (fix == 1 .and. .not. present(fixed)) then
+                print *, "If 'fix' is given, 'fixed' must be given too."
+                return
+            end if
+            ifix = fix
         else
-            print *, 'Unknown value for spec. Should be 1 to specify rpm, or 2 to specify thrust.'
-            operate = 1.0
+            ifix = 2
+        end if
+
+        select case (spec)
+            case (1)
+                ctxt%tspec = value
+            case (2)
+                ctxt%qspec = value
+            case (3)
+                ctxt%pspec = value
+            case (4)
+                ctxt%adv = ctxt%vel / (ctxt%rad * value * pi / 30.)
+            case default
+                print *, "Unknown value for 'spec'. Should be 1, 2, 3, or 4."
+                return
+        end select
+
+        if (ifix == 1) then
+            ctxt%adv = ctxt%vel / (ctxt%rad * fixed * pi / 30.)
+        elseif (ifix /= 2) then
+            print *, "Unknown value for 'fix'. Should be 1 or 2."
             return
+        end if
+
+        ctxt%conv = .false.
+        call aper(ctxt, spec, ifix, ctxt%loprini)
+
+        if (ifix == 1 .and. spec /= 4) then
+            if(ctxt%conv) then
+                !----- convergence was achieved: show blade angle change incurred
+                if (show_output) write(*, 1550) ctxt%dbeta * 180.0 / pi
+                1550 format(' Blade angle changed', f7.3, ' degrees')
+            else
+                !----- convergence failed: restore clobbered blade angles
+                do i = 1, ctxt%ii
+                    ctxt%beta(i) = ctxt%beta(i) - ctxt%dbeta
+                    ctxt%beta0(i) = ctxt%beta0(i) - ctxt%dbeta
+                enddo
+            endif
         end if
 
         operate = ctxt%rms

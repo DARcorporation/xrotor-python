@@ -54,7 +54,7 @@ class XRotor(object):
         self._lib = cdll.LoadLibrary(self._lib_path)
 
         self._lib.get_print.restype = c_bool
-        self._lib.operate.restype = c_bool
+        self._lib.operate.restype = c_float
         self._lib.get_rms.restype = c_float
 
         self._lib.init()
@@ -140,7 +140,7 @@ class XRotor(object):
         """float: The root-mean-squared error of the last XRotor analysis."""
         return float(self._lib.get_rms())
 
-    def operate(self, thrust=None, torque=None, power=None, rpm=None, pitch=None):
+    def operate(self, thrust=None, torque=None, power=None, rpm=None):
         """Operate the propeller at a specified RPM or thrust.
 
         Parameters
@@ -167,27 +167,26 @@ class XRotor(object):
             raise ValueError('Thrust and torque cannot be specified simultaneously.')
         if thrust is not None and power is not None:
             raise ValueError('Thrust and power cannot be specified simultaneously.')
-        if rpm is not None and pitch is not None:
-            raise ValueError('RPM and pitch cannot be specified together.')
 
         if thrust is not None:
             if rpm is not None:
-                return self._lib.operate(byref(c_int(2)), byref(c_float(thrust)), byref(c_int(2)), byref(c_float(rpm)))
-            elif pitch is not None:
-                return self._lib.operate(byref(c_int(2)), byref(c_float(thrust)), byref(c_int(1)), byref(c_float(pitch)))
+                return self._lib.operate(byref(c_int(1)), byref(c_float(thrust)), byref(c_int(1)), byref(c_float(rpm)))
             else:
-                raise ValueError('When specifying the thrust, either the RPM of the blade pitch has to be given too.')
+                return self._lib.operate(byref(c_int(1)), byref(c_float(thrust)), byref(c_int(2)), None)
+        elif torque is not None:
+            if rpm is not None:
+                return self._lib.operate(byref(c_int(2)), byref(c_float(torque)), byref(c_int(1)), byref(c_float(rpm)))
+            else:
+                return self._lib.operate(byref(c_int(2)), byref(c_float(torque)), byref(c_int(2)), None)
         elif power is not None:
             if rpm is not None:
-                return self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(2)), byref(c_float(rpm)))
-            elif pitch is not None:
-                self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(1)), byref(c_float(pitch)))
+                return self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(1)), byref(c_float(rpm)))
             else:
-                raise ValueError('When specifying the power, either the RPM of the blade pitch has to be given too.')
+                return self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(2)), None)
         elif rpm is not None:
-            return self._lib.operate(byref(c_int(1)), byref(c_float(rpm)), byref(c_int(2)), byref(c_float(rpm)))
-        elif pitch is not None:
-            raise ValueError('Cannot operate with only a specified blade pitch.')
+            return self._lib.operate(byref(c_int(4)), byref(c_float(rpm)), None, None)
+        else:
+            raise ValueError('Neither thrust, torque, power, or rpm was provided.')
 
     def print_case(self):
         """Print the characteristics of the run case at the last operating point to the terminal."""
