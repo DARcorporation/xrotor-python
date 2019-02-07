@@ -191,6 +191,11 @@ contains
         rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
     end subroutine get_performance
 
+    function get_blade_angle_change() bind(c, name='get_blade_angle_change')
+        real(c_float) :: get_blade_angle_change
+        get_blade_angle_change = ctxt%dbeta * 180.0 / pi
+    end function get_blade_angle_change
+
     function get_number_of_stations() bind(c, name='get_number_of_stations')
         integer(c_int) :: get_number_of_stations
         get_number_of_stations = ctxt%ii

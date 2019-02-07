@@ -56,6 +56,7 @@ class XRotor(object):
         self._lib.get_print.restype = c_bool
         self._lib.operate.restype = c_float
         self._lib.get_rms.restype = c_float
+        self._lib.get_blade_angle_change.restype = c_float
 
         self._lib.init()
         self._case: Case = None
@@ -141,7 +142,10 @@ class XRotor(object):
         return float(self._lib.get_rms())
 
     def operate(self, thrust=None, torque=None, power=None, rpm=None):
-        """Operate the propeller at a specified RPM or thrust.
+        """Operate the propeller at a specified thrust, torque, power, or rpm.
+
+        When only only one parameter is specified, the blade pitch will be left unchanged.
+        If thrust, torque, or power is given along with rpm, the blade pitch will be varied and the rpm constrained.
 
         Parameters
         ----------
@@ -153,13 +157,13 @@ class XRotor(object):
             Power in W
         rpm : float
             Rotational speed in rev/s
-        pitch : float
-            Blade pitch in deg
 
         Returns
         -------
-        conv : bool
-            True is XRotor converged.
+        rms : float
+            Root-mean-squared error of after last XRotor iteration.
+        blade_angle_change : float, optional
+            Blade angle change in degrees, if the rpm is constrained for given thrust, torque, or power.
         """
         if thrust is not None and torque is not None and power is not None:
             raise ValueError('Thrust, torque, and power cannot be specified simultaneously.')
@@ -170,17 +174,23 @@ class XRotor(object):
 
         if thrust is not None:
             if rpm is not None:
-                return self._lib.operate(byref(c_int(1)), byref(c_float(thrust)), byref(c_int(1)), byref(c_float(rpm)))
+                rms = self._lib.operate(byref(c_int(1)), byref(c_float(thrust)), byref(c_int(1)), byref(c_float(rpm)))
+                blade_angle_change = self._lib.get_blade_angle_change()
+                return rms, blade_angle_change
             else:
                 return self._lib.operate(byref(c_int(1)), byref(c_float(thrust)), byref(c_int(2)), None)
         elif torque is not None:
             if rpm is not None:
-                return self._lib.operate(byref(c_int(2)), byref(c_float(torque)), byref(c_int(1)), byref(c_float(rpm)))
+                rms = self._lib.operate(byref(c_int(2)), byref(c_float(torque)), byref(c_int(1)), byref(c_float(rpm)))
+                blade_angle_change = self._lib.get_blade_angle_change()
+                return rms, blade_angle_change
             else:
                 return self._lib.operate(byref(c_int(2)), byref(c_float(torque)), byref(c_int(2)), None)
         elif power is not None:
             if rpm is not None:
-                return self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(1)), byref(c_float(rpm)))
+                rms = self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(1)), byref(c_float(rpm)))
+                blade_angle_change = self._lib.get_blade_angle_change()
+                return rms, blade_angle_change
             else:
                 return self._lib.operate(byref(c_int(3)), byref(c_float(power)), byref(c_int(2)), None)
         elif rpm is not None:
