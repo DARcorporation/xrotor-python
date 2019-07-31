@@ -21,6 +21,7 @@
 module m_xoper
 contains
     subroutine oper(ctxt)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_userio
@@ -729,6 +730,7 @@ contains
 
 
     subroutine getpvar(lu, ndim, n, xrpm, xpwr)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_userio
@@ -755,6 +757,7 @@ contains
 
 
     subroutine shocas(lu, ndim, n, par, rad, name)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_userio
@@ -868,6 +871,7 @@ contains
 
 
     subroutine getcas(lu, ndim, ncas, par)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_userio
@@ -937,6 +941,7 @@ contains
 
 
     subroutine setcas(ctxt, itype, ninput, rinput)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_userio
@@ -1251,6 +1256,7 @@ contains
 
 
     subroutine aper(ctxt, ispec, icon, linit)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_common
@@ -1295,6 +1301,7 @@ contains
 
 
     subroutine apinit(ctxt)
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_common
@@ -1528,6 +1535,7 @@ contains
         !       icon = 1    Advance ratio(rpm) fixed
         !       icon = 2    Blade pitch fixed
         !-------------------------------------------------------
+        use m_xutils
         use m_xaero
         use m_vortex
         use m_common
