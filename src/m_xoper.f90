@@ -21,6 +21,7 @@
 module m_xoper
 contains
     subroutine oper(ctxt)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -730,6 +731,7 @@ contains
 
 
     subroutine getpvar(lu, ndim, n, xrpm, xpwr)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -757,6 +759,7 @@ contains
 
 
     subroutine shocas(lu, ndim, n, par, rad, name)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -871,6 +874,7 @@ contains
 
 
     subroutine getcas(lu, ndim, ncas, par)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -941,6 +945,7 @@ contains
 
 
     subroutine setcas(ctxt, itype, ninput, rinput)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -1256,6 +1261,7 @@ contains
 
 
     subroutine aper(ctxt, ispec, icon, linit)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -1301,6 +1307,7 @@ contains
 
 
     subroutine apinit(ctxt)
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -1535,6 +1542,7 @@ contains
         !       icon = 1    Advance ratio(rpm) fixed
         !       icon = 2    Blade pitch fixed
         !-------------------------------------------------------
+        use m_xrotor
         use m_xutils
         use m_xaero
         use m_vortex
@@ -1917,6 +1925,7 @@ contains
         !
         !---- Calculate velocity components at radial station i on real prop
         !
+        use m_xrotor
         use m_xaero
         use m_common
         implicit real (m)
@@ -1972,6 +1981,7 @@ contains
 
 
     subroutine xwinit(ctxt)
+        use m_xrotor
         use m_xaero
         use m_common
         implicit real (m)
@@ -2019,6 +2029,7 @@ contains
 
 
     subroutine setxw(ctxt)
+        use m_xrotor
         use m_xaero
         use m_common
         implicit real (m)
@@ -2199,6 +2210,7 @@ contains
 
 
     subroutine tpq(ctxt, itype)
+        use m_xrotor
         use m_xaero
         use m_common
         implicit real (m)

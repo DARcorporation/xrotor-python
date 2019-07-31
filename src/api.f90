@@ -31,6 +31,7 @@ module api
 contains
 
     subroutine set_print(setting) bind(c, name = 'set_print')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_xaero
@@ -40,6 +41,7 @@ contains
     end subroutine set_print
 
     function get_print() bind(c, name = 'get_print')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_xaero
@@ -49,6 +51,7 @@ contains
     end function get_print
 
     subroutine set_max_iter(setting) bind(c, name = 'set_max_iter')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_xaero
@@ -57,6 +60,7 @@ contains
     end subroutine set_max_iter
 
     function get_max_iter() bind(c, name = 'get_max_iter')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_xaero
@@ -65,6 +69,7 @@ contains
     end function get_max_iter
 
     subroutine init() bind(c, name = 'init')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_xaero
@@ -78,6 +83,7 @@ contains
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
             free, duct, wind) bind(c, name = 'set_case')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_xaero
@@ -124,6 +130,7 @@ contains
     end subroutine set_case
 
     function operate(spec, value, fix, fixed) bind(c, name = 'operate')
+       use m_xrotor
         use m_xoper
         use m_xio
         use m_common, only : show_output
@@ -188,6 +195,7 @@ contains
     end function operate
 
     subroutine show() bind(c, name = 'show')
+       use m_xrotor
         use m_xio
         call output(ctxt, 6)
     end subroutine show

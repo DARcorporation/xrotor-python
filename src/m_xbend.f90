@@ -21,6 +21,7 @@
 module m_xbend
 contains
     subroutine bend(ctxt)
+        use m_xrotor
         use m_xoper
         use m_userio
         use m_common
