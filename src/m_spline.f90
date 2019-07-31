@@ -18,7 +18,7 @@
 !   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 !***********************************************************************
 
-module mod_spline
+module m_spline
     implicit none
     public
 contains
@@ -350,4 +350,4 @@ contains
         xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
     end
     ! segspl
-end module mod_spline
+end module m_spline

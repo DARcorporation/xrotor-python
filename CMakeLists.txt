@@ -3,8 +3,8 @@ project(xrotor Fortran)
 
 enable_language(Fortran)
 add_library(xrotor SHARED
-        src/common.f90
-        src/spline.f90
+        src/m_common.f90
+        src/m_spline.f90
         src/userio.f90
         src/vortex.f90
         src/xaero.f90
@@ -14,4 +14,4 @@ add_library(xrotor SHARED
         src/xoper.f90
         src/xrotor.f90
         src/xutils.f90
-        src/interface.f90)
+        src/api.f90)

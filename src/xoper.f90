@@ -19,8 +19,8 @@
 !***********************************************************************
 
 subroutine oper(ctxt)
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     character*4 comand, ans
@@ -724,7 +724,7 @@ end
 
 
 subroutine getpvar(lu, ndim, n, xrpm, xpwr)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     dimension xpwr(ndim), xrpm(ndim)
     character*1 dummy
     !
@@ -747,7 +747,7 @@ end
 
 
 subroutine shocas(lu, ndim, n, par, rad, name)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     dimension par(0:ndim, *)
     character name*(*)
     !
@@ -857,7 +857,7 @@ end
 
 
 subroutine getcas(lu, ndim, ncas, par)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     dimension par(0:ndim, *), a(16)
     character dummy*1, line*128, cname*32
     logical error
@@ -923,7 +923,7 @@ end
 
 
 subroutine setcas(ctxt, itype, ninput, rinput)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     dimension rinput(*)
@@ -1234,7 +1234,7 @@ end
 
 
 subroutine aper(ctxt, ispec, icon, linit)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     logical linit
@@ -1276,7 +1276,7 @@ end
 
 
 subroutine apinit(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     !---------------------------------------------------------
     !     Sets reasonable initial circulation.
@@ -1507,8 +1507,8 @@ subroutine apiter(ctxt, ispec, icon)
     !       icon = 1    Advance ratio(rpm) fixed
     !       icon = 2    Blade pitch fixed
     !-------------------------------------------------------
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
 
     implicit real (m)
     dimension clmax(ix), clmin(ix), dclstall(ix)
@@ -1886,7 +1886,7 @@ subroutine cscalc(ctxt, i, utot, wa, wt, &
     !
     !---- Calculate velocity components at radial station i on real prop
     !
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -1940,7 +1940,7 @@ end
 
 
 subroutine xwinit(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !------------------------------------------------------------
@@ -1986,7 +1986,7 @@ end
 
 
 subroutine setxw(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     real xwm_gam(ix), z_gam(ix)
@@ -2165,7 +2165,7 @@ end
 
 
 subroutine tpq(ctxt, itype)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !----------------------------------------------------------
@@ -2636,7 +2636,7 @@ end
 
 
 subroutine vcalc(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !---------------------------------------------
@@ -2762,7 +2762,7 @@ end
 
 subroutine helico(imax, ii, nblds, lduct, rake, &
         xi, xv, gam, adw, vind_gam, vind_adw)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     dimension xi(imax), xv(imax), gam(imax)
     dimension vind_adw(3, imax), vind_gam(3, imax, imax)
     !
@@ -3040,13 +3040,13 @@ end
 
 
 subroutine filter(q, smlen, n)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !-----------------------------------------
     !     Smooths array q.
     !     smlen is the number of points over
     !     which information is smeared.
     !-----------------------------------------
-    use mod_spline
+    use m_spline
     implicit real (a-h, m, o-z)
     dimension q(n)
     !

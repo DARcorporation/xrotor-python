@@ -18,7 +18,7 @@
 !   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 !***********************************************************************
 
-module mod_common
+module m_common
     implicit none
 
     public
@@ -372,4 +372,4 @@ module mod_common
     !   ABODY(.)    Nacelle cross-sectional area array
     !   ZBODY(.)    Nacelle streamwise coordinate
     !   NZ          Number of nacelle streamwise stations
-end module mod_common
+end module m_common

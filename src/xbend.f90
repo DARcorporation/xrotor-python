@@ -19,7 +19,7 @@
 !***********************************************************************
 !
 subroutine bend(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     character*4 comand
@@ -170,8 +170,8 @@ end
 
 
 subroutine eiload(ctxt, fname1)
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     character*(*) fname1
@@ -272,7 +272,7 @@ end
 
 
 subroutine stclr(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -297,7 +297,7 @@ end
 
 
 subroutine mclr(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -314,7 +314,7 @@ end
 
 
 subroutine stload(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !-----------------------------------------------------------
@@ -455,7 +455,7 @@ end
 
 
 subroutine stcalc(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !------------------------------------------------------------
@@ -873,7 +873,7 @@ end
 
 
 subroutine stadd(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !------------------------------------------------------
@@ -896,7 +896,7 @@ end
 
 
 subroutine stset(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !------------------------------------------------------
@@ -920,7 +920,7 @@ end
 
 
 subroutine stwrit(ctxt, lu)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !---------------------------------------------
@@ -1017,7 +1017,7 @@ end
 
 
 subroutine b12sol(a, b, c, r, ii)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     dimension a(12, 12, ii), b(12, 12, ii), c(12, 12, ii)
     dimension r(12, 1, ii)
     !-------------------------------------------------------

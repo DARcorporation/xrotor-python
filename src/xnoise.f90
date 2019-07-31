@@ -24,8 +24,8 @@ subroutine noise(ctxt)
     !     time history of the propeller
     !     at specified observer positions.
     !---------------------------------------
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
     implicit real (m)
     !
     parameter (ntx = 160)
@@ -416,8 +416,8 @@ subroutine ptrace(xobs, yobs, zobs, &
     !                  (over one blade-passing period, non-uniformly spaced)
     !
     !------------------------------------------------------------------------
-    use mod_common, only: show_output
-    use mod_spline
+    use m_common, only: show_output
+    use m_spline
 
     implicit real(a-h, m, o-z)
     !
@@ -797,7 +797,7 @@ subroutine dbfoot(nblds, ii, xi, dxi, aoc, ch, gam, &
         adv, rad, vel, vso, rho, &
         galt, dclimb, unitl, nt, &
         nxdim, nydim, nx, ny, x, y, d)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !--------------------------------------------------------
     !     Calculates db noise levels on a ground plane grid.
     !

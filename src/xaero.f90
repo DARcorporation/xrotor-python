@@ -46,7 +46,7 @@ subroutine setiaero(ctxt)
     !     Sets up indices referring to aero section for
     !     each radial station
     !--------------------------------------------------
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -68,7 +68,7 @@ subroutine getaero(ctxt, n, xisect, a0, clmax, clmin, &
     !---------------------------------------------
     !     Gets aero data from stored section array
     !---------------------------------------------
-    use mod_common
+    use m_common
     implicit real(m)
     type(Common), intent(inout) :: ctxt
     !
@@ -101,7 +101,7 @@ subroutine putaero(ctxt, n, xisect, a0, clmax, clmin, &
     !--------------------------------------------------------
     !     Puts aero data into stored section array at index n
     !--------------------------------------------------------
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -146,7 +146,7 @@ subroutine getclcdcm(ctxt, is, alf, w, rey, &
     !      cd(alpha),
     !       cm(alpha) interpolation function for blade at station is
     !-------------------------------------------------------------
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     logical stallf, stallf2
@@ -252,7 +252,7 @@ subroutine getalf(ctxt, is, clift, w, alf, alf_cl, alf_w, stallf)
     !     Inverse alpha(cl) function
     !     Uses Newton-Raphson iteration to get alf from cl function
     !------------------------------------------------------------
-    use mod_common
+    use m_common
     implicit real (m)
     logical stallf
     data niter / 10 /
@@ -323,7 +323,7 @@ subroutine clcdcm(ctxt, alf, w, rey, &
     !     varying only with Mach by Prandtl-Glauert scaling
     !------------------------------------------------------------
     !
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     logical stallf

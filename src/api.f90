@@ -17,9 +17,9 @@
 !   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 !***********************************************************************
 
-module interface
+module api
     use, intrinsic :: iso_c_binding, only: c_float, c_double, c_int, c_bool, c_char
-    use :: mod_common, only: Common, pi, ix, nax
+    use :: m_common, only: Common, pi, ix, nax
     implicit none
     private
     public init, set_case, operate, dp
@@ -31,13 +31,13 @@ module interface
 contains
 
     subroutine set_print(setting) bind(c, name='set_print')
-        use mod_common, only: show_output
+        use m_common, only: show_output
         logical(c_bool), intent(in) :: setting
         show_output = setting
     end subroutine set_print
 
     function get_print() bind(c, name='get_print')
-        use mod_common, only: show_output
+        use m_common, only: show_output
         logical(c_bool) :: get_print
         get_print = show_output
     end function get_print
@@ -106,7 +106,7 @@ contains
     end subroutine set_case
 
     function operate(spec, value, fix, fixed) bind(c, name='operate')
-        use mod_common, only: show_output
+        use m_common, only: show_output
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
         real(c_float),  intent(in) :: value
@@ -212,4 +212,4 @@ contains
         end do
     end subroutine get_station_conditions
 
-end module interface
+end module api

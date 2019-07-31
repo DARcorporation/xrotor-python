@@ -27,7 +27,7 @@ subroutine rotor()    !
     !--- module statement for Windoze dvFortran
     !cc   use dflib
     !
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common) :: ctxt
     character*7 comand
@@ -141,7 +141,7 @@ end
 
 
 subroutine init_(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !--------------------------------------
@@ -221,7 +221,7 @@ end
 
 
 subroutine setdef(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -281,7 +281,7 @@ end
 
 
 subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !---------------------------------------------------------
     !     Returns speed of sound (vso) in m/s, density (rho)
     !     in kg/m^3, and dynamic viscosity (rmu) in kg/m-s
@@ -400,7 +400,7 @@ end
 
 
 subroutine reinit(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     logical yes
@@ -443,7 +443,7 @@ end
 ! reinit
 
 subroutine setx(ctxt)
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     !
@@ -483,7 +483,7 @@ end
 
 
 subroutine opfile(lu, fname)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     character*(*) fname
     !
     character*4 comand
@@ -545,8 +545,8 @@ end
 
 
 subroutine output(ctxt, lu)
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     logical lheli
@@ -758,8 +758,8 @@ end
 
 
 subroutine uvadd(ctxt, xiw, wa, wt)
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
 
     implicit real (m)
     type(Common), intent(inout) :: ctxt

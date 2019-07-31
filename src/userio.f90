@@ -22,8 +22,9 @@
 !==== user input routines with prompting and error trapping
 !
 !
+
 subroutine aski(prompt, iinput)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !
     !---- integer input
     !
@@ -47,7 +48,7 @@ end
 
 
 subroutine askr(prompt, rinput)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !
     !---- real input
     !
@@ -71,7 +72,7 @@ end
 
 
 subroutine askl(prompt, linput)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !
     !---- logical input
     !
@@ -98,7 +99,7 @@ end
 
 
 subroutine asks(prompt, input)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !
     !---- string of arbitrary length input
     !
@@ -121,7 +122,7 @@ end
 
 
 subroutine askc(prompt, comand, cargs)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !
     !---- returns 4-byte character string input converted to uppercase
     !---- also returns rest of input characters in cargs string

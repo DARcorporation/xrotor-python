@@ -20,7 +20,7 @@
 
 subroutine vrtxco(imax, ii, nblds, lduct, rake, &
         xi, xv, gam, adw, vind_gam, vind_adw)
-    use mod_common, only: show_output
+    use m_common, only: show_output
     !
     parameter (ntdim = 5000)
     dimension xi(imax), xv(imax), gam(imax)

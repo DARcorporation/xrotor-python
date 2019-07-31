@@ -19,7 +19,7 @@
 !***********************************************************************
 
 subroutine save(ctxt, fname1)
-    use mod_common
+    use m_common
     implicit real(m)
     type(Common), intent(inout) :: ctxt
     character*(*) fname1
@@ -151,7 +151,7 @@ subroutine load(ctxt, fname1)
     !     This format saves more information and can have optional comment
     !     lines beginning with a ! character.
     !------------------------------------------------------------------------
-    use mod_common
+    use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     character*(*) fname1
@@ -300,8 +300,8 @@ subroutine load(ctxt, fname1)
 end
 
 subroutine initcase(ctxt, iix, losolve)
-    use mod_common
-    use mod_spline
+    use m_common
+    use m_spline
     implicit real (m)
     type(Common), intent(inout) :: ctxt
     logical losolve
