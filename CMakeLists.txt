@@ -8,7 +8,7 @@ add_library(xrotor SHARED
         src/m_userio.f90
         src/m_vortex.f90
         src/m_xaero.f90
-        src/xbend.f90
+        src/m_xbend.f90
         src/xio.f90
         src/xnoise.f90
         src/xoper.f90
