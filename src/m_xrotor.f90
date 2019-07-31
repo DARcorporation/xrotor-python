@@ -18,10 +18,6 @@
 !   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 !***********************************************************************
 !
-program xrotor
-    call rotor
-end
-
 module m_xrotor
 contains
     subroutine rotor()    !
