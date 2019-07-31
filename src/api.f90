@@ -31,6 +31,7 @@ module api
 contains
 
     subroutine set_print(setting) bind(c, name = 'set_print')
+        use m_xio
         use m_xaero
         use m_common, only : show_output
         logical(c_bool), intent(in) :: setting
@@ -38,6 +39,7 @@ contains
     end subroutine set_print
 
     function get_print() bind(c, name = 'get_print')
+        use m_xio
         use m_xaero
         use m_common, only : show_output
         logical(c_bool) :: get_print
@@ -45,18 +47,21 @@ contains
     end function get_print
 
     subroutine set_max_iter(setting) bind(c, name = 'set_max_iter')
+        use m_xio
         use m_xaero
         integer(c_int), intent(in) :: setting
         ctxt%nitera = ctxt%nitera
     end subroutine set_max_iter
 
     function get_max_iter() bind(c, name = 'get_max_iter')
+        use m_xio
         use m_xaero
         integer(c_int) :: get_max_iter
         get_max_iter = ctxt%nitera
     end function get_max_iter
 
     subroutine init() bind(c, name = 'init')
+        use m_xio
         use m_xaero
         ctxt = Common()
         call init_(ctxt)
@@ -68,6 +73,7 @@ contains
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
             free, duct, wind) bind(c, name = 'set_case')
+        use m_xio
         use m_xaero
         real    (c_float), intent(in) :: rho, vso, rmu, alt, vel, adv
         real    (c_float), intent(in) :: r_hub, r_tip, r_wake, rake
@@ -112,6 +118,7 @@ contains
     end subroutine set_case
 
     function operate(spec, value, fix, fixed) bind(c, name = 'operate')
+        use m_xio
         use m_common, only : show_output
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
@@ -174,10 +181,12 @@ contains
     end function operate
 
     subroutine show() bind(c, name = 'show')
+        use m_xio
         call output(ctxt, 6)
     end subroutine show
 
     subroutine save_prop() bind(c, name = 'save_prop')
+        use m_xio
         call save(ctxt, 'output.prop')
     end subroutine save_prop
 

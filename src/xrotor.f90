@@ -19,6 +19,7 @@
 !***********************************************************************
 !
 program xrotor
+    use m_xio
     use m_xbend
     use m_xaero
     use m_userio
@@ -30,6 +31,7 @@ subroutine rotor()    !
     !--- module statement for Windoze dvFortran
     !cc   use dflib
     !
+    use m_xio
     use m_xbend
     use m_xaero
     use m_userio
