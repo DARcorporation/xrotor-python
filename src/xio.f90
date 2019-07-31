@@ -19,6 +19,7 @@
 !***********************************************************************
 
 subroutine save(ctxt, fname1)
+    use m_userio
     use m_common
     implicit real(m)
     type(Common), intent(inout) :: ctxt
@@ -151,6 +152,7 @@ subroutine load(ctxt, fname1)
     !     This format saves more information and can have optional comment
     !     lines beginning with a ! character.
     !------------------------------------------------------------------------
+    use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt

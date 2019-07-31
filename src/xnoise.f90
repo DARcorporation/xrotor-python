@@ -24,6 +24,7 @@ subroutine noise(ctxt)
     !     time history of the propeller
     !     at specified observer positions.
     !---------------------------------------
+    use m_userio
     use m_common
     use m_spline
     implicit real (m)
@@ -52,6 +53,8 @@ subroutine noise(ctxt)
     !
     dimension xyzobs(3)
     character*2 ulnam
+
+    integer nt_temp(1)
     !
     save nt
     save aoc0, xyzobs
@@ -239,7 +242,8 @@ subroutine noise(ctxt)
     else
         251     if (show_output) write(*, 1251) nt
         1251   format(/1x, ' Enter number of p(t) samples/revolution:', i7)
-        call readi(1, nt, error)
+        call readi(1, nt_temp, error)
+        nt = nt_temp(1)
         if(error) go to 251
     endif
     !

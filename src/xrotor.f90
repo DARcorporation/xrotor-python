@@ -19,6 +19,7 @@
 !***********************************************************************
 !
 program xrotor
+    use m_userio
    call rotor
 end
 
@@ -27,6 +28,7 @@ subroutine rotor()    !
     !--- module statement for Windoze dvFortran
     !cc   use dflib
     !
+    use m_userio
     use m_common
     implicit real (m)
     type(Common) :: ctxt
@@ -141,6 +143,7 @@ end
 
 
 subroutine init_(ctxt)
+    use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
@@ -221,6 +224,7 @@ end
 
 
 subroutine setdef(ctxt)
+    use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
@@ -281,6 +285,7 @@ end
 
 
 subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
+    use m_userio
     use m_common, only: show_output
     !---------------------------------------------------------
     !     Returns speed of sound (vso) in m/s, density (rho)
@@ -383,6 +388,7 @@ end
 
 
 subroutine flosho(lu, vso, rho, rmu)
+    use m_userio
     data r, gam / 287.0, 1.4 /
     rnu = rmu / rho
     p = rho * vso**2 / gam
@@ -400,6 +406,7 @@ end
 
 
 subroutine reinit(ctxt)
+    use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
@@ -443,6 +450,7 @@ end
 ! reinit
 
 subroutine setx(ctxt)
+    use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
@@ -483,6 +491,7 @@ end
 
 
 subroutine opfile(lu, fname)
+    use m_userio
     use m_common, only: show_output
     character*(*) fname
     !

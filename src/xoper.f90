@@ -19,6 +19,7 @@
 !***********************************************************************
 
 subroutine oper(ctxt)
+    use m_userio
     use m_common
     use m_spline
     implicit real (m)
@@ -724,6 +725,7 @@ end
 
 
 subroutine getpvar(lu, ndim, n, xrpm, xpwr)
+        use m_userio
     use m_common, only: show_output
     dimension xpwr(ndim), xrpm(ndim)
     character*1 dummy
@@ -747,6 +749,7 @@ end
 
 
 subroutine shocas(lu, ndim, n, par, rad, name)
+        use m_userio
     use m_common, only: show_output
     dimension par(0:ndim, *)
     character name*(*)
@@ -857,6 +860,7 @@ end
 
 
 subroutine getcas(lu, ndim, ncas, par)
+        use m_userio
     use m_common, only: show_output
     dimension par(0:ndim, *), a(16)
     character dummy*1, line*128, cname*32
@@ -923,6 +927,7 @@ end
 
 
 subroutine setcas(ctxt, itype, ninput, rinput)
+            use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt

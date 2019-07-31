@@ -19,6 +19,7 @@
 !***********************************************************************
 !
 subroutine bend(ctxt)
+    use m_userio
     use m_common
     implicit real (m)
     type(Common), intent(inout) :: ctxt
@@ -170,6 +171,7 @@ end
 
 
 subroutine eiload(ctxt, fname1)
+    use m_userio
     use m_common
     use m_spline
     implicit real (m)
