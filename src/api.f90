@@ -18,8 +18,8 @@
 !***********************************************************************
 
 module api
-    use, intrinsic :: iso_c_binding, only: c_float, c_double, c_int, c_bool, c_char
-    use :: m_common, only: Common, pi, ix, nax
+    use, intrinsic :: iso_c_binding, only : c_float, c_double, c_int, c_bool, c_char
+    use :: m_common, only : Common, pi, ix, nax
     implicit none
     private
     public init, set_case, operate, dp
@@ -30,29 +30,34 @@ module api
 
 contains
 
-    subroutine set_print(setting) bind(c, name='set_print')
-        use m_common, only: show_output
+    subroutine set_print(setting) bind(c, name = 'set_print')
+        use m_xaero
+        use m_common, only : show_output
         logical(c_bool), intent(in) :: setting
         show_output = setting
     end subroutine set_print
 
-    function get_print() bind(c, name='get_print')
-        use m_common, only: show_output
+    function get_print() bind(c, name = 'get_print')
+        use m_xaero
+        use m_common, only : show_output
         logical(c_bool) :: get_print
         get_print = show_output
     end function get_print
 
-    subroutine set_max_iter(setting) bind(c, name='set_max_iter')
+    subroutine set_max_iter(setting) bind(c, name = 'set_max_iter')
+        use m_xaero
         integer(c_int), intent(in) :: setting
         ctxt%nitera = ctxt%nitera
     end subroutine set_max_iter
 
-    function get_max_iter() bind(c, name='get_max_iter')
+    function get_max_iter() bind(c, name = 'get_max_iter')
+        use m_xaero
         integer(c_int) :: get_max_iter
         get_max_iter = ctxt%nitera
     end function get_max_iter
 
-    subroutine init() bind(c, name='init')
+    subroutine init() bind(c, name = 'init')
+        use m_xaero
         ctxt = Common()
         call init_(ctxt)
     end subroutine init
@@ -62,54 +67,55 @@ contains
             r_hub, r_tip, r_wake, rake, &
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
-            free, duct, wind) bind(c, name='set_case')
-        real    (c_float),  intent(in)          :: rho, vso, rmu, alt, vel, adv
-        real    (c_float),  intent(in)          :: r_hub, r_tip, r_wake, rake
-        integer (c_int),    intent(in)          :: n_blds, n_aero, n_geom
-        real    (c_float),  intent(in)          :: aerodata(14, n_aero), geomdata(4, n_geom)
-        logical (c_bool),   intent(in)          :: free, duct, wind
+            free, duct, wind) bind(c, name = 'set_case')
+        use m_xaero
+        real    (c_float), intent(in) :: rho, vso, rmu, alt, vel, adv
+        real    (c_float), intent(in) :: r_hub, r_tip, r_wake, rake
+        integer (c_int), intent(in) :: n_blds, n_aero, n_geom
+        real    (c_float), intent(in) :: aerodata(14, n_aero), geomdata(4, n_geom)
+        logical (c_bool), intent(in) :: free, duct, wind
 
         integer :: i
 
-        ctxt%rho    = rho
-        ctxt%vso    = vso
-        ctxt%rmu    = rmu
-        ctxt%alt    = alt
-        ctxt%vel    = vel
-        ctxt%adv    = adv
+        ctxt%rho = rho
+        ctxt%vso = vso
+        ctxt%rmu = rmu
+        ctxt%alt = alt
+        ctxt%vel = vel
+        ctxt%adv = adv
 
-        ctxt%rad    = r_tip
-        ctxt%xi0    = r_hub / r_tip
-        ctxt%xw0    = r_wake / r_tip
-        ctxt%rake   = rake
+        ctxt%rad = r_tip
+        ctxt%xi0 = r_hub / r_tip
+        ctxt%xw0 = r_wake / r_tip
+        ctxt%rake = rake
 
-        ctxt%nblds  = n_blds
+        ctxt%nblds = n_blds
 
         ctxt%naero = n_aero
-        do i=1, n_aero
-            call putaero(ctxt, i,  aerodata(1 , i), &
-            aerodata(2 , i) * pi / 180., aerodata(3 , i), aerodata(4 , i), aerodata(5 , i), &
-            aerodata(6 , i), aerodata(7 , i), aerodata(8 , i), aerodata(9 , i), &
-            aerodata(10, i), aerodata(11, i), aerodata(12, i), aerodata(13, i), &
-            aerodata(14, i))
+        do i = 1, n_aero
+            call putaero(ctxt, i, aerodata(1, i), &
+                    aerodata(2, i) * pi / 180., aerodata(3, i), aerodata(4, i), aerodata(5, i), &
+                    aerodata(6, i), aerodata(7, i), aerodata(8, i), aerodata(9, i), &
+                    aerodata(10, i), aerodata(11, i), aerodata(12, i), aerodata(13, i), &
+                    aerodata(14, i))
         end do
 
-        do i=1, n_geom
-            ctxt%xi(i)  = geomdata(1, i)
-            ctxt%ch(i)  = geomdata(2, i)
+        do i = 1, n_geom
+            ctxt%xi(i) = geomdata(1, i)
+            ctxt%ch(i) = geomdata(2, i)
             ctxt%beta(i) = geomdata(3, i) * pi / 180.
-            ctxt%beta0(i)  = ctxt%beta(i)
+            ctxt%beta0(i) = ctxt%beta(i)
             ctxt%ubody(i) = geomdata(4, i)
         end do
 
         call initcase(ctxt, n_geom, .false.)
     end subroutine set_case
 
-    function operate(spec, value, fix, fixed) bind(c, name='operate')
-        use m_common, only: show_output
+    function operate(spec, value, fix, fixed) bind(c, name = 'operate')
+        use m_common, only : show_output
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
-        real(c_float),  intent(in) :: value
+        real(c_float), intent(in) :: value
         integer(c_int), optional, intent(in) :: fix
         real(c_float), optional, intent(in) :: fixed
         integer :: ifix, i
@@ -127,17 +133,17 @@ contains
         end if
 
         select case (spec)
-            case (1)
-                ctxt%tspec = value
-            case (2)
-                ctxt%qspec = value
-            case (3)
-                ctxt%pspec = value
-            case (4)
-                ctxt%adv = ctxt%vel / (ctxt%rad * value * pi / 30.)
-            case default
-                print *, "Unknown value for 'spec'. Should be 1, 2, 3, or 4."
-                return
+        case (1)
+            ctxt%tspec = value
+        case (2)
+            ctxt%qspec = value
+        case (3)
+            ctxt%pspec = value
+        case (4)
+            ctxt%adv = ctxt%vel / (ctxt%rad * value * pi / 30.)
+        case default
+            print *, "Unknown value for 'spec'. Should be 1, 2, 3, or 4."
+            return
         end select
 
         if (ifix == 1) then
@@ -167,46 +173,46 @@ contains
         operate = ctxt%rms
     end function operate
 
-    subroutine show() bind(c, name='show')
+    subroutine show() bind(c, name = 'show')
         call output(ctxt, 6)
     end subroutine show
 
-    subroutine save_prop() bind(c, name='save_prop')
+    subroutine save_prop() bind(c, name = 'save_prop')
         call save(ctxt, 'output.prop')
     end subroutine save_prop
 
-    function get_rms() bind(c, name='get_rms')
+    function get_rms() bind(c, name = 'get_rms')
         real(c_float) :: get_rms
         get_rms = ctxt%rms
     end function get_rms
 
-    subroutine get_performance(rpm, thrust, torque, power, efficiency) bind(c, name='get_performance')
+    subroutine get_performance(rpm, thrust, torque, power, efficiency) bind(c, name = 'get_performance')
         real(c_float), intent(out) :: rpm, thrust, torque, power, efficiency
 
         thrust = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
         torque = ctxt%qtot * ctxt%rho * ctxt%vel**2 * ctxt%rad**3
-        power  = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
+        power = ctxt%ptot * ctxt%rho * ctxt%vel**3 * ctxt%rad**2
 
         efficiency = ctxt%ttot / ctxt%ptot
         rpm = ctxt%vel / (ctxt%rad * ctxt%adv * pi / 30.)
     end subroutine get_performance
 
-    function get_blade_angle_change() bind(c, name='get_blade_angle_change')
+    function get_blade_angle_change() bind(c, name = 'get_blade_angle_change')
         real(c_float) :: get_blade_angle_change
         get_blade_angle_change = ctxt%dbeta * 180.0 / pi
     end function get_blade_angle_change
 
-    function get_number_of_stations() bind(c, name='get_number_of_stations')
+    function get_number_of_stations() bind(c, name = 'get_number_of_stations')
         integer(c_int) :: get_number_of_stations
         get_number_of_stations = ctxt%ii
     end function get_number_of_stations
 
-    subroutine get_station_conditions(n, xi, Re) bind(c, name='get_station_conditions')
+    subroutine get_station_conditions(n, xi, Re) bind(c, name = 'get_station_conditions')
         integer(c_int), intent(in) :: n
         real(c_float), intent(out) :: xi(n), Re(n)
         integer :: i
 
-        do i=1, n
+        do i = 1, n
             xi(i) = ctxt%xi(i)
             Re(i) = ctxt%re(i)
         end do

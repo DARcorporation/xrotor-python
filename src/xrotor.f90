@@ -19,8 +19,9 @@
 !***********************************************************************
 !
 program xrotor
+    use m_xaero
     use m_userio
-   call rotor
+    call rotor
 end
 
 subroutine rotor()    !
@@ -28,6 +29,7 @@ subroutine rotor()    !
     !--- module statement for Windoze dvFortran
     !cc   use dflib
     !
+    use m_xaero
     use m_userio
     use m_common
     implicit real (m)
@@ -62,7 +64,7 @@ subroutine rotor()    !
     ctxt%lusave = 4    ! save file                  (usually open)
     !
     !
-     if (show_output) write(*, 1000) ctxt%version
+    if (show_output) write(*, 1000) ctxt%version
     !
     call init_(ctxt)
     !
@@ -82,14 +84,14 @@ subroutine rotor()    !
         close(ctxt%lutemp)
         if(ctxt%ncase > 0) then
             kf = index(ctxt%fname, ' ') - 1
-             if (show_output) write(*, *) 'Operating cases read from file  ', &
+            if (show_output) write(*, *) 'Operating cases read from file  ', &
                     ctxt%fname(1:kf), ' ...'
             call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
         endif
         2      continue
     endif
     !
-     if (show_output) write(*, 1100)
+    if (show_output) write(*, 1100)
     !
     900  continue
     call askc(' xrotor^', comand, comarg)
@@ -143,6 +145,7 @@ end
 
 
 subroutine init_(ctxt)
+    use m_xaero
     use m_userio
     use m_common
     implicit real (m)
@@ -160,7 +163,7 @@ subroutine init_(ctxt)
     call setdef(ctxt)
     !
     if(ctxt%duct) then
-         if (show_output) write(*, *) 'Aprop/Aexit initialized to 1.0'
+        if (show_output) write(*, *) 'Aprop/Aexit initialized to 1.0'
         ctxt%urduct = 1.0
     endif
     !
@@ -224,6 +227,7 @@ end
 
 
 subroutine setdef(ctxt)
+    use m_xaero
     use m_userio
     use m_common
     implicit real (m)
@@ -286,7 +290,7 @@ end
 
 subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
     use m_userio
-    use m_common, only: show_output
+    use m_common, only : show_output
     !---------------------------------------------------------
     !     Returns speed of sound (vso) in m/s, density (rho)
     !     in kg/m^3, and dynamic viscosity (rmu) in kg/m-s
@@ -332,8 +336,8 @@ subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
         vsoalt = 1500.
         rhoalt = 1000.
         rmualt = 1.15e-3
-         if (show_output) write(*, *) '                              o        '
-         if (show_output) write(*, *) 'atmo: You are underwater at 15  Celsius'
+        if (show_output) write(*, *) '                              o        '
+        if (show_output) write(*, *) 'atmo: You are underwater at 15  Celsius'
         return
     endif
     !
@@ -358,8 +362,8 @@ subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
     !
     !
     if(alspec > alt(n)) then
-         if (show_output) write(*, *) ' '
-         if (show_output) write(*, *) 'atmo: You''re in low earth orbit.  Good luck.'
+        if (show_output) write(*, *) ' '
+        if (show_output) write(*, *) 'atmo: You''re in low earth orbit.  Good luck.'
         vsoalt = vso(n)
         rhoalt = rho(n)
         rmualt = rmu(n) * 1.0e-5
@@ -492,7 +496,7 @@ end
 
 subroutine opfile(lu, fname)
     use m_userio
-    use m_common, only: show_output
+    use m_common, only : show_output
     character*(*) fname
     !
     character*4 comand
@@ -519,7 +523,7 @@ subroutine opfile(lu, fname)
         !
         if(index('OoAaNn', ans) == 0) then
             !------- Still bad reply. Give up asking and just return
-             if (show_output) write(*, *) 'No action taken'
+            if (show_output) write(*, *) 'No action taken'
             return
         endif
     endif
