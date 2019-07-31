@@ -19,11 +19,6 @@
 !***********************************************************************
 !
 program xrotor
-    use m_xnoise
-    use m_xio
-    use m_xbend
-    use m_xaero
-    use m_userio
     call rotor
 end
 
@@ -32,6 +27,7 @@ subroutine rotor()    !
     !--- module statement for Windoze dvFortran
     !cc   use dflib
     !
+    use m_xoper
     use m_xnoise
     use m_xio
     use m_xbend
@@ -151,6 +147,7 @@ end
 
 
 subroutine init_(ctxt)
+    use m_xoper
     use m_xaero
     use m_userio
     use m_common
@@ -233,6 +230,7 @@ end
 
 
 subroutine setdef(ctxt)
+    use m_xoper
     use m_xaero
     use m_userio
     use m_common
@@ -295,6 +293,7 @@ end
 
 
 subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
+    use m_xoper
     use m_userio
     use m_common, only : show_output
     !---------------------------------------------------------
@@ -398,6 +397,7 @@ end
 
 
 subroutine flosho(lu, vso, rho, rmu)
+    use m_xoper
     use m_userio
     data r, gam / 287.0, 1.4 /
     rnu = rmu / rho
@@ -416,6 +416,7 @@ end
 
 
 subroutine reinit(ctxt)
+    use m_xoper
     use m_userio
     use m_common
     implicit real (m)
@@ -460,6 +461,7 @@ end
 ! reinit
 
 subroutine setx(ctxt)
+    use m_xoper
     use m_userio
     use m_common
     implicit real (m)
@@ -501,6 +503,7 @@ end
 
 
 subroutine opfile(lu, fname)
+    use m_xoper
     use m_userio
     use m_common, only : show_output
     character*(*) fname
@@ -564,6 +567,7 @@ end
 
 
 subroutine output(ctxt, lu)
+    use m_xoper
     use m_common
     use m_spline
     implicit real (m)

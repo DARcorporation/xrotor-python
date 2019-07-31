@@ -21,6 +21,7 @@
 module m_xbend
 contains
     subroutine bend(ctxt)
+        use m_xoper
         use m_userio
         use m_common
         implicit real (m)
@@ -173,6 +174,7 @@ contains
 
 
     subroutine eiload(ctxt, fname1)
+        use m_xoper
         use m_userio
         use m_common
         use m_spline
@@ -276,6 +278,7 @@ contains
 
 
     subroutine stclr(ctxt)
+        use m_xoper
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -301,6 +304,7 @@ contains
 
 
     subroutine mclr(ctxt)
+        use m_xoper
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -318,6 +322,7 @@ contains
 
 
     subroutine stload(ctxt)
+        use m_xoper
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
