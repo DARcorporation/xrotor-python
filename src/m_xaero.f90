@@ -48,7 +48,7 @@ contains
         !     Sets up indices referring to aero section for
         !     each radial station
         !--------------------------------------------------
-        use m_common, only : Common
+        use i_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -70,7 +70,7 @@ contains
         !---------------------------------------------
         !     Gets aero data from stored section array
         !---------------------------------------------
-        use m_common, only : Common, show_output
+        use i_common, only : Common, show_output
         implicit real(m)
         type(Common), intent(inout) :: ctxt
         !
@@ -103,7 +103,7 @@ contains
         !--------------------------------------------------------
         !     Puts aero data into stored section array at index n
         !--------------------------------------------------------
-        use m_common, only : Common, show_output, nax
+        use i_common, only : Common, show_output, nax
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -148,7 +148,7 @@ contains
         !      cd(alpha),
         !       cm(alpha) interpolation function for blade at station is
         !-------------------------------------------------------------
-        use m_common, only : Common, show_output
+        use i_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical stallf, stallf2
@@ -254,7 +254,7 @@ contains
         !     Inverse alpha(cl) function
         !     Uses Newton-Raphson iteration to get alf from cl function
         !------------------------------------------------------------
-        use m_common, only : Common, show_output
+        use i_common, only : Common, show_output
         implicit real (m)
         logical stallf
         data niter / 10 /
@@ -325,7 +325,7 @@ contains
         !     varying only with Mach by Prandtl-Glauert scaling
         !------------------------------------------------------------
         !
-        use m_common, only : Common, show_output
+        use i_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical stallf

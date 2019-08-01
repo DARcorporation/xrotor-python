@@ -8,7 +8,7 @@ contains
         !     time history of the propeller
         !     at specified observer positions.
         !---------------------------------------
-        use m_common, only : Common, ix, show_output
+        use i_common, only : Common, ix, show_output
         use m_spline, only : spline, seval
         implicit real (m)
         !

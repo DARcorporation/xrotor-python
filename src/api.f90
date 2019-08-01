@@ -19,7 +19,7 @@
 
 module api
     use, intrinsic :: iso_c_binding, only : c_float, c_double, c_int, c_bool, c_char
-    use :: m_common, only : Common
+    use :: i_common, only : Common
     implicit none
     private
     public init, set_case, operate, dp
@@ -31,13 +31,13 @@ module api
 contains
 
     subroutine set_print(setting) bind(c, name = 'set_print')
-        use m_common, only : show_output
+        use i_common, only : show_output
         logical(c_bool), intent(in) :: setting
         show_output = setting
     end subroutine set_print
 
     function get_print() bind(c, name = 'get_print')
-        use m_common, only : show_output
+        use i_common, only : show_output
         logical(c_bool) :: get_print
         get_print = show_output
     end function get_print
@@ -65,7 +65,7 @@ contains
             aerodata, geomdata, &
             free, duct, wind) bind(c, name = 'set_case')
         use m_xaero, only : putaero
-        use m_common, only: pi
+        use i_common, only: pi
         use m_xio, only : initcase
         real    (c_float), intent(in) :: rho, vso, rmu, alt, vel, adv
         real    (c_float), intent(in) :: r_hub, r_tip, r_wake, rake
@@ -111,7 +111,7 @@ contains
 
     function operate(spec, value, fix, fixed) bind(c, name = 'operate')
         use m_xoper, only : aper
-        use m_common, only : show_output, pi
+        use i_common, only : show_output, pi
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
         real(c_float), intent(in) :: value
@@ -188,7 +188,7 @@ contains
     end function get_rms
 
     subroutine get_performance(rpm, thrust, torque, power, efficiency) bind(c, name = 'get_performance')
-        use m_common, only: pi
+        use i_common, only: pi
         real(c_float), intent(out) :: rpm, thrust, torque, power, efficiency
 
         thrust = ctxt%ttot * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
@@ -200,7 +200,7 @@ contains
     end subroutine get_performance
 
     function get_blade_angle_change() bind(c, name = 'get_blade_angle_change')
-        use m_common, only: pi
+        use i_common, only: pi
         real(c_float) :: get_blade_angle_change
         get_blade_angle_change = ctxt%dbeta * 180.0 / pi
     end function get_blade_angle_change

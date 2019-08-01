@@ -23,7 +23,7 @@ contains
 
 
     subroutine init_(ctxt)
-        use m_common, only : Common, show_output, ix, jx
+        use i_common, only : Common, show_output, ix, jx
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !--------------------------------------
@@ -104,7 +104,7 @@ contains
 
     subroutine setdef(ctxt)
         use m_xaero, only : putaero
-        use m_common, only : Common, ix
+        use i_common, only : Common, ix
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -164,7 +164,7 @@ contains
 
 
     subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !---------------------------------------------------------
         !     Returns speed of sound (vso) in m/s, density (rho)
         !     in kg/m^3, and dynamic viscosity (rmu) in kg/m-s
@@ -285,7 +285,7 @@ contains
     subroutine reinit(ctxt)
         use m_xoper, only : aper
         use m_userio, only : askl, askr
-        use m_common, only : Common, pi
+        use i_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical yes
@@ -328,7 +328,7 @@ contains
     ! reinit
 
     subroutine setx(ctxt)
-        use m_common, only : Common, pi
+        use i_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -369,7 +369,7 @@ contains
 
     subroutine opfile(lu, fname)
         use m_userio, only : asks, askc
-        use m_common, only : show_output
+        use i_common, only : show_output
         character*(*) fname
         !
         character*4 comand
@@ -432,7 +432,7 @@ contains
 
     subroutine output(ctxt, lu)
         use m_xoper, only : cscalc
-        use m_common, only : Common
+        use i_common, only : Common
         use m_spline, only : spline, seval
         use s_xrotor, only : uvadd
         implicit real (m)

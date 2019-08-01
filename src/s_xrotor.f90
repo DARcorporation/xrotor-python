@@ -1,7 +1,7 @@
 module s_xrotor
 contains
     subroutine uvadd(ctxt, xiw, wa, wt)
-        use m_common, only : Common
+        use i_common, only : Common
         use m_spline, only : seval
 
         implicit real (m)

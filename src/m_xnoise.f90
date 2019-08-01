@@ -56,7 +56,7 @@ contains
         !                  (over one blade-passing period, non-uniformly spaced)
         !
         !------------------------------------------------------------------------
-        use m_common, only : show_output, pi
+        use i_common, only : show_output, pi
         use m_spline, only : seval
 
         implicit real(a-h, m, o-z)
@@ -307,8 +307,8 @@ contains
 
 
     subroutine sft(y, t, n, fampl, phase, nf)
-        use m_common, only: pi
-        use m_common, only: pi
+        use i_common, only: pi
+        use i_common, only: pi
         dimension y(n), t(n)
         dimension fampl(nf), phase(nf)
         !---------------------------------------------------
@@ -438,7 +438,7 @@ contains
             adv, rad, vel, vso, rho, &
             galt, dclimb, unitl, nt, &
             nxdim, nydim, nx, ny, x, y, d)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !--------------------------------------------------------
         !     Calculates db noise levels on a ground plane grid.
         !

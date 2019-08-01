@@ -26,7 +26,7 @@
 module m_userio
 contains
     subroutine aski(prompt, iinput)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !
         !---- integer input
         !
@@ -50,7 +50,7 @@ contains
 
 
     subroutine askr(prompt, rinput)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !
         !---- real input
         !
@@ -74,7 +74,7 @@ contains
 
 
     subroutine askl(prompt, linput)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !
         !---- logical input
         !
@@ -101,7 +101,7 @@ contains
 
 
     subroutine asks(prompt, input)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !
         !---- string of arbitrary length input
         !
@@ -124,7 +124,7 @@ contains
 
 
     subroutine askc(prompt, comand, cargs)
-        use m_common, only : show_output
+        use i_common, only : show_output
         !
         !---- returns 4-byte character string input converted to uppercase
         !---- also returns rest of input characters in cargs string

@@ -23,7 +23,7 @@ contains
 
 
     subroutine getpvar(lu, ndim, n, xrpm, xpwr)
-        use m_common, only : show_output
+        use i_common, only : show_output
         dimension xpwr(ndim), xrpm(ndim)
         character*1 dummy
         !
@@ -46,7 +46,7 @@ contains
 
 
     subroutine shocas(lu, ndim, n, par, rad, name)
-        use m_common, only : show_output, pi
+        use i_common, only : show_output, pi
         dimension par(0:ndim, *)
         character name*(*)
         !
@@ -157,7 +157,7 @@ contains
 
     subroutine getcas(lu, ndim, ncas, par)
         use m_userio, only : getflt
-        use m_common, only : show_output, pi
+        use i_common, only : show_output, pi
         dimension par(0:ndim, *), a(16)
         character dummy*1, line*128, cname*32
         logical error
@@ -224,7 +224,7 @@ contains
 
     subroutine setcas(ctxt, itype, ninput, rinput)
         use m_userio, only : askr, asks, askl, lc2uc
-        use m_common, only : Common, show_output, icasx, pi
+        use i_common, only : Common, show_output, icasx, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         dimension rinput(*)
@@ -535,7 +535,7 @@ contains
 
 
     subroutine aper(ctxt, ispec, icon, linit)
-        use m_common, only : Common, show_output
+        use i_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical linit
@@ -579,7 +579,7 @@ contains
     subroutine apinit(ctxt)
         use s_xrotor, only : uvadd
         use m_xaero, only : getclcdcm
-        use m_common, only : Common, show_output, ix, pi
+        use i_common, only : Common, show_output, ix, pi
         implicit real (m)
         !---------------------------------------------------------
         !     Sets reasonable initial circulation.
@@ -813,7 +813,7 @@ contains
         !       icon = 1    Advance ratio(rpm) fixed
         !       icon = 2    Blade pitch fixed
         !-------------------------------------------------------
-        use m_common, only : Common, ix, show_output, pi, iq
+        use i_common, only : Common, ix, show_output, pi, iq
         use m_spline, only : seval, deval
 
         implicit real (m)
@@ -1193,7 +1193,7 @@ contains
         !
         !---- Calculate velocity components at radial station i on real prop
         !
-        use m_common, only : Common
+        use i_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -1247,7 +1247,7 @@ contains
 
 
     subroutine xwinit(ctxt)
-        use m_common, only : Common
+        use i_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------------
@@ -1293,7 +1293,7 @@ contains
 
 
     subroutine setxw(ctxt)
-        use m_common, only : Common, ix, show_output
+        use i_common, only : Common, ix, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         real xwm_gam(ix), z_gam(ix)
@@ -1474,7 +1474,7 @@ contains
     subroutine tpq(ctxt, itype)
         use m_xaero, only : getclcdcm, getalf
         use s_xrotor, only : uvadd
-        use m_common, only : Common, pi
+        use i_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !----------------------------------------------------------
@@ -1945,7 +1945,7 @@ contains
 
 
     subroutine vcalc(ctxt)
-        use m_common, only : Common
+        use i_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !---------------------------------------------
@@ -1973,7 +1973,7 @@ contains
 
     subroutine gradmo(imax, ii, nblds, lduct, rake, &
             xi, xv, gam, adw, vind_gam, vind_adw)
-        use m_common, only: pi
+        use i_common, only: pi
         dimension xi(imax), xv(imax), gam(imax)
         dimension vind_adw(3, imax), vind_gam(3, imax, imax)
         logical lduct
@@ -2072,7 +2072,7 @@ contains
 
     subroutine helico(imax, ii, nblds, lduct, rake, &
             xi, xv, gam, adw, vind_gam, vind_adw)
-        use m_common, only : show_output, pi
+        use i_common, only : show_output, pi
         dimension xi(imax), xv(imax), gam(imax)
         dimension vind_adw(3, imax), vind_gam(3, imax, imax)
         !
@@ -2351,7 +2351,7 @@ contains
 
     subroutine filter(q, smlen, n)
         use m_spline, only : trisol
-        use m_common, only : show_output
+        use i_common, only : show_output
         !-----------------------------------------
         !     Smooths array q.
         !     smlen is the number of points over
