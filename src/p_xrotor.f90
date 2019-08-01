@@ -31,7 +31,7 @@ contains
         !--- module statement for Windoze dvFortran
         !cc   use dflib
         !
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common) :: ctxt
         character*7 comand

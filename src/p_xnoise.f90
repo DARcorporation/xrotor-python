@@ -8,7 +8,7 @@ contains
         !     time history of the propeller
         !     at specified observer positions.
         !---------------------------------------
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         !
         parameter (ntx = 160)

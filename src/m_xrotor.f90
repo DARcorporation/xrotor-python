@@ -23,7 +23,7 @@ contains
 
 
     subroutine init_(ctxt)
-        use m_common
+        use m_common, only: Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !--------------------------------------
@@ -104,7 +104,7 @@ contains
 
     subroutine setdef(ctxt)
         use m_xaero, only: putaero
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -285,7 +285,7 @@ contains
     subroutine reinit(ctxt)
         use m_xoper, only: aper
         use m_userio, only: askl, askr
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical yes
@@ -328,7 +328,7 @@ contains
     ! reinit
 
     subroutine setx(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -432,7 +432,7 @@ contains
 
     subroutine output(ctxt, lu)
         use m_xoper, only: cscalc
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical lheli
@@ -644,7 +644,7 @@ contains
 
 
     subroutine uvadd(ctxt, xiw, wa, wt)
-        use m_common
+        use m_common, only: Common
 
         implicit real (m)
         type(Common), intent(inout) :: ctxt

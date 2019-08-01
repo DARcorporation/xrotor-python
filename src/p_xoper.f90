@@ -4,7 +4,7 @@ contains
         use m_xrotor, only: output, flosho, setx, atmo, reinit, opfile
         use m_xoper, only: getcas, getpvar, aper, shocas, setcas
         use m_userio, only: aski, askr, getflt, asks, getint, askc
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         character*4 comand, ans

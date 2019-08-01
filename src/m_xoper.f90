@@ -225,7 +225,7 @@ contains
 
     subroutine setcas(ctxt, itype, ninput, rinput)
         use m_userio, only: askr, asks, askl, lc2uc
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         dimension rinput(*)
@@ -536,7 +536,7 @@ contains
 
 
     subroutine aper(ctxt, ispec, icon, linit)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical linit
@@ -580,7 +580,7 @@ contains
     subroutine apinit(ctxt)
         use m_xrotor, only: uvadd
         use m_xaero, only: getclcdcm
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         !---------------------------------------------------------
         !     Sets reasonable initial circulation.
@@ -814,7 +814,7 @@ contains
         !       icon = 1    Advance ratio(rpm) fixed
         !       icon = 2    Blade pitch fixed
         !-------------------------------------------------------
-        use m_common
+        use m_common, only: Common
 
         implicit real (m)
         dimension clmax(ix), clmin(ix), dclstall(ix)
@@ -1193,7 +1193,7 @@ contains
         !
         !---- Calculate velocity components at radial station i on real prop
         !
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -1247,7 +1247,7 @@ contains
 
 
     subroutine xwinit(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------------
@@ -1293,7 +1293,7 @@ contains
 
 
     subroutine setxw(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         real xwm_gam(ix), z_gam(ix)
@@ -1474,7 +1474,7 @@ contains
     subroutine tpq(ctxt, itype)
         use m_xaero, only: getclcdcm, getalf
         use m_xrotor, only: uvadd
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !----------------------------------------------------------
@@ -1945,7 +1945,7 @@ contains
 
 
     subroutine vcalc(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !---------------------------------------------

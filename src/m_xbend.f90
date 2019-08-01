@@ -25,7 +25,7 @@ contains
 
     subroutine eiload(ctxt, fname1)
         use m_userio, only: asks
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         character*(*) fname1
@@ -126,7 +126,7 @@ contains
 
 
     subroutine stclr(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -151,7 +151,7 @@ contains
 
 
     subroutine mclr(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -169,7 +169,7 @@ contains
 
     subroutine stload(ctxt)
         use m_xoper, only: cscalc
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !-----------------------------------------------------------
@@ -310,7 +310,7 @@ contains
 
 
     subroutine stcalc(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------------
@@ -728,7 +728,7 @@ contains
 
 
     subroutine stadd(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------
@@ -751,7 +751,7 @@ contains
 
 
     subroutine stset(ctxt)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------
@@ -775,7 +775,7 @@ contains
 
 
     subroutine stwrit(ctxt, lu)
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !---------------------------------------------

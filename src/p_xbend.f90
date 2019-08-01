@@ -4,7 +4,7 @@ contains
         use m_xbend, only: mclr, stset, eiload, stadd, stcalc, stclr, stwrit
         use m_xrotor, only: opfile
         use m_userio, only: getflt, askc, getint
-        use m_common
+        use m_common, only: Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         character*4 comand
