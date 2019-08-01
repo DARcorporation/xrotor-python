@@ -28,4 +28,7 @@ add_library(xrotor SHARED
 #        src/m_xoper.f90
 #        src/m_xrotor.f90
 #        src/m_xutils.f90
+#        src/p_xbend.f90
+#        src/p_xnoise.f90
+#        src/p_xoper.f90
 #        src/p_xrotor.f90)

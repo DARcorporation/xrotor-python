@@ -20,134 +20,9 @@
 !
 module m_xrotor
 contains
-    subroutine rotor()    !
-
-        !--- module statement for Windoze dvFortran
-        !cc   use dflib
-        !
-        use m_xoper
-        use m_xnoise
-        use m_xio
-        use m_xbend
-        use m_xaero
-        use m_userio
-        use m_common
-        implicit real (m)
-        type(Common) :: ctxt
-        character*7 comand
-        character*128 comarg
-        !
-        dimension iinput(20)
-        dimension rinput(20)
-        logical error
-        !
-        !====================================================
-        !
-        !      Interactive Design and Analysis Program
-        !          for Free-tip and Ducted Rotors
-        !
-        !      October 1992
-        !      Copyright Mark Drela
-        !      Versions 6.7-7.x
-        !      Copyright Mark Drela, Harold Youngren
-        !
-        !====================================================
-        !
-        ctxt = Common()
-
-        ctxt%version = 7.55
-        !
-        !---- logical unit numbers
-        ctxt%luread = 5    ! terminal read
-        ctxt%luwrit = 6    ! terminal write
-        ctxt%lutemp = 3    ! general-use disk i/o unit  (usually available)
-        ctxt%lusave = 4    ! save file                  (usually open)
-        !
-        !
-        if (show_output) write(*, 1000) ctxt%version
-        !
-        call init_(ctxt)
-        !
-        ctxt%fname = ' '
-        !--- Get command line args (if present)
-        narg = iargc()
-        !
-        if(narg > 0) call getarg(1, ctxt%fname)
-        if(ctxt%fname(1:1) /= ' ') call load(ctxt, ctxt%fname)
-        !
-        ctxt%fname = ' '
-        if(narg > 1) call getarg(2, ctxt%fname)
-        if(ctxt%fname(1:1) /= ' ') then
-            ctxt%ncase = 0
-            open(ctxt%lutemp, file = ctxt%fname, status = 'old', err = 2)
-            call getcas(ctxt%lutemp, nparx, ctxt%ncase, ctxt%caspar)
-            close(ctxt%lutemp)
-            if(ctxt%ncase > 0) then
-                kf = index(ctxt%fname, ' ') - 1
-                if (show_output) write(*, *) 'Operating cases read from file  ', &
-                        ctxt%fname(1:kf), ' ...'
-                call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
-            endif
-            2      continue
-        endif
-        !
-        if (show_output) write(*, 1100)
-        !
-        900  continue
-        call askc(' xrotor^', comand, comarg)
-        !
-        do i = 1, 20
-            iinput(i) = 0
-            rinput(i) = 0.0
-        enddo
-        ninput = 0
-        call getint(comarg, iinput, ninput, error)
-        ninput = 0
-        call getflt(comarg, rinput, ninput, error)
-        !
-        ctxt%greek = .true.
-        if(comand == '    ') go to 900
-        if (comand == '?   ' .and. show_output) write(*, 1100)
-        if(comand == '?   ') go to 900
-        if(comand == 'quit') then
-            stop
-        endif
-        !
-        if(comand == 'oper') call oper(ctxt)
-        if(comand == 'bend') call bend(ctxt)
-        if(comand == 'save') call save(ctxt, comarg)
-        if(comand == 'load') call load(ctxt, comarg)
-        if(comand == 'nois') call noise(ctxt)
-        if(comand == 'disp') go to 100
-        if (ctxt%greek .and. show_output) write(*, 1050) comand
-        go to 900
-        !
-        !---------------------------------------------------------------------
-        100 call output(ctxt, ctxt%luwrit)
-        go to 900
-        !
-        !.....................................................................
-        !
-        1000 format(/' ========================='&
-                /'    xrotor Version', f5.2&
-                /' =========================')
-        1050 format(1x, a4, ' command not recognized.  Type a "?" for list')
-        1100 format(&
-                /'   quit   Exit program'&
-                /'  .oper   Calculate off-design operating points'&
-                /'  .bend   Calculate structural loads and deflections'&
-                /'  .nois   Calculate and plot acoustic signature'&
-                /'   save f Save rotor to restart file'&
-                /'   load f Read rotor from restart file'&
-                /'   disp   Display current design point')
-    end
-    ! rotor
 
 
     subroutine init_(ctxt)
-        use m_xoper
-        use m_xaero
-        use m_userio
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -228,9 +103,7 @@ contains
 
 
     subroutine setdef(ctxt)
-        use m_xoper
-        use m_xaero
-        use m_userio
+        use m_xaero, only: putaero
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -291,8 +164,6 @@ contains
 
 
     subroutine atmo(alspec, vsoalt, rhoalt, rmualt)
-        use m_xoper
-        use m_userio
         use m_common, only : show_output
         !---------------------------------------------------------
         !     Returns speed of sound (vso) in m/s, density (rho)
@@ -395,8 +266,6 @@ contains
 
 
     subroutine flosho(lu, vso, rho, rmu)
-        use m_xoper
-        use m_userio
         data r, gam / 287.0, 1.4 /
         rnu = rmu / rho
         p = rho * vso**2 / gam
@@ -414,8 +283,8 @@ contains
 
 
     subroutine reinit(ctxt)
-        use m_xoper
-        use m_userio
+        use m_xoper, only: aper
+        use m_userio, only: askl, askr
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -459,8 +328,6 @@ contains
     ! reinit
 
     subroutine setx(ctxt)
-        use m_xoper
-        use m_userio
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -501,8 +368,7 @@ contains
 
 
     subroutine opfile(lu, fname)
-        use m_xoper
-        use m_userio
+        use m_userio, only: asks, askc
         use m_common, only : show_output
         character*(*) fname
         !
@@ -565,9 +431,8 @@ contains
 
 
     subroutine output(ctxt, lu)
-        use m_xoper
+        use m_xoper, only: cscalc
         use m_common
-        use m_spline
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical lheli
@@ -780,7 +645,6 @@ contains
 
     subroutine uvadd(ctxt, xiw, wa, wt)
         use m_common
-        use m_spline
 
         implicit real (m)
         type(Common), intent(inout) :: ctxt

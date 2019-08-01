@@ -31,48 +31,29 @@ module api
 contains
 
     subroutine set_print(setting) bind(c, name = 'set_print')
-       use m_xrotor
-        use m_xoper
-        use m_xio
-        use m_xaero
         use m_common, only : show_output
         logical(c_bool), intent(in) :: setting
         show_output = setting
     end subroutine set_print
 
     function get_print() bind(c, name = 'get_print')
-       use m_xrotor
-        use m_xoper
-        use m_xio
-        use m_xaero
         use m_common, only : show_output
         logical(c_bool) :: get_print
         get_print = show_output
     end function get_print
 
     subroutine set_max_iter(setting) bind(c, name = 'set_max_iter')
-       use m_xrotor
-        use m_xoper
-        use m_xio
-        use m_xaero
         integer(c_int), intent(in) :: setting
         ctxt%nitera = ctxt%nitera
     end subroutine set_max_iter
 
     function get_max_iter() bind(c, name = 'get_max_iter')
-       use m_xrotor
-        use m_xoper
-        use m_xio
-        use m_xaero
         integer(c_int) :: get_max_iter
         get_max_iter = ctxt%nitera
     end function get_max_iter
 
     subroutine init() bind(c, name = 'init')
-       use m_xrotor
-        use m_xoper
-        use m_xio
-        use m_xaero
+        use m_xrotor, only: init_
         ctxt = Common()
         call init_(ctxt)
     end subroutine init
@@ -83,10 +64,8 @@ contains
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
             free, duct, wind) bind(c, name = 'set_case')
-       use m_xrotor
-        use m_xoper
-        use m_xio
-        use m_xaero
+        use m_xaero, only: putaero
+        use m_xio, only: initcase
         real    (c_float), intent(in) :: rho, vso, rmu, alt, vel, adv
         real    (c_float), intent(in) :: r_hub, r_tip, r_wake, rake
         integer (c_int), intent(in) :: n_blds, n_aero, n_geom
@@ -130,9 +109,7 @@ contains
     end subroutine set_case
 
     function operate(spec, value, fix, fixed) bind(c, name = 'operate')
-       use m_xrotor
-        use m_xoper
-        use m_xio
+        use m_xoper, only: aper
         use m_common, only : show_output
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
@@ -195,13 +172,12 @@ contains
     end function operate
 
     subroutine show() bind(c, name = 'show')
-       use m_xrotor
-        use m_xio
+        use m_xrotor, only: output
         call output(ctxt, 6)
     end subroutine show
 
     subroutine save_prop() bind(c, name = 'save_prop')
-        use m_xio
+        use m_xio, only: save
         call save(ctxt, 'output.prop')
     end subroutine save_prop
 

@@ -21,10 +21,8 @@
 module m_xio
 contains
     subroutine save(ctxt, fname1)
-        use m_xrotor
-        use m_xoper
-        use m_xaero
-        use m_userio
+        use m_userio, only: asks
+        use m_xaero, only: getaero
         use m_common
         implicit real(m)
         type(Common), intent(inout) :: ctxt
@@ -152,15 +150,13 @@ contains
     ! sav
 
     subroutine load(ctxt, fname1)
+        use m_xaero, only: putaero
+        use m_userio, only: asks
         !------------------------------------------------------------------------
         !     Reads in previously saved rotor in new xrotor_Version >= 6.9 format
         !     This format saves more information and can have optional comment
         !     lines beginning with a ! character.
         !------------------------------------------------------------------------
-        use m_xrotor
-        use m_xoper
-        use m_xaero
-        use m_userio
         use m_common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
@@ -310,11 +306,10 @@ contains
     end
 
     subroutine initcase(ctxt, iix, losolve)
-        use m_xrotor
-        use m_xoper
-        use m_xaero
+        use m_xrotor, only: output, setx
+        use m_xoper, only: aper, xwinit
+        use m_xaero, only: setiaero
         use m_common
-        use m_spline
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical losolve
