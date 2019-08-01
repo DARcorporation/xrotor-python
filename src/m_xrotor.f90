@@ -23,7 +23,7 @@ contains
 
 
     subroutine init_(ctxt)
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, ix, jx
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !--------------------------------------

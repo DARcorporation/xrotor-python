@@ -33,7 +33,8 @@ module m_common
     integer, parameter :: nax = 20, ndx = 14
 
     integer, parameter :: iq = ix + 5, jx = (iq * 3) / 2 + 1
-    real, parameter :: pi = 3.141592654
+    real, parameter :: pi = 4.0 * atan(1.0)
+    ! real, parameter :: pi = 3.141592654
 
     logical :: show_output = .true.
 

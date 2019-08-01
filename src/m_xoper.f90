@@ -46,7 +46,7 @@ contains
 
 
     subroutine shocas(lu, ndim, n, par, rad, name)
-        use m_common, only : show_output
+        use m_common, only : show_output, pi
         dimension par(0:ndim, *)
         character name*(*)
         !
@@ -55,7 +55,7 @@ contains
             return
         endif
         !
-        pi = 4.0 * atan(1.0)
+        !pi = 4.0 * atan(1.0)
         !
         write(lu, 900) name
         write(lu, 1000)
@@ -157,7 +157,7 @@ contains
 
     subroutine getcas(lu, ndim, ncas, par)
         use m_userio, only : getflt
-        use m_common, only : show_output
+        use m_common, only : show_output, pi
         dimension par(0:ndim, *), a(16)
         character dummy*1, line*128, cname*32
         logical error
@@ -167,7 +167,7 @@ contains
             return
         endif
         !
-        pi = 4.0 * atan(1.0)
+        !pi = 4.0 * atan(1.0)
         !
         1000 format(a)
         read(lu, 1000) cname
@@ -224,7 +224,7 @@ contains
 
     subroutine setcas(ctxt, itype, ninput, rinput)
         use m_userio, only : askr, asks, askl, lc2uc
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, icasx, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         dimension rinput(*)
@@ -579,7 +579,7 @@ contains
     subroutine apinit(ctxt)
         use s_xrotor, only : uvadd
         use m_xaero, only : getclcdcm
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, ix, pi
         implicit real (m)
         !---------------------------------------------------------
         !     Sets reasonable initial circulation.
@@ -813,7 +813,7 @@ contains
         !       icon = 1    Advance ratio(rpm) fixed
         !       icon = 2    Blade pitch fixed
         !-------------------------------------------------------
-        use m_common, only : Common, ix, show_output
+        use m_common, only : Common, ix, show_output, pi, iq
         use m_spline, only : seval, deval
 
         implicit real (m)
@@ -1973,6 +1973,7 @@ contains
 
     subroutine gradmo(imax, ii, nblds, lduct, rake, &
             xi, xv, gam, adw, vind_gam, vind_adw)
+        use m_common, only: pi
         dimension xi(imax), xv(imax), gam(imax)
         dimension vind_adw(3, imax), vind_gam(3, imax, imax)
         logical lduct
@@ -2001,7 +2002,7 @@ contains
         !-----------------------------------------
         blds = float(nblds)
         !
-        pi = 4.0 * atan(1.0)
+        !pi = 4.0 * atan(1.0)
         !
         xi0 = xv(1)
         xitip = xv(ii + 1)
@@ -2071,7 +2072,7 @@ contains
 
     subroutine helico(imax, ii, nblds, lduct, rake, &
             xi, xv, gam, adw, vind_gam, vind_adw)
-        use m_common, only : show_output
+        use m_common, only : show_output, pi
         dimension xi(imax), xv(imax), gam(imax)
         dimension vind_adw(3, imax), vind_gam(3, imax, imax)
         !
@@ -2112,7 +2113,7 @@ contains
         !
         if(idim < imax) stop 'helico: Array overflow:  Increase idim.'
         !
-        pi = 4.0 * atan(1.0)
+        !pi = 4.0 * atan(1.0)
         !
         !---- number of Fourier harmonics
         nn = 128

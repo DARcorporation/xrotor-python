@@ -157,7 +157,7 @@ contains
         !     This format saves more information and can have optional comment
         !     lines beginning with a ! character.
         !------------------------------------------------------------------------
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, ix, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         character*(*) fname1

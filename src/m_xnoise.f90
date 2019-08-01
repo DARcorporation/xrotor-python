@@ -56,7 +56,7 @@ contains
         !                  (over one blade-passing period, non-uniformly spaced)
         !
         !------------------------------------------------------------------------
-        use m_common, only : show_output
+        use m_common, only : show_output, pi
         use m_spline, only : seval
 
         implicit real(a-h, m, o-z)
@@ -67,7 +67,6 @@ contains
         parameter (ntx = 160, ix = 40)
         dimension pel(0:ntx, ix, 3), tel(0:ntx, ix), pel_t(0:ntx, ix)
         !
-        pi = 4.0 * atan(1.0)
         !
         if(ii > ix) stop 'ptrace: Array overflow. ix too small.'
         if(nt > ntx) stop 'ptrace: Array overflow. ntx too small.'
@@ -308,6 +307,7 @@ contains
 
 
     subroutine sft(y, t, n, fampl, phase, nf)
+        use m_common, only: pi
         dimension y(n), t(n)
         dimension fampl(nf), phase(nf)
         !---------------------------------------------------
@@ -322,7 +322,7 @@ contains
         !
         if(n + 1 > 361) stop 'sft: Array overflow'
         !
-        pi = 4.0 * atan(1.0)
+        ! pi = 4.0 * atan(1.0)
         !
         omega = 2.0 * pi / (t(n + 1) - t(1))
         !
