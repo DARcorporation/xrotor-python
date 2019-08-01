@@ -20,13 +20,10 @@
 !
 module m_xbend
 contains
-
-
-
     subroutine eiload(ctxt, fname1)
-        use m_userio, only: asks
-        use m_common, only: Common, ix, show_output
-        use m_spline, only: segspl, seval
+        use m_userio, only : asks
+        use m_common, only : Common, ix, show_output
+        use m_spline, only : segspl, seval
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         character*(*) fname1
@@ -127,7 +124,7 @@ contains
 
 
     subroutine stclr(ctxt)
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -152,7 +149,7 @@ contains
 
 
     subroutine mclr(ctxt)
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -169,8 +166,8 @@ contains
 
 
     subroutine stload(ctxt)
-        use m_xoper, only: cscalc
-        use m_common, only: Common, show_output
+        use m_xoper, only : cscalc
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !-----------------------------------------------------------
@@ -311,7 +308,7 @@ contains
 
 
     subroutine stcalc(ctxt)
-        use m_common, only: Common, ixp, show_output
+        use m_common, only : Common, ixp, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------------
@@ -729,7 +726,7 @@ contains
 
 
     subroutine stadd(ctxt)
-        use m_common, only: Common, show_output
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------
@@ -752,7 +749,7 @@ contains
 
 
     subroutine stset(ctxt)
-        use m_common, only: Common, show_output
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------
@@ -776,7 +773,7 @@ contains
 
 
     subroutine stwrit(ctxt, lu)
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !---------------------------------------------

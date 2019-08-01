@@ -53,7 +53,7 @@ contains
     end function get_max_iter
 
     subroutine init() bind(c, name = 'init')
-        use m_xrotor, only: init_
+        use m_xrotor, only : init_
         ctxt = Common()
         call init_(ctxt)
     end subroutine init
@@ -64,8 +64,8 @@ contains
             n_blds, n_aero, n_geom, &
             aerodata, geomdata, &
             free, duct, wind) bind(c, name = 'set_case')
-        use m_xaero, only: putaero
-        use m_xio, only: initcase
+        use m_xaero, only : putaero
+        use m_xio, only : initcase
         real    (c_float), intent(in) :: rho, vso, rmu, alt, vel, adv
         real    (c_float), intent(in) :: r_hub, r_tip, r_wake, rake
         integer (c_int), intent(in) :: n_blds, n_aero, n_geom
@@ -109,7 +109,7 @@ contains
     end subroutine set_case
 
     function operate(spec, value, fix, fixed) bind(c, name = 'operate')
-        use m_xoper, only: aper
+        use m_xoper, only : aper
         use m_common, only : show_output
         real(c_float) :: operate
         integer(c_int), intent(in) :: spec
@@ -172,12 +172,12 @@ contains
     end function operate
 
     subroutine show() bind(c, name = 'show')
-        use m_xrotor, only: output
+        use m_xrotor, only : output
         call output(ctxt, 6)
     end subroutine show
 
     subroutine save_prop() bind(c, name = 'save_prop')
-        use m_xio, only: save
+        use m_xio, only : save
         call save(ctxt, 'output.prop')
     end subroutine save_prop
 

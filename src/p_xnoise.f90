@@ -1,14 +1,15 @@
 module p_xnoise
 contains
     subroutine noise(ctxt)
-        use m_xnoise, only: dbfoot, sft, ptrace
-        use m_userio, only: askr, readi, getflt, asks, readr, getint, askc
+        use m_xnoise, only : dbfoot, sft, ptrace
+        use m_userio, only : askr, readi, getflt, asks, readr, getint, askc
         !---------------------------------------
         !     Calculates the sound pressure
         !     time history of the propeller
         !     at specified observer positions.
         !---------------------------------------
-        use m_common, only: Common
+        use m_common, only : Common, ix, show_output
+        use m_spline, only : spline, seval
         implicit real (m)
         !
         parameter (ntx = 160)

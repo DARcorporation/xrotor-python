@@ -22,7 +22,6 @@ module m_xoper
 contains
 
 
-
     subroutine getpvar(lu, ndim, n, xrpm, xpwr)
         use m_common, only : show_output
         dimension xpwr(ndim), xrpm(ndim)
@@ -157,7 +156,7 @@ contains
 
 
     subroutine getcas(lu, ndim, ncas, par)
-        use m_userio, only: getflt
+        use m_userio, only : getflt
         use m_common, only : show_output
         dimension par(0:ndim, *), a(16)
         character dummy*1, line*128, cname*32
@@ -224,8 +223,8 @@ contains
 
 
     subroutine setcas(ctxt, itype, ninput, rinput)
-        use m_userio, only: askr, asks, askl, lc2uc
-        use m_common, only: Common, show_output
+        use m_userio, only : askr, asks, askl, lc2uc
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         dimension rinput(*)
@@ -536,7 +535,7 @@ contains
 
 
     subroutine aper(ctxt, ispec, icon, linit)
-        use m_common, only: Common, show_output
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical linit
@@ -578,9 +577,9 @@ contains
 
 
     subroutine apinit(ctxt)
-        use s_xrotor, only: uvadd
-        use m_xaero, only: getclcdcm
-        use m_common, only: Common, show_output
+        use s_xrotor, only : uvadd
+        use m_xaero, only : getclcdcm
+        use m_common, only : Common, show_output
         implicit real (m)
         !---------------------------------------------------------
         !     Sets reasonable initial circulation.
@@ -796,9 +795,9 @@ contains
 
 
     subroutine apiter(ctxt, ispec, icon)
-        use m_xutils, only: gauss
-        use m_vortex, only: vrtxco
-        use m_xaero, only: getclcdcm
+        use m_xutils, only : gauss
+        use m_vortex, only : vrtxco
+        use m_xaero, only : getclcdcm
         !-------------------------------------------------------
         !     Converges arbitrary performance operating point
         !
@@ -814,8 +813,8 @@ contains
         !       icon = 1    Advance ratio(rpm) fixed
         !       icon = 2    Blade pitch fixed
         !-------------------------------------------------------
-        use m_common, only: Common, ix, show_output
-        use m_spline, only: seval, deval
+        use m_common, only : Common, ix, show_output
+        use m_spline, only : seval, deval
 
         implicit real (m)
         dimension clmax(ix), clmin(ix), dclstall(ix)
@@ -1190,11 +1189,11 @@ contains
             si, si_va, &
             w, w_adv, w_vt, w_va, &
             phi, p_adv, p_vt, p_va)
-        use s_xrotor, only: uvadd
+        use s_xrotor, only : uvadd
         !
         !---- Calculate velocity components at radial station i on real prop
         !
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -1248,7 +1247,7 @@ contains
 
 
     subroutine xwinit(ctxt)
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------------
@@ -1294,7 +1293,7 @@ contains
 
 
     subroutine setxw(ctxt)
-        use m_common, only: Common, ix, show_output
+        use m_common, only : Common, ix, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         real xwm_gam(ix), z_gam(ix)
@@ -1473,9 +1472,9 @@ contains
 
 
     subroutine tpq(ctxt, itype)
-        use m_xaero, only: getclcdcm, getalf
-        use s_xrotor, only: uvadd
-        use m_common, only: Common
+        use m_xaero, only : getclcdcm, getalf
+        use s_xrotor, only : uvadd
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !----------------------------------------------------------
@@ -1946,7 +1945,7 @@ contains
 
 
     subroutine vcalc(ctxt)
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !---------------------------------------------
@@ -2350,7 +2349,7 @@ contains
 
 
     subroutine filter(q, smlen, n)
-        use m_spline, only: trisol
+        use m_spline, only : trisol
         use m_common, only : show_output
         !-----------------------------------------
         !     Smooths array q.

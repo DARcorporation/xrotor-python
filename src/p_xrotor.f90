@@ -20,18 +20,18 @@
 module p_xrotor
 contains
     subroutine rotor()    !
-        use m_xio, only: save, load
-        use p_xnoise, only: noise
-        use m_xoper, only: shocas, getcas
-        use m_xrotor, only: output, init_
-        use p_xoper, only: oper
-        use p_xbend, only: bend
-        use m_userio, only: getflt, askc, getint
+        use m_xio, only : save, load
+        use p_xnoise, only : noise
+        use m_xoper, only : shocas, getcas
+        use m_xrotor, only : output, init_
+        use p_xoper, only : oper
+        use p_xbend, only : bend
+        use m_userio, only : getflt, askc, getint
 
         !--- module statement for Windoze dvFortran
         !cc   use dflib
         !
-        use m_common, only: Common
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common) :: ctxt
         character*7 comand
@@ -145,5 +145,6 @@ contains
 end module p_xrotor
 
 program xrotor
+    use p_xrotor, only : rotor
     call rotor
 end

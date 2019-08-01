@@ -23,7 +23,7 @@ contains
 
 
     subroutine init_(ctxt)
-        use m_common, only: Common, show_output
+        use m_common, only : Common, show_output
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !--------------------------------------
@@ -103,8 +103,8 @@ contains
 
 
     subroutine setdef(ctxt)
-        use m_xaero, only: putaero
-        use m_common, only: Common
+        use m_xaero, only : putaero
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -283,9 +283,9 @@ contains
 
 
     subroutine reinit(ctxt)
-        use m_xoper, only: aper
-        use m_userio, only: askl, askr
-        use m_common, only: Common
+        use m_xoper, only : aper
+        use m_userio, only : askl, askr
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical yes
@@ -328,7 +328,7 @@ contains
     ! reinit
 
     subroutine setx(ctxt)
-        use m_common, only: Common
+        use m_common, only : Common
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -368,7 +368,7 @@ contains
 
 
     subroutine opfile(lu, fname)
-        use m_userio, only: asks, askc
+        use m_userio, only : asks, askc
         use m_common, only : show_output
         character*(*) fname
         !
@@ -431,10 +431,10 @@ contains
 
 
     subroutine output(ctxt, lu)
-        use m_xoper, only: cscalc
-        use m_common, only: Common
-        use m_spline, only: spline, seval
-        use s_xrotor, only: uvadd
+        use m_xoper, only : cscalc
+        use m_common, only : Common
+        use m_spline, only : spline, seval
+        use s_xrotor, only : uvadd
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical lheli

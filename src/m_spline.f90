@@ -291,7 +291,7 @@ contains
         !     Calculates dx/ds(ss)                         |
         !     xs array must have been calculated by spline |
         !--------------------------------------------------
-         n = min(size(x), size(xs), size(s))
+        n = min(size(x), size(xs), size(s))
         if(n == 1) then
             val = x(1)
             return
@@ -341,13 +341,13 @@ contains
         do iseg = 2, n - 2
             if(s(iseg) == s(iseg + 1)) then
                 nseg = iseg - iseg0 + 1
-                xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
+                xs(iseg0:iseg0 + nseg) = splind(s(iseg0:iseg0 + nseg), x(iseg0:iseg0 + nseg), -999.0, -999.0)
                 iseg0 = iseg + 1
             endif
         end do
 
         nseg = n - iseg0 + 1
-        xs(iseg0:iseg0+nseg) = splind(s(iseg0:iseg0+nseg), x(iseg0:iseg0+nseg), -999.0, -999.0)
+        xs(iseg0:iseg0 + nseg) = splind(s(iseg0:iseg0 + nseg), x(iseg0:iseg0 + nseg), -999.0, -999.0)
     end
     ! segspl
 end module m_spline
