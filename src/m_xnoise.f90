@@ -308,6 +308,7 @@ contains
 
     subroutine sft(y, t, n, fampl, phase, nf)
         use m_common, only: pi
+        use m_common, only: pi
         dimension y(n), t(n)
         dimension fampl(nf), phase(nf)
         !---------------------------------------------------

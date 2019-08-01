@@ -23,7 +23,7 @@ contains
     subroutine save(ctxt, fname1)
         use m_userio, only : asks
         use m_xaero, only : getaero
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, pi
         implicit real(m)
         type(Common), intent(inout) :: ctxt
         character*(*) fname1
@@ -309,7 +309,7 @@ contains
         use m_xrotor, only : output, setx
         use m_xoper, only : aper, xwinit
         use m_xaero, only : setiaero
-        use m_common, only : Common
+        use m_common, only : Common, pi
         use m_spline, only : spline, seval
         implicit real (m)
         type(Common), intent(inout) :: ctxt

@@ -104,7 +104,7 @@ contains
 
     subroutine setdef(ctxt)
         use m_xaero, only : putaero
-        use m_common, only : Common
+        use m_common, only : Common, ix
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !
@@ -285,7 +285,7 @@ contains
     subroutine reinit(ctxt)
         use m_xoper, only : aper
         use m_userio, only : askl, askr
-        use m_common, only : Common
+        use m_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical yes
@@ -328,7 +328,7 @@ contains
     ! reinit
 
     subroutine setx(ctxt)
-        use m_common, only : Common
+        use m_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !

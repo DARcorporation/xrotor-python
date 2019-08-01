@@ -103,7 +103,7 @@ contains
         !--------------------------------------------------------
         !     Puts aero data into stored section array at index n
         !--------------------------------------------------------
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, nax
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !

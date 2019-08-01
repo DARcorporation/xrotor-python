@@ -726,7 +726,7 @@ contains
 
 
     subroutine stadd(ctxt)
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------
@@ -749,7 +749,7 @@ contains
 
 
     subroutine stset(ctxt)
-        use m_common, only : Common, show_output
+        use m_common, only : Common, show_output, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !------------------------------------------------------
@@ -773,7 +773,7 @@ contains
 
 
     subroutine stwrit(ctxt, lu)
-        use m_common, only : Common
+        use m_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !---------------------------------------------

@@ -1474,7 +1474,7 @@ contains
     subroutine tpq(ctxt, itype)
         use m_xaero, only : getclcdcm, getalf
         use s_xrotor, only : uvadd
-        use m_common, only : Common
+        use m_common, only : Common, pi
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         !----------------------------------------------------------
