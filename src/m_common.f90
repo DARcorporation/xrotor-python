@@ -22,35 +22,25 @@ module m_common
     implicit none
 
     public
-    integer :: ix, ixp, nparx, icasx, iwx, nax, ndx, iq, jx
-    real :: pi
     !--- ix - max number of radial prop stations
     !--- icasx - max number of stored cases
     !--- nparx - number of case parameters stored
     !--- iwx - dimension of work arrays
-    parameter (ix = 100, ixp = ix + 1, nparx = 12, icasx = 100, iwx = 200)
+    integer, parameter :: ix = 100, ixp = ix + 1, nparx = 12, icasx = 100, iwx = 200
 
     !--- nax - max number of aerodynamic sections defined
     !--- ndx - number of aerodynamic parameter defined for each section
-    parameter (nax = 20, ndx = 14)
+    integer, parameter :: nax = 20, ndx = 14
 
-    parameter (iq = ix + 5, jx = (iq * 3) / 2 + 1)
-    parameter (pi = 3.141592654)
+    integer, parameter :: iq = ix + 5, jx = (iq * 3) / 2 + 1
+    real, parameter :: pi = 3.141592654
+
+    logical :: show_output = .true.
 
     logical, private, parameter :: f = .false.
-    integer, private :: i
-    integer, private, parameter :: int_ix(ix) = (/ (0, i = 1, ix) /)
-    real, private, parameter :: rix(ix) = (/ (0., i = 1, ix) /)
-    real, private, parameter :: rixp(ixp) = (/ (0., i = 1, ixp) /)
-    real, private, parameter :: riwx(iwx) = (/ (0., i = 1, iwx) /)
-    real, private, parameter :: rixix(ix, ix) = reshape((/ (0., i = 1, ix * ix) /), (/ix, ix/))
-    real, private, parameter :: r3ix(3, ix) = reshape((/ (0., i = 1, 3 * ix) /), (/3, ix/))
-    real, private, parameter :: riq(iq) = (/(0., i = 1, iq)/)
-
-    logical, public :: show_output = .true.
 
     type, public :: Common
-        real :: q(iq, iq) = reshape((/ (0, i = 1, iq * iq) /), (/iq, iq/))
+        real :: q(iq, iq) = 0.
 
         character(len = 80) :: savfil = '', fname = ''
         character(len = 32) :: name = ''
@@ -59,7 +49,7 @@ module m_common
 
         logical :: conv = f, greek = f, terse = f, vrtx = f, fast = f, free = f, duct = f, lstruc = f, &
                 ldesini = f, loprini = f, lrotor = f, lvnorm = f, lpwrvar = f, &
-                wind = f, dest = f, desp = f, stall(ix) = (/ (f, i = 1, ix) /), legend = f
+                wind = f, dest = f, desp = f, stall(ix) = f, legend = f
 
         real :: rho = 0., rmu = 0., vso = 0., vel = 0., rad = 0., gee = 0., alt = 0.
 
@@ -67,81 +57,78 @@ module m_common
                 niterd = 0, nitera = 0
         real :: version = 0., dt = 0.
 
-        integer :: iaero(ix) = int_ix + 0
+        integer :: iaero(ix) = 0
 
-        real :: ch(ix) = rix, beta(ix) = rix, beta0(ix) = rix, t(ix) = rix, dbeta = 0., &
-                xi(ix) = rix, dxi(ix) = rix, xi0 = 0., xitip = 0., xinf = 0., &
-                xpitch = 0., xv(ix) = rix, rake = 0.
+        real :: ch(ix) = 0., beta(ix) = 0., beta0(ix) = 0., t(ix) = 0., dbeta = 0., &
+                xi(ix) = 0., dxi(ix) = 0., xi0 = 0., xitip = 0., xinf = 0., &
+                xpitch = 0., xv(ix) = 0., rake = 0.
 
         integer :: nadd = 0
-        real :: radd(ix) = rix, &
-                uadd(ix) = rix, vadd(ix) = rix, &
-                uaddr(ix) = rix, vaddr(ix) = rix, &
-                ubody(ix) = rix, vbody(ix) = rix, urduct = 0.
+        real :: radd(ix) = 0., &
+                uadd(ix) = 0., vadd(ix) = 0., &
+                uaddr(ix) = 0., vaddr(ix) = 0., &
+                ubody(ix) = 0., vbody(ix) = 0., urduct = 0.
 
-        real :: cl(ix) = rix, cd(ix) = rix, cm(ix) = rix, &
-                re(ix) = rix, effp(ix) = rix, gam(ix) = rix, &
-                dtii(ix) = rix, dpii(ix) = rix, &
-                dtvi(ix) = rix, dpvi(ix) = rix, &
-                dtwi(ix) = rix, dpwi(ix) = rix
+        real :: cl(ix) = 0., cd(ix) = 0., cm(ix) = 0., &
+                re(ix) = 0., effp(ix) = 0., gam(ix) = 0., &
+                dtii(ix) = 0., dpii(ix) = 0., &
+                dtvi(ix) = 0., dpvi(ix) = 0., &
+                dtwi(ix) = 0., dpwi(ix) = 0.
 
         integer :: naero = 0
-        real :: xiaero(nax) = (/ (0., i = 1, nax) /), &
-                aerodata(ndx, nax) = reshape((/ (0., i = 1, ndx * nax) /), (/ndx, nax/))
+        real :: xiaero(nax) = 0., aerodata(ndx, nax) = 0.
 
-        real :: px(ix) = rix, py(ix) = rix, pz(ix) = rix, &
-                mx(ix) = rix, my(ix) = rix, mz(ix) = rix, &
-                px_ty(ix) = rix, px_tz(ix) = rix, pz_tx(ix) = rix, pz_ty(ix) = rix, pz_wz(ix) = rix, &
-                my_ty(ix) = rix, mz_ty(ix) = rix, mz_tx(ix) = rix, mz_wz(ix) = rix, &
-                tx(ixp) = rixp, ty(ixp) = rixp, tz(ixp) = rixp, &
-                wx(ixp) = rixp, wy(ixp) = rixp, wz(ixp) = rixp, &
-                shrx(ixp) = rixp, shry(ixp) = rixp, shrz(ixp) = rixp, &
-                momx(ixp) = rixp, momy(ixp) = rixp, momz(ixp) = rixp, &
-                eixxb(ix) = rix, eiyyb(ix) = rix, &
-                eab(ix) = rix, gjb(ix) = rix, ekb(ix) = rix, &
-                mb(ix) = rix, mxxb(ix) = rix, &
-                xocg(ix) = rix, xosc(ix) = rix, &
-                rstb(ix) = rix
+        real :: px(ix) = 0., py(ix) = 0., pz(ix) = 0., &
+                mx(ix) = 0., my(ix) = 0., mz(ix) = 0., &
+                px_ty(ix) = 0., px_tz(ix) = 0., pz_tx(ix) = 0., pz_ty(ix) = 0., pz_wz(ix) = 0., &
+                my_ty(ix) = 0., mz_ty(ix) = 0., mz_tx(ix) = 0., mz_wz(ix) = 0., &
+                tx(ixp) = 0., ty(ixp) = 0., tz(ixp) = 0., &
+                wx(ixp) = 0., wy(ixp) = 0., wz(ixp) = 0., &
+                shrx(ixp) = 0., shry(ixp) = 0., shrz(ixp) = 0., &
+                momx(ixp) = 0., momy(ixp) = 0., momz(ixp) = 0., &
+                eixxb(ix) = 0., eiyyb(ix) = 0., &
+                eab(ix) = 0., gjb(ix) = 0., ekb(ix) = 0., &
+                mb(ix) = 0., mxxb(ix) = 0., &
+                xocg(ix) = 0., xosc(ix) = 0., &
+                rstb(ix) = 0.
 
-        real :: caspar(0:nparx, icasx) = reshape((/ (0., i = 1, (nparx + 1) * icasx) /), (/nparx + 1, icasx/))
+        real :: caspar(0:nparx, icasx) = 0.
         integer :: ncase = 0, kcase = 0, iwtyp = 0
 
         real :: adv = 0., adw = 0., adwfctr = 0., &
                 rms = 0., rlx = 0., effinv = 0., &
                 tspec = 0., pspec = 0., qspec = 0., &
                 ttot = 0., ptot = 0., qtot = 0., &
-                tinv = 0., pinv = 0., twak = 0., pwak = 0., tvis = 0., pvis = 0., &
+                tinv = 0., pinv = 0., twak = 0., &
+                pwak = 0., tvis = 0., pvis = 0., &
                 gresmx = 0., fresmx = 0., aresmx = 0.
 
         real :: ti_adv = 0., pi_adv = 0., ti_adw = 0., pi_adw = 0., &
                 tw_adv = 0., pw_adv = 0., tw_adw = 0., pw_adw = 0., &
                 tv_adv = 0., pv_adv = 0., tv_adw = 0., pv_adw = 0., tv_dbe = 0., pv_dbe = 0., &
-                ti_gam(ix) = rix, pi_gam(ix) = rix, &
-                tw_gam(ix) = rix, pw_gam(ix) = rix, &
-                tv_gam(ix) = rix, pv_gam(ix) = rix
+                ti_gam(ix) = 0., pi_gam(ix) = 0., &
+                tw_gam(ix) = 0., pw_gam(ix) = 0., &
+                tv_gam(ix) = 0., pv_gam(ix) = 0.
 
-        real :: w0(iwx) = riwx, w1(iwx) = riwx, w2(iwx) = riwx, w3(iwx) = riwx, w4(iwx) = riwx, &
-                w5(iwx) = riwx, w6(iwx) = riwx, w7(iwx) = riwx, w8(iwx) = riwx, w9(iwx) = riwx, &
-                t0(iwx) = riwx, t1(iwx) = riwx, t2(iwx) = riwx, t3(iwx) = riwx, t4(iwx) = riwx, &
-                t5(iwx) = riwx, t6(iwx) = riwx, t7(iwx) = riwx, t8(iwx) = riwx, t9(iwx) = riwx
+        real :: w0(iwx) = 0., w1(iwx) = 0., w2(iwx) = 0., w3(iwx) = 0., w4(iwx) = 0., &
+                w5(iwx) = 0., w6(iwx) = 0., w7(iwx) = 0., w8(iwx) = 0., w9(iwx) = 0., &
+                t0(iwx) = 0., t1(iwx) = 0., t2(iwx) = 0., t3(iwx) = 0., t4(iwx) = 0., &
+                t5(iwx) = 0., t6(iwx) = 0., t7(iwx) = 0., t8(iwx) = 0., t9(iwx) = 0.
 
         real :: raddes = 0., veldes = 0., advdes = 0., rpmdes = 0., r0des = 0., rwdes = 0., &
-                tddes = 0., pddes = 0., &
-                tdes = 0., pdes = 0., cldes0 = 0., cldes(ix) = rix
+                tddes = 0., pddes = 0., des = 0., pdes = 0., cldes0 = 0., cldes(ix) = 0.
 
         integer :: npwrvar = 0
-        real :: rpmvar(ix) = rix, pwrvar(ix) = rix, xpwrvar(ix) = rix
+        real :: rpmvar(ix) = 0., pwrvar(ix) = 0., xpwrvar(ix) = 0.
 
-        real :: vwak(ix) = rix, vw_gam(ix, ix) = rixix, vw_adw(ix) = rix, vw_adv(ix) = rix, &
-                vind(3, ix) = r3ix, vind_gam(3, ix, ix) = reshape((/(0., i = 1, 3 * ix * ix)/), (/3, ix, ix/)), &
-                vind_adw(3, ix) = r3ix
+        real :: vwak(ix) = 0., vw_gam(ix, ix) = 0., vw_adw(ix) = 0., vw_adv(ix) = 0., &
+                vind(3, ix) = 0., vind_gam(3, ix, ix) = 0., vind_adw(3, ix) = 0.
 
         real :: xw0 = 0., xwtip = 0., &
-                xw(ix) = rix, xw_gam(ix, ix) = rixix, xw_adw(ix) = rix, xw_adv(ix) = rix, &
-                dxw(ix) = rix, dxw_gam(ix, ix) = rixix, dxw_adw(ix) = rix, dxw_adv(ix) = rix
+                xw(ix) = 0., xw_gam(ix, ix) = 0., xw_adw(ix) = 0., xw_adv(ix) = 0., &
+                dxw(ix) = 0., dxw_gam(ix, ix) = 0., dxw_adw(ix) = 0., dxw_adv(ix) = 0.
 
-        real :: dgam(ix) = rix, res(iq) = riq, dadv = 0., dadw = 0., dbet = 0., deff = 0., dq(iq) = riq, &
-                dgamold(ix) = rix
+        real :: dgam(ix) = 0., res(iq) = 0., dadv = 0., dadw = 0., dbet = 0., deff = 0., dq(iq) = 0., dgamold(ix) = 0.
     end type Common
     !
     !cc   EQUIVALENCE (A_GAMJ(0,1),Q(1,1))
