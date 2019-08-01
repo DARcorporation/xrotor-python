@@ -433,6 +433,8 @@ contains
     subroutine output(ctxt, lu)
         use m_xoper, only: cscalc
         use m_common, only: Common
+        use m_spline, only: spline, seval
+        use s_xrotor, only: uvadd
         implicit real (m)
         type(Common), intent(inout) :: ctxt
         logical lheli
@@ -641,27 +643,6 @@ contains
         2000 format(/19x, '********** not converged **********'/)
     end
     ! output
-
-
-    subroutine uvadd(ctxt, xiw, wa, wt)
-        use m_common, only: Common
-
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
-        !
-        wa = 0.0
-        wt = 0.0
-        !
-        if(ctxt%nadd <= 1) return
-        !
-        rdim = xiw * ctxt%rad
-        if(rdim >= ctxt%radd(1) .and. rdim <= ctxt%radd(ctxt%nadd)) then
-            wa = seval(rdim, ctxt%uadd, ctxt%uaddr, ctxt%radd) / ctxt%vel
-            wt = seval(rdim, ctxt%vadd, ctxt%vaddr, ctxt%radd) / ctxt%vel
-        endif
-        !
-        return
-    end
 
 
 end module m_xrotor

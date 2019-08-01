@@ -57,6 +57,7 @@ contains
         !
         !------------------------------------------------------------------------
         use m_common, only : show_output
+        use m_spline, only : seval
 
         implicit real(a-h, m, o-z)
         !
