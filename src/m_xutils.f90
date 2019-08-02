@@ -1,3 +1,4 @@
+!*==M_XUTILS.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -19,8 +20,13 @@
 !***********************************************************************
 
 module m_xutils
+    implicit none
 contains
     subroutine gauss(nsiz, nn, z, r, nrhs)
+        !*** Start of declarations inserted by SPAG
+        integer K, L, N, NN, NP, NP1, NRHS, NSIZ, NX
+        real PIVOT, R, TEMP, Z, ZTMP
+        !*** End of declarations inserted by SPAG
         !     *******************************************************
         !     *                                                     *
         !     *   Solves general Nxn system in n unknowns           *
@@ -44,9 +50,8 @@ contains
             !------ find max pivot index nx
             nx = np
             do n = np1, nn
-                if(abs(z(n, np)) - abs(z(nx, np))) 11, 11, 111
-                111      nx = n
-            11 end do
+                if (abs(z(n, np))>abs(z(nx, np))) nx = n
+            enddo
             !
             pivot = 1.0 / z(nx, np)
             !
@@ -58,13 +63,13 @@ contains
                 temp = z(nx, l) * pivot
                 z(nx, l) = z(np, l)
                 z(np, l) = temp
-            end do
+            enddo
             !
             do l = 1, nrhs
                 temp = r(nx, l) * pivot
                 r(nx, l) = r(np, l)
                 r(np, l) = temp
-            end do
+            enddo
             !
             !------ forward eliminate everything
             do k = np1, nn
@@ -74,18 +79,18 @@ contains
                 !
                 do l = np1, nn
                     z(k, l) = z(k, l) - ztmp * z(np, l)
-                end do
+                enddo
                 do l = 1, nrhs
                     r(k, l) = r(k, l) - ztmp * r(np, l)
-                end do
-            end do
+                enddo
+            enddo
             !
-        end do
+        enddo
         !
         !---- solve for last row
         do l = 1, nrhs
             r(nn, l) = r(nn, l) / z(nn, nn)
-        end do
+        enddo
         !
         !---- back substitute everything
         do np = nn - 1, 1, -1
@@ -93,11 +98,10 @@ contains
             do l = 1, nrhs
                 do k = np1, nn
                     r(np, l) = r(np, l) - z(np, k) * r(k, l)
-                end do
-            end do
-        end do
+                enddo
+            enddo
+        enddo
         !
-        return
     end
     ! gauss
-end module m_xutils
+end

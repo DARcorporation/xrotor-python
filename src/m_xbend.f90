@@ -1,3 +1,4 @@
+!*==M_XBEND.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -19,13 +20,18 @@
 !***********************************************************************
 !
 module m_xbend
+    implicit none
 contains
     subroutine eiload(ctxt, fname1)
         use m_userio, only : asks
         use i_common, only : Common, ix, show_output
         use m_spline, only : segspl, seval
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real DUMMY, MASS, MAXX, MRSQ, XT
+        integer I, IT, LU, NT
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         character*(*) fname1
         dimension xt(ix)
         !----------------------------------------------------
@@ -47,22 +53,23 @@ contains
         lu = 14
         !
         ctxt%fname = fname1
-        if(ctxt%fname(1:1) == ' ') call asks('enter input filename^', ctxt%fname)
+        if (ctxt%fname(1:1)==' ') call asks('enter input filename^', ctxt%fname)
         !
-        open(lu, file = ctxt%fname, status = 'old', err = 200)
-        read(lu, 1000) dummy
-        read(lu, 1000) dummy
-        read(lu, 1000) dummy
+        open (lu, file = ctxt%fname, status = 'old', err = 200)
+        read (lu, 99004) dummy
+        read (lu, 99004) dummy
+        read (lu, 99004) dummy
         do it = 1, ix
-            read(lu, *, end = 11, err = 210) xt(it), &
-                    ctxt%w0(it), ctxt%w1(it), ctxt%w2(it), ctxt%w3(it), ctxt%w4(it), &
-                    ctxt%w5(it), ctxt%w6(it), ctxt%w7(it), ctxt%w8(it), ctxt%w9(it)
+            read (lu, *, end = 100, err = 300) xt(it), ctxt%w0(it), ctxt%w1(it), &
+                    & ctxt%w2(it), ctxt%w3(it), ctxt%w4(it), &
+                    & ctxt%w5(it), ctxt%w6(it), ctxt%w7(it), &
+                    & ctxt%w8(it), ctxt%w9(it)
             xt(it) = xt(it) / ctxt%rad
-        end do
-        if (show_output) write(*, *) 'eiload: Array overflow.  Too many radial stations.'
-        11   continue
-        nt = it - 1
-        close(lu)
+        enddo
+        if (show_output) write (*, *)                                           &
+                &'eiload: Array overflow.  Too many radial stations.'
+        100   nt = it - 1
+        close (lu)
         !
         ! todo: test these
         ctxt%t0(1:nt) = segspl(xt(1:nt), ctxt%w0(1:nt))
@@ -88,7 +95,7 @@ contains
             ctxt%xocg(i) = seval(ctxt%xi(i), ctxt%w7, ctxt%t7, xt)
             ctxt%xosc(i) = seval(ctxt%xi(i), ctxt%w8, ctxt%t8, xt)
             ctxt%rstb(i) = seval(ctxt%xi(i), ctxt%w9, ctxt%t9, xt)
-        end do
+        enddo
         !
         mass = 0.0
         mrsq = 0.0
@@ -97,36 +104,37 @@ contains
             mass = mass + ctxt%mb(i) * ctxt%rad * ctxt%dxi(i)
             mrsq = mrsq + ctxt%mb(i) * ctxt%rad * ctxt%dxi(i) * (ctxt%xi(i) * ctxt%rad)**2
             maxx = maxx + ctxt%mxxb(i) * ctxt%rad * ctxt%dxi(i)
-        end do
+        enddo
         !
-        if (show_output) write(*, 3100) mass, maxx, mrsq
+        if (show_output) write (*, 99001) mass, maxx, mrsq
+        99001  format (/' Blade mass =', g12.4/' Pitch-axis inertia =', &
+                &g14.5/' Rotational inertia =', g14.5)
         !
         ctxt%lstruc = .true.
         return
         !
-        200  if (show_output) write(*, 1010) ctxt%fname(1:32)
+        200   if (show_output) write (*, 99002) ctxt%fname(1:32)
+        99002  format (' File  ', a, ' not found'/)
         return
         !
-        210  if (show_output) write(*, 1020) ctxt%fname(1:32)
-        close(lu)
+        300   if (show_output) write (*, 99003) ctxt%fname(1:32)
+        99003  format (' File  ', a, ' has incompatible format'/' Loading not completed'/)
+        close (lu)
         ctxt%conv = .false.
         return
         !..............................
-        1000 format(32a1)
-        1010 format(' File  ', a, ' not found'/)
-        1020 format(' File  ', a, ' has incompatible format'/&
-                ' Loading not completed'/)
-        3100 format(/' Blade mass =', g12.4&
-                /' Pitch-axis inertia =', g14.5&
-                /' Rotational inertia =', g14.5)
+        99004  format (32A1)
     end
     ! eiload
 
 
     subroutine stclr(ctxt)
         use i_common, only : Common
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        integer I
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !
         do i = 1, ctxt%ii
             ctxt%tx(i) = 0.0
@@ -141,25 +149,26 @@ contains
             ctxt%shrx(i) = 0.0
             ctxt%shry(i) = 0.0
             ctxt%shrz(i) = 0.0
-        end do
+        enddo
         !
-        return
     end
     ! stclr
 
 
     subroutine mclr(ctxt)
         use i_common, only : Common
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        integer I
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !
         do i = 1, ctxt%ii
             ctxt%mb(i) = 0.0
             ctxt%mxxb(i) = 0.0
             ctxt%ekb(i) = 0.0
-        end do
+        enddo
         !
-        return
     end
     ! mclr
 
@@ -168,8 +177,17 @@ contains
     subroutine stload(ctxt)
         use m_xoper, only : cscalc
         use i_common, only : Common, show_output
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real CI, CI_ADV, CI_VT, COSB, COSR, DXII, FCENT, FDRAG, FLIFT, FLIFT_A, &
+                & FX, FXA, FXC, FY, FYA, FYC, FZ, FZA, FZC, MAERO
+        real MAERO_A, MCENT, MCENT_B, MPREC, MPREC_B, PHI, P_ADV, P_VA, &
+                & P_VT, RAD, RHO, SI, SINB, SINR, SI_VA, TXA, TZA, UTOT, VA
+        real VA_ADW, VD, VD_ADW, VT, VT_ADW, W, WA, WSQ, WT, WZA, W_ADV, W_VA, &
+                & W_VT
+        integer I
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !-----------------------------------------------------------
         !     Calculates force and moment loadings along blade.
         ! hhy 3/99 a local x',y',z' system is assumed that is tilted by
@@ -285,23 +303,20 @@ contains
             !
             ctxt%my_ty(i) = maero_a + mprec_b * (wza / ctxt%xi(i) - txa)
             ctxt%mz_ty(i) = mcent_b
-            ctxt%mz_tx(i) = - mprec
+            ctxt%mz_tx(i) = -mprec
             ctxt%mz_wz(i) = mprec / ctxt%xi(i)
             !
-        end do
+        enddo
         !
         !--- Print the blade aerodynamic forces
-        if (show_output)then
-            write(*, 20) fx * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
-                    fy * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
-                    fz * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
-            20   format(/'Blade aerodynamic forces:', &
-                    /' fx (axial)      = ', f12.6, &
-                    /' fy (radial)     = ', f12.6, &
-                    /' fz (tangential) = ', f12.6)
-        end if
+        if (show_output) then
+            write (*, 99001) fx * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
+                    & fy * ctxt%rho * ctxt%vel**2 * ctxt%rad**2, &
+                    & fz * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
+            99001      format (/'Blade aerodynamic forces:', /' fx (axial)      = ', f12.6, &
+                    &/' fy (radial)     = ', f12.6, /' fz (tangential) = ', f12.6)
+        endif
         !
-        return
     end
     ! stload
 
@@ -309,8 +324,16 @@ contains
 
     subroutine stcalc(ctxt)
         use i_common, only : Common, ixp, show_output
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real CB, COSR, DXII, EA, EAREF, EIBIG, EIREF, EIXX, EIXX_B, EIXZ, EIXZ_B, &
+                & EIZZ, EIZZ_B, EK, EKREF, EPS, GJ, MOMXD, MOMYD, MOMZD
+        real MX1, MX2, MY1, MY2, MZ1, MZ2, RMAX, SB, SX1, SX2, SY1, SY2, SZ1, &
+                & SZ2, TX1, TX2, TY1, TY2, TZ1, TZ2
+        real WX1, WX2, WY1, WY2, WZ1, WZ2
+        integer I, ITER, J, K
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !------------------------------------------------------------
         !     Updates resultants and deflections along blade.
         !     Uses current loading distributions px,py,pz, mx,my,mz.
@@ -318,7 +341,7 @@ contains
         real aa(12, 12, ixp), bb(12, 12, ixp), cc(12, 12, ixp), rr(12, ixp)
         real rrlim(12), rlxr(12)
         !
-        eps = 1.0e-5
+        eps = 1.0E-5
         !
         rrlim(1) = 0.10
         rrlim(2) = 0.10
@@ -336,7 +359,7 @@ contains
         rrlim(11) = 0.01
         rrlim(12) = 0.10
         !
-        if (show_output) write(*, *)
+        if (show_output) write (*, *)
         !
         !---- Newton iteration loop
         do iter = 1, 10
@@ -349,10 +372,10 @@ contains
                         aa(k, j, i) = 0.0
                         bb(k, j, i) = 0.0
                         cc(k, j, i) = 0.0
-                    end do
+                    enddo
                     rr(k, i) = 0.0
-                end do
-            end do
+                enddo
+            enddo
             !
             !
             !---- fix deflection angles at root
@@ -471,7 +494,7 @@ contains
                 aa(6, 5, i) = 0.5 * (tx2 - tx1)
                 aa(6, 6, i) = -1.0
                 aa(6, 7, i) = 0.5 * dxii
-                aa(6, 12, i) = + ctxt%mz_wz(i) * dxii * 0.5
+                aa(6, 12, i) = +ctxt%mz_wz(i) * dxii * 0.5
                 cc(6, 1, i) = (my2 + my1) * 0.5
                 cc(6, 2, i) = -(mx2 + mx1) * 0.5 + ctxt%mz_ty(i) * dxii * 0.5
                 cc(6, 3, i) = ctxt%mz_tx(i) * dxii * 0.5
@@ -479,7 +502,7 @@ contains
                 cc(6, 5, i) = 0.5 * (tx2 - tx1)
                 cc(6, 6, i) = 1.0
                 cc(6, 7, i) = 0.5 * dxii
-                cc(6, 12, i) = + ctxt%mz_wz(i) * dxii * 0.5
+                cc(6, 12, i) = +ctxt%mz_wz(i) * dxii * 0.5
                 !
                 !
                 !------ x-shear
@@ -523,19 +546,19 @@ contains
                 aa(9, 7, i) = -0.5 * (ty2 - ty1)
                 aa(9, 8, i) = -0.5 * (tx2 - tx1)
                 aa(9, 9, i) = -1.0
-                aa(9, 12, i) = - ctxt%pz_wz(i) * dxii * 0.5
+                aa(9, 12, i) = -ctxt%pz_wz(i) * dxii * 0.5
                 cc(9, 1, i) = -(sy2 + sy1) * 0.5 - ctxt%pz_tx(i) * dxii * 0.5
                 cc(9, 2, i) = -(sx2 + sx1) * 0.5 - ctxt%pz_ty(i) * dxii * 0.5
                 cc(9, 7, i) = -0.5 * (ty2 - ty1)
                 cc(9, 8, i) = -0.5 * (tx2 - tx1)
                 cc(9, 9, i) = 1.0
-                cc(9, 12, i) = - ctxt%pz_wz(i) * dxii * 0.5
+                cc(9, 12, i) = -ctxt%pz_wz(i) * dxii * 0.5
                 !
                 !
                 sb = sin(ctxt%beta(i))
                 cb = cos(ctxt%beta(i))
                 !
-                if(ctxt%lstruc) then
+                if (ctxt%lstruc) then
                     gj = ctxt%gjb(i) / eiref
                     ek = ctxt%ekb(i) / ekref
                     ea = ctxt%eab(i) / earef
@@ -548,7 +571,7 @@ contains
                     eixx_b = (ctxt%eixxb(i) - ctxt%eiyyb(i)) * 2.0 * sb * cb / eiref
                     eixz_b = (ctxt%eixxb(i) - ctxt%eiyyb(i)) * (cb * cb - sb * sb) / eiref
                 else
-                    eibig = 1.0e+8
+                    eibig = 1.0E+8
                     !
                     gj = eibig
                     ek = 0.0
@@ -569,23 +592,19 @@ contains
                 !
                 !
                 !------ x-deflection angle
-                rr(1, i + 1) = eizz * (tx2 - tx1)&
-                        - eixz * (tz2 - tz1) - (mx2 + mx1) * 0.5 * dxii
+                rr(1, i + 1) = eizz * (tx2 - tx1) - eixz * (tz2 - tz1) - (mx2 + mx1) * 0.5 * dxii
                 !
                 bb(1, 1, i + 1) = -eizz
-                bb(1, 2, i + 1) = eizz_b * (tx2 - tx1) * 0.5&
-                        - eixz_b * (tz2 - tz1) * 0.5
+                bb(1, 2, i + 1) = eizz_b * (tx2 - tx1) * 0.5 - eixz_b * (tz2 - tz1) * 0.5
                 bb(1, 3, i + 1) = eixz
                 bb(1, 4, i + 1) = -0.5 * dxii
                 aa(1, 1, i + 1) = eizz
-                aa(1, 2, i + 1) = eizz_b * (tx2 - tx1) * 0.5&
-                        - eixz_b * (tz2 - tz1) * 0.5
+                aa(1, 2, i + 1) = eizz_b * (tx2 - tx1) * 0.5 - eixz_b * (tz2 - tz1) * 0.5
                 aa(1, 3, i + 1) = -eixz
                 aa(1, 4, i + 1) = -0.5 * dxii
                 !
                 !------ y-deflection angle (twist)
-                rr(2, i + 1) = gj * (ty2 - ty1) - (my2 + my1) * 0.5 * dxii&
-                        - ek * (wy2 - wy1)
+                rr(2, i + 1) = gj * (ty2 - ty1) - (my2 + my1) * 0.5 * dxii - ek * (wy2 - wy1)
                 !
                 bb(2, 2, i + 1) = -gj
                 bb(2, 5, i + 1) = -0.5 * dxii
@@ -595,17 +614,14 @@ contains
                 aa(2, 11, i + 1) = -ek
                 !
                 !------ z-deflection angle
-                rr(3, i + 1) = eixx * (tz2 - tz1)&
-                        - eixz * (tx2 - tx1) - (mz2 + mz1) * 0.5 * dxii
+                rr(3, i + 1) = eixx * (tz2 - tz1) - eixz * (tx2 - tx1) - (mz2 + mz1) * 0.5 * dxii
                 !
                 bb(3, 1, i + 1) = eixz
-                bb(3, 2, i + 1) = eixx_b * (tz2 - tz1)&
-                        - eixz_b * (tx2 - tx1)
+                bb(3, 2, i + 1) = eixx_b * (tz2 - tz1) - eixz_b * (tx2 - tx1)
                 bb(3, 3, i + 1) = -eixx
                 bb(3, 6, i + 1) = -0.5 * dxii
                 aa(3, 1, i + 1) = -eixz
-                aa(3, 2, i + 1) = eixx_b * (tz2 - tz1)&
-                        - eixz_b * (tx2 - tx1)
+                aa(3, 2, i + 1) = eixx_b * (tz2 - tz1) - eixz_b * (tx2 - tx1)
                 aa(3, 3, i + 1) = eixx
                 aa(3, 6, i + 1) = -0.5 * dxii
                 !
@@ -631,7 +647,7 @@ contains
                 aa(12, 1, i + 1) = 0.5 * dxii
                 aa(12, 12, i + 1) = -1.0
                 !
-            end do
+            enddo
             !
             !---- set tip  m,s  to zero
             i = ctxt%ii + 1
@@ -656,17 +672,17 @@ contains
             !---- set under-relaxation factors
             do k = 1, 12
                 rlxr(k) = 1.0
-            end do
+            enddo
             !
             do i = 1, ctxt%ii + 1
                 do k = 1, 12
-                    if(rlxr(k) * rr(k, i) > rrlim(k)) rlxr(k) = rrlim(k) / rr(k, i)
-                    if(rlxr(k) * rr(k, i) < -rrlim(k)) rlxr(k) = -rrlim(k) / rr(k, i)
+                    if (rlxr(k) * rr(k, i)>rrlim(k)) rlxr(k) = rrlim(k) / rr(k, i)
+                    if (rlxr(k) * rr(k, i)<-rrlim(k)) rlxr(k) = -rrlim(k) / rr(k, i)
                     !
                     rmax = max(rmax, abs(rr(k, i) / rrlim(k)))
                     ctxt%rms = ctxt%rms + (rr(k, i) / rrlim(k))**2
-                end do
-            end do
+                enddo
+            enddo
             !
             ctxt%rms = sqrt(ctxt%rms / float(9 * ctxt%ii))
             !
@@ -674,7 +690,7 @@ contains
             ctxt%rlx = 1.0
             do k = 1, 12
                 ctxt%rlx = amin1(ctxt%rlx, rlxr(k))
-            end do
+            enddo
             !
             !---- update solution
             do i = 1, ctxt%ii + 1
@@ -694,23 +710,23 @@ contains
                 !        write(*,*) i
                 !        write(*,1200) (rr(k,i),k=1,12)
                 ! 1200   format( 4(1x, 3e12.4 /) )
-            end do
+            enddo
             !
             !
             !c      write(*,1250) (rlxr(k), k=1, 12)
             !c 1250 format(1x, 11f8.3)
             !
             if (show_output) then
-                write(*, 1800) iter, rmax, ctxt%rms, ctxt%rlx
-                1800 format(1x, i3, '   max:', e9.3, '   rms:', e9.3, '   rlx =', f7.4)
-            end if
+                write (*, 99001) iter, rmax, ctxt%rms, ctxt%rlx
+                99001          format (1x, i3, '   max:', e9.3, '   rms:', e9.3, '   rlx =', f7.4)
+            endif
             !
-            if(rmax <= eps) go to 101
+            if (rmax<=eps) goto 99999
             !
-        end do
-        if (show_output) write(*, *) 'stcalc: Convergence failed.  Continuing ...'
+        enddo
+        if (show_output) write (*, *)                                           &
+                &'stcalc: Convergence failed.  Continuing ...'
         !
-        101  continue
         !
         !---- integrate towards tip for x displacements
         !      i = 1
@@ -719,54 +735,61 @@ contains
         !        wx(i+1) =  wx(i)  -  (  tz(i) +   tz(i+1))*0.5 * dxii
         ! end do
         !
-        return
-    end
+    99999  end
     ! stcalc
 
 
 
     subroutine stadd(ctxt)
         use i_common, only : Common, show_output, pi
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        integer I
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !------------------------------------------------------
         !     Adds on structural twist to static blade angles
         !------------------------------------------------------
         !
         do i = 1, ctxt%ii
             ctxt%beta(i) = ctxt%beta0(i) + (ctxt%ty(i) + ctxt%ty(i + 1)) * 0.5
-        end do
+        enddo
         !
-        if (show_output) write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
+        if (show_output) write (*, 99001) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii&
+                &)) * 180.0 / pi
+        !
+        99001  format (/' New working blade angles set.'/' Tip angle deflection =', f8.3, &
+                &'  deg.')
         !
         ctxt%conv = .false.
         return
-        !
-        1000 format(/' New working blade angles set.'&
-                /' Tip angle deflection =', f8.3, '  deg.')
     end
     ! stadd
 
 
     subroutine stset(ctxt)
         use i_common, only : Common, show_output, pi
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        integer I
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !------------------------------------------------------
         !     Removes structural twist to get static blade angles
         !------------------------------------------------------
         !
         do i = 1, ctxt%ii
             ctxt%beta0(i) = ctxt%beta(i) - (ctxt%ty(i) + ctxt%ty(i + 1)) * 0.5
-        end do
+        enddo
         !
-        if (show_output) write(*, 1000) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii)) * 180.0 / pi
+        if (show_output) write (*, 99001) (ctxt%beta(ctxt%ii) - ctxt%beta0(ctxt%ii&
+                &)) * 180.0 / pi
+        !
+        99001  format (/' New static blade angles set.'/' Tip angle deflection =', f8.3, &
+                &'  deg.')
         !
         ctxt%conv = .false.
         return
-        !
-        1000 format(/' New static blade angles set.'&
-                /' Tip angle deflection =', f8.3, '  deg.')
     end
     ! stset
 
@@ -774,8 +797,14 @@ contains
 
     subroutine stwrit(ctxt, lu)
         use i_common, only : Common, pi
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real COSR, DXII, EMAX, EX, EY, EZ, GT, MOMREF, MXA, MYA, MZA, RST, RTD, &
+                & SXA, SYA, SZA, TXA, TYA, TZA, WXA
+        real WYA, WZA
+        integer I, IADD, LU
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !---------------------------------------------
         !     Dumps blade force output to unit lu
         !---------------------------------------------
@@ -783,9 +812,17 @@ contains
         rtd = 180.0 / pi
         !
         iadd = 1
-        if(lu == ctxt%luwrit) iadd = ctxt%incr
+        if (lu==ctxt%luwrit) iadd = ctxt%incr
         !
-        write(lu, 1020)
+        write (lu, 99001)
+        !
+        !....................................................................
+        !
+        99001  format (/                                                                &
+                &'  i    r/r     u/r     w/r     t         Mz          Mx''           t    &
+                &        p            Sx           Sz'/                                    &
+                &'                             (deg)      (n-m)       (n-m)''       (n-m)  &
+                &       (n)          (n)          (n)')
         !
         momref = ctxt%rho * ctxt%vel**2 * ctxt%rad**3
         !
@@ -811,19 +848,10 @@ contains
             sya = ctxt%shry(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
             sza = ctxt%shrz(i) * ctxt%rho * ctxt%vel**2 * ctxt%rad**2
             !
-            write(lu, 1035) i, ctxt%xi(i), wxa, wza, tya, mza, mxa, mya, sya, sxa, sza
-        end do
-        !
-        !....................................................................
-        !
-        1020 format(&
-                /'  i    r/r     u/r     w/r     t         Mz          Mx'&
-                '           t            p            Sx           Sz'&
-                /'                             (deg)      (n-m)       (n-m)'&
-                '       (n-m)         (n)          (n)          (n)')
-        !
-        1035 format(1x, &
-                i2, f7.3, f8.4, f8.4, f7.2, 6(1x, g12.4))
+            write (lu, 99002) i, ctxt%xi(i), wxa, wza, tya, mza, mxa, mya, sya, sxa, sza
+            !
+            99002      format (1x, i2, f7.3, f8.4, f8.4, f7.2, 6(1x, g12.4))
+        enddo
         !
         !c  i    r/r     u/r     w/r     t         Mz          Mx           t            p            Sx           Sz
         !c                            (deg)      (n-m)       (n-m)       (n-m)         (n)          (n)          (n)
@@ -833,7 +861,12 @@ contains
         !
         !--- Display the strain components on the blade beam
         cosr = cos(ctxt%rake)
-        write(lu, 2020)
+        write (lu, 99003)
+
+        !
+        99003  format (/                                                                &
+                &' i    r/r      Ex       Ez       Ey      Emax''      g     x 1000'&
+                &)
         !
         do i = 1, ctxt%ii, iadd
             !
@@ -851,18 +884,12 @@ contains
             !------ max normal strain
             emax = sqrt(ex**2 + ez**2) + ey
             !
-            write(lu, 2030) i, ctxt%xi(i), ex, ez, ey, emax, gt
-        end do
+            write (lu, 99004) i, ctxt%xi(i), ex, ez, ey, emax, gt
+            !          10  0.425   10.002   14.002   20.203   12.000   13.450
+            99004      format (1x, i2, f7.3, 5F9.4)
+        enddo
         !
         return
-
-        !
-        2020 format(&
-                /' i    r/r      Ex       Ez       Ey      Emax'&
-                '      g     x 1000')
-        !          10  0.425   10.002   14.002   20.203   12.000   13.450
-        2030 format(1x, &
-                i2, f7.3, 5f9.4)
         !
     end
     ! stwrit
@@ -871,6 +898,10 @@ contains
 
     subroutine b12sol(a, b, c, r, ii)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        real A, ATMP, B, C, PIVOT, R, TEMP
+        integer I, II, IM, IP, K, KP1, KPIV, KX, L, NRHS
+        !*** End of declarations inserted by SPAG
         dimension a(12, 12, ii), b(12, 12, ii), c(12, 12, ii)
         dimension r(12, 1, ii)
         !-------------------------------------------------------
@@ -893,41 +924,30 @@ contains
             im = i - 1
             !
             !------ don't eliminate first b block because it doesn't exist
-            if(i == 1) go to 12
-            !
-            !------ eliminate Bi block, thus modifying Ai and Ci blocks
-            do k = 1, 12
-                do l = 1, 12
-                    a(k, l, i) = a(k, l, i)&
-                            - (b(k, 1, i) * c(1, l, im)&
-                                    + b(k, 2, i) * c(2, l, im)&
-                                    + b(k, 3, i) * c(3, l, im)&
-                                    + b(k, 4, i) * c(4, l, im)&
-                                    + b(k, 5, i) * c(5, l, im)&
-                                    + b(k, 6, i) * c(6, l, im)&
-                                    + b(k, 7, i) * c(7, l, im)&
-                                    + b(k, 8, i) * c(8, l, im)&
-                                    + b(k, 9, i) * c(9, l, im)&
-                                    + b(k, 10, i) * c(10, l, im)&
-                                    + b(k, 11, i) * c(11, l, im)&
-                                    + b(k, 12, i) * c(12, l, im))
-                end do
-                do l = 1, nrhs
-                    r(k, l, i) = r(k, l, i)&
-                            - (b(k, 1, i) * r(1, l, im)&
-                                    + b(k, 2, i) * r(2, l, im)&
-                                    + b(k, 3, i) * r(3, l, im)&
-                                    + b(k, 4, i) * r(4, l, im)&
-                                    + b(k, 5, i) * r(5, l, im)&
-                                    + b(k, 6, i) * r(6, l, im)&
-                                    + b(k, 7, i) * r(7, l, im)&
-                                    + b(k, 8, i) * r(8, l, im)&
-                                    + b(k, 9, i) * r(9, l, im)&
-                                    + b(k, 10, i) * r(10, l, im)&
-                                    + b(k, 11, i) * r(11, l, im)&
-                                    + b(k, 12, i) * r(12, l, im))
-                end do
-            end do
+            if (i/=1) then
+                !
+                !------ eliminate Bi block, thus modifying Ai and Ci blocks
+                do k = 1, 12
+                    do l = 1, 12
+                        a(k, l, i) = a(k, l, i)                                      &
+                                & - (b(k, 1, i) * c(1, l, im) + b(k, 2, i) * c(2, l, im)      &
+                                        & + b(k, 3, i) * c(3, l, im) + b(k, 4, i) * c(4, l, im)        &
+                                        & + b(k, 5, i) * c(5, l, im) + b(k, 6, i) * c(6, l, im)        &
+                                        & + b(k, 7, i) * c(7, l, im) + b(k, 8, i) * c(8, l, im)        &
+                                        & + b(k, 9, i) * c(9, l, im) + b(k, 10, i) * c(10, l, im)      &
+                                        & + b(k, 11, i) * c(11, l, im) + b(k, 12, i) * c(12, l, im))
+                    enddo
+                    do l = 1, nrhs
+                        r(k, l, i) = r(k, l, i)                                      &
+                                & - (b(k, 1, i) * r(1, l, im) + b(k, 2, i) * r(2, l, im)      &
+                                        & + b(k, 3, i) * r(3, l, im) + b(k, 4, i) * r(4, l, im)        &
+                                        & + b(k, 5, i) * r(5, l, im) + b(k, 6, i) * r(6, l, im)        &
+                                        & + b(k, 7, i) * r(7, l, im) + b(k, 8, i) * r(8, l, im)        &
+                                        & + b(k, 9, i) * r(9, l, im) + b(k, 10, i) * r(10, l, im)      &
+                                        & + b(k, 11, i) * r(11, l, im) + b(k, 12, i) * r(12, l, im))
+                    enddo
+                enddo
+            endif
             !
             !                                                              -1
             !cc---- multiply Ci block and righthand side Ri vectors by (Ai)
@@ -935,18 +955,17 @@ contains
             !
             !cc        call shoblk(12,i,a(1,1,i))
             !
-            12   do kpiv = 1, 11
+            do kpiv = 1, 11
                 kp1 = kpiv + 1
                 !
                 !-------- find max pivot index kx
                 kx = kpiv
                 do k = kp1, 12
-                    if(abs(a(k, kpiv, i)) - abs(a(kx, kpiv, i))) 131, 131, 1311
-                    1311        kx = k
-                131 end do
+                    if (abs(a(k, kpiv, i))>abs(a(kx, kpiv, i))) kx = k
+                enddo
                 !
-                if(a(kx, kpiv, i) == 0.0) then
-                    if (show_output) write(*, *) 'Singular a block, i = ', i
+                if (a(kx, kpiv, i)==0.0) then
+                    if (show_output) write (*, *) 'Singular a block, i = ', i
                     stop
                 endif
                 !
@@ -960,49 +979,50 @@ contains
                     temp = a(kx, l, i) * pivot
                     a(kx, l, i) = a(kpiv, l, i)
                     a(kpiv, l, i) = temp
-                end do
+                enddo
                 !
                 do l = 1, 12
                     temp = c(kx, l, i) * pivot
                     c(kx, l, i) = c(kpiv, l, i)
                     c(kpiv, l, i) = temp
-                end do
+                enddo
                 !
                 do l = 1, nrhs
                     temp = r(kx, l, i) * pivot
                     r(kx, l, i) = r(kpiv, l, i)
                     r(kpiv, l, i) = temp
-                end do
+                enddo
                 !
                 !-------- forward eliminate everything
                 do k = kp1, 12
                     atmp = -a(k, kpiv, i)
-                    if(atmp == 0.0) go to 135
-                    do l = kp1, 12
-                        a(k, l, i) = a(k, l, i) + atmp * a(kpiv, l, i)
-                    end do
-                    c(k, 1, i) = c(k, 1, i) + atmp * c(kpiv, 1, i)
-                    c(k, 2, i) = c(k, 2, i) + atmp * c(kpiv, 2, i)
-                    c(k, 3, i) = c(k, 3, i) + atmp * c(kpiv, 3, i)
-                    c(k, 4, i) = c(k, 4, i) + atmp * c(kpiv, 4, i)
-                    c(k, 5, i) = c(k, 5, i) + atmp * c(kpiv, 5, i)
-                    c(k, 6, i) = c(k, 6, i) + atmp * c(kpiv, 6, i)
-                    c(k, 7, i) = c(k, 7, i) + atmp * c(kpiv, 7, i)
-                    c(k, 8, i) = c(k, 8, i) + atmp * c(kpiv, 8, i)
-                    c(k, 9, i) = c(k, 9, i) + atmp * c(kpiv, 9, i)
-                    c(k, 10, i) = c(k, 10, i) + atmp * c(kpiv, 10, i)
-                    c(k, 11, i) = c(k, 11, i) + atmp * c(kpiv, 11, i)
-                    c(k, 12, i) = c(k, 12, i) + atmp * c(kpiv, 12, i)
-                    do l = 1, nrhs
-                        r(k, l, i) = r(k, l, i) + atmp * r(kpiv, l, i)
-                    end do
-                135 end do
+                    if (atmp/=0.0) then
+                        do l = kp1, 12
+                            a(k, l, i) = a(k, l, i) + atmp * a(kpiv, l, i)
+                        enddo
+                        c(k, 1, i) = c(k, 1, i) + atmp * c(kpiv, 1, i)
+                        c(k, 2, i) = c(k, 2, i) + atmp * c(kpiv, 2, i)
+                        c(k, 3, i) = c(k, 3, i) + atmp * c(kpiv, 3, i)
+                        c(k, 4, i) = c(k, 4, i) + atmp * c(kpiv, 4, i)
+                        c(k, 5, i) = c(k, 5, i) + atmp * c(kpiv, 5, i)
+                        c(k, 6, i) = c(k, 6, i) + atmp * c(kpiv, 6, i)
+                        c(k, 7, i) = c(k, 7, i) + atmp * c(kpiv, 7, i)
+                        c(k, 8, i) = c(k, 8, i) + atmp * c(kpiv, 8, i)
+                        c(k, 9, i) = c(k, 9, i) + atmp * c(kpiv, 9, i)
+                        c(k, 10, i) = c(k, 10, i) + atmp * c(kpiv, 10, i)
+                        c(k, 11, i) = c(k, 11, i) + atmp * c(kpiv, 11, i)
+                        c(k, 12, i) = c(k, 12, i) + atmp * c(kpiv, 12, i)
+                        do l = 1, nrhs
+                            r(k, l, i) = r(k, l, i) + atmp * r(kpiv, l, i)
+                        enddo
+                    endif
+                enddo
                 !
-            end do
+            enddo
             !
             !------ solve for last row
-            if(a(12, 12, i) == 0.0) then
-                if (show_output) write(*, *) 'Singular a block, i = ', i
+            if (a(12, 12, i)==0.0) then
+                if (show_output) write (*, *) 'Singular a block, i = ', i
                 stop
             endif
             pivot = 1.0 / a(12, 12, i)
@@ -1020,7 +1040,7 @@ contains
             c(12, 12, i) = c(12, 12, i) * pivot
             do l = 1, nrhs
                 r(12, l, i) = r(12, l, i) * pivot
-            end do
+            enddo
             !
             !------ back substitute everything
             do kpiv = 10, 1, -1
@@ -1040,34 +1060,26 @@ contains
                     c(kpiv, 12, i) = c(kpiv, 12, i) - a(kpiv, k, i) * c(k, 12, i)
                     do l = 1, nrhs
                         r(kpiv, l, i) = r(kpiv, l, i) - a(kpiv, k, i) * r(k, l, i)
-                    end do
-                end do
-            end do
-        end do
+                    enddo
+                enddo
+            enddo
+        enddo
         !
         !cc** Backward sweep: Back substitution using upper block diagonal (Ci's).
         do i = ii - 1, 1, -1
             ip = i + 1
             do l = 1, nrhs
                 do k = 1, 12
-                    r(k, l, i) = r(k, l, i)&
-                            - (r(1, l, ip) * c(k, 1, i)&
-                                    + r(2, l, ip) * c(k, 2, i)&
-                                    + r(3, l, ip) * c(k, 3, i)&
-                                    + r(4, l, ip) * c(k, 4, i)&
-                                    + r(5, l, ip) * c(k, 5, i)&
-                                    + r(6, l, ip) * c(k, 6, i)&
-                                    + r(7, l, ip) * c(k, 7, i)&
-                                    + r(8, l, ip) * c(k, 8, i)&
-                                    + r(9, l, ip) * c(k, 9, i)&
-                                    + r(10, l, ip) * c(k, 10, i)&
-                                    + r(11, l, ip) * c(k, 11, i)&
-                                    + r(12, l, ip) * c(k, 12, i))
-                end do
-            end do
-        end do
+                    r(k, l, i) = r(k, l, i) - (r(1, l, ip) * c(k, 1, i) + r(2, l, ip) * c(k, 2, i) &
+                            & + r(3, l, ip) * c(k, 3, i) + r(4, l, ip) * c(k, 4, i) + r(5, l, ip)  &
+                            & * c(k, 5, i) + r(6, l, ip) * c(k, 6, i) + r(7, l, ip) * c(k, 7, i)   &
+                            & + r(8, l, ip) * c(k, 8, i) + r(9, l, ip) * c(k, 9, i) + r(10, l, ip) &
+                            & * c(k, 10, i) + r(11, l, ip) * c(k, 11, i) + r(12, l, ip)        &
+                            & * c(k, 12, i))
+                enddo
+            enddo
+        enddo
         !
-        return
     end
     ! b12sol
-end module m_xbend
+end

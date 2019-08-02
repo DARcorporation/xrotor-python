@@ -1,3 +1,4 @@
+!*==M_XAERO.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -20,7 +21,7 @@
 
 
 !--- Aero data stored for one or more radial aerodynamic sections
-!   
+!
 !-- aero data quantities for each defined radial aerodynamic section
 !   naero       Number of aerodynamic datasets defined (naero>=1)
 !   xiaero      Radial station r/r where aero dataset is defined
@@ -42,6 +43,7 @@
 
 
 module m_xaero
+    implicit none
 contains
     subroutine setiaero(ctxt)
         !--------------------------------------------------
@@ -49,19 +51,19 @@ contains
         !     each radial station
         !--------------------------------------------------
         use i_common, only : Common
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        integer I, N
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !
         !--- Find lower index of aero data sections xiaero(n) bounding xi(is)
         do i = 1, ctxt%ii
             ctxt%iaero(i) = 1
             do n = 1, ctxt%naero
-                if(ctxt%xiaero(n) <= ctxt%xi(i)) then
-                    ctxt%iaero(i) = n
-                endif
-            end do
-        end do
-        return
+                if (ctxt%xiaero(n)<=ctxt%xi(i)) ctxt%iaero(i) = n
+            enddo
+        enddo
     end
 
     subroutine getaero(ctxt, n, xisect, a0, clmax, clmin, &
@@ -71,11 +73,17 @@ contains
         !     Gets aero data from stored section array
         !---------------------------------------------
         use i_common, only : Common, show_output
-        implicit real(m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real A0, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, DCLDA, DCLDA_STALL, &
+                & DCL_STALL, MCRIT, REREF, REXP, XISECT
+        integer N
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !
-        if(n < 1 .or. n > ctxt%naero) then
-            if (show_output) write(*, *) 'Error: index of aero section out of bounds'
+        if (n<1.or.n>ctxt%naero) then
+            if (show_output) write (*, *)                                       &
+                    &'Error: index of aero section out of bounds'
             return
         endif
         !
@@ -94,7 +102,6 @@ contains
         mcrit = ctxt%aerodata(13, n)
         xisect = ctxt%xiaero(n)
         !
-        return
     end
 
     subroutine putaero(ctxt, n, xisect, a0, clmax, clmin, &
@@ -104,11 +111,16 @@ contains
         !     Puts aero data into stored section array at index n
         !--------------------------------------------------------
         use i_common, only : Common, show_output, nax
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real A0, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, DCLDA, DCLDA_STALL, &
+                & DCL_STALL, MCRIT, REREF, REXP, XISECT
+        integer N
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         !
-        if(n > nax) then
-            if (show_output) write(*, *) 'Too many aero sections defined...'
+        if (n>nax) then
+            if (show_output) write (*, *) 'Too many aero sections defined...'
             return
         endif
         !
@@ -127,7 +139,6 @@ contains
         ctxt%aerodata(13, n) = mcrit
         ctxt%xiaero(n) = xisect
         !
-        return
     end
 
 
@@ -149,25 +160,34 @@ contains
         !       cm(alpha) interpolation function for blade at station is
         !-------------------------------------------------------------
         use i_common, only : Common, show_output
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real A0, ALF, CDMIN, CDRAG, CDRAG2, CD_ALF, CD_ALF2, CD_REY, CD_REY2, &
+                & CD_W, CD_W2, CLDMIN, CLIFT, CLIFT2, CLMAX, CLMAX2, CLMIN, CLMIN2, &
+                & CL_ALF, CL_ALF2
+        real CL_W, CL_W2, CMCON, CMOM, CMOM2, CM_AL, CM_AL2, CM_W, CM_W2, DCDCL2, &
+                & DCLDA, DCLDA_STALL, DCL_STALL, DCL_STALL2, FRAC, MCRIT, REREF, REXP, &
+                & REY, W
+        real XISECT1, XISECT2
+        integer IS, N
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         logical stallf, stallf2
         !
         !--- Check for installed aero data section index
         n = ctxt%iaero(is)
-        if(n < 1 .or. n > ctxt%naero) then
+        if (n<1.or.n>ctxt%naero) then
             !
-            if(ctxt%naero > 1) then
+            if (ctxt%naero>1) then
                 !--- Find lower index of aero data sections xiaero(n) bounding xi(is)
                 do n = 1, ctxt%naero
-                    if(ctxt%xiaero(n) <= ctxt%xi(is)) then
-                        !c          write(*,*) 'getcl iaero= ',n,' is= ',is,xiaero(n),xi(is)
-                        ctxt%iaero(is) = n
-                    else
-                        go to 10
-                    endif
-                end do
-                if (show_output) write(*, *) 'aero section not found for station ', ctxt%xi(is)
+                    if (ctxt%xiaero(n)>ctxt%xi(is)) goto 100
+                    !c          write(*,*) 'getcl iaero= ',n,' is= ',is,xiaero(n),xi(is)
+                    ctxt%iaero(is) = n
+                enddo
+                if (show_output) write (*, *)                                   &
+                        &'aero section not found for station '&
+                        &, ctxt%xi(is)
             endif
             !
             n = 1
@@ -175,7 +195,7 @@ contains
         endif
         !
         !--- Get section aero data from stored section array
-        10   a0 = ctxt%aerodata(1, n)
+        100   a0 = ctxt%aerodata(1, n)
         clmax = ctxt%aerodata(2, n)
         clmin = ctxt%aerodata(3, n)
         dclda = ctxt%aerodata(4, n)
@@ -199,10 +219,10 @@ contains
         !
         !--- Check for another bounding section, if not we are done,
         !    if we have another section linearly interpolate data to station is
-        if(n < ctxt%naero) then
+        if (n<ctxt%naero) then
             xisect2 = ctxt%xiaero(n + 1)
             frac = (ctxt%xi(is) - xisect1) / (xisect2 - xisect1)
-            if(frac <= 0.0 .or. frac > 1.0) then
+            if (frac<=0.0.or.frac>1.0) then
                 !c         write(*,*) 'cl n,is,xi,frac = ',n,is,xi(is),frac
             endif
             !
@@ -245,7 +265,6 @@ contains
             cd_rey = (1.0 - frac) * cd_rey + frac * cd_rey2
         endif
         !
-        return
     end
 
 
@@ -255,11 +274,17 @@ contains
         !     Uses Newton-Raphson iteration to get alf from cl function
         !------------------------------------------------------------
         use i_common, only : Common, show_output
-        implicit real (m)
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real A0, ALF, ALF_CL, ALF_W, CDRAG, CD_ALF, CD_REY, CD_W, CLIFT, CLMAX, &
+                & CLMIN, CLTEMP, CL_ALF, CL_W, CMOM, CM_AL, CM_W, DALF, DCL_STALL, EPS
+        integer IS, ITER, NITER
+        real REY, W
+        !*** End of declarations inserted by SPAG
         logical stallf
-        data niter / 10 /
-        data eps   / 1.0e-5 /
-        type(Common), intent(inout) :: ctxt
+        data niter/10/
+        data eps/1.0E-5/
+        type (Common), intent(inout) :: ctxt
         !
         stallf = .false.
         !
@@ -279,15 +304,14 @@ contains
             alf = alf + dalf
             alf_cl = 1.0 / cl_alf
             alf_w = -cl_w / cl_alf
-            if(abs(dalf) < eps) return
-        end do
+            if (abs(dalf)<eps) return
+        enddo
         !
         if (show_output) write(*, *) 'getalf: alpha(ctxt%cl) function inversion failed'
         !      write(*,*) 'is,clift  ',is,clift
         !      write(*,*) 'abs(dalf) ',abs(dalf)
         !      write(*,*) 'cl_alf    ',cl_alf
         !
-        return
     end
     ! getalf
 
@@ -326,8 +350,20 @@ contains
         !------------------------------------------------------------
         !
         use i_common, only : Common, show_output
-        implicit real (m)
-        type(Common), intent(inout) :: ctxt
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        real A0, ALF, CDC, CDC_ALF, CDC_W, CDMDD, CDMFACTOR, CDMIN, CDMSTALL, &
+                & CDRAG, CD_ALF, CD_REY, CD_W, CLA, CLA_ALF, CLA_W, CLDMIN, CLIFT, &
+                & CLLIM, CLLIM_CLA
+        real CLMAX, CLMAXM, CLMFACTOR, CLMIN, CLMINM, CLMN, CLMX, CL_ALF, CL_W, &
+                & CMCON, CMOM, CM_AL, CM_W, CRITMACH, CRITMACH_ALF, CRITMACH_W, DCD, &
+                & DCDCL2, DCDX, DCD_ALF
+        real DCD_W, DCLDA, DCLDA_STALL, DCL_STALL, DMDD, DMSTALL, FAC, FAC_W, &
+                & FSTALL, MACH, MACH_W, MCRIT, MEXP, MSQ, MSQ_W, PG, PG_W, RCORR, &
+                & RCORR_REY, REREF
+        real REXP, REY, W
+        !*** End of declarations inserted by SPAG
+        type (Common), intent(inout) :: ctxt
         logical stallf
         double precision ecmin, ecmax
         !
@@ -358,7 +394,7 @@ contains
         !---- Mach number and dependence on velocity
         mach = sqrt(msq)
         mach_w = 0.0
-        if(mach /= 0.0) mach_w = 0.5 * msq_w / mach
+        if (mach/=0.0) mach_w = 0.5 * msq_w / mach
         !
         !
         !------------------------------------------------------------
@@ -378,9 +414,9 @@ contains
         clmin = max(clmin, clminm)
         !
         !--- cl limiter function (turns on after +-stall
-        ecmax = dexp(min(200.0d0, dble((cla - clmax) / dcl_stall)))
-        ecmin = dexp(min(200.0d0, dble((clmin - cla) / dcl_stall)))
-        cllim = dcl_stall * dlog((1.0d0 + ecmax) / (1.0d0 + ecmin))
+        ecmax = dexp(min(200.0D0, dble((cla - clmax) / dcl_stall)))
+        ecmin = dexp(min(200.0D0, dble((clmin - cla) / dcl_stall)))
+        cllim = dcl_stall * dlog((1.0D0 + ecmax) / (1.0D0 + ecmin))
         cllim_cla = ecmax / (1.0 + ecmax) + ecmin / (1.0 + ecmin)
         !
         !      if(cllim > 0.001) then
@@ -397,8 +433,8 @@ contains
         cl_w = cla_w - (1.0 - fstall) * cllim_cla * cla_w
         !
         stallf = .false.
-        if(clift > clmax) stallf = .true.
-        if(clift < clmin) stallf = .true.
+        if (clift>clmax) stallf = .true.
+        if (clift<clmin) stallf = .true.
         !
         !
         !------------------------------------------------------------
@@ -412,7 +448,7 @@ contains
         !--- cd from profile drag, stall drag and compressibility drag
         !
         !---- Reynolds number scaling factor
-        if(rey <= 0) then
+        if (rey<=0) then
             rcorr = 1.0
             rcorr_rey = 0.0
         else
@@ -432,10 +468,8 @@ contains
         dcdx = (1.0 - fstall) * cllim / (pg * dclda)
         !      write(*,*) 'cla,cllim,fstall,pg,dclda ',cla,cllim,fstall,pg,dclda
         dcd = 2.0 * dcdx**2
-        dcd_alf = 4.0 * dcdx * &
-                (1.0 - fstall) * cllim_cla * cla_alf / (pg * dclda)
-        dcd_w = 4.0 * dcdx * &
-                ((1.0 - fstall) * cllim_cla * cla_w / (pg * dclda) - dcd / pg * pg_w)
+        dcd_alf = 4.0 * dcdx * (1.0 - fstall) * cllim_cla * cla_alf / (pg * dclda)
+        dcd_w = 4.0 * dcdx * ((1.0 - fstall) * cllim_cla * cla_w / (pg * dclda) - dcd / pg * pg_w)
         !      write(*,*) 'alf,cl,dcd,dcd_alf,dcd_w ',alf,clift,dcd,dcd_alf,dcd_w
         !
         !--- Compressibility drag (accounts for drag rise above Mcrit with cl effects
@@ -445,14 +479,14 @@ contains
         critmach = mcrit - clmfactor * abs(clift - cldmin) - dmdd
         critmach_alf = -clmfactor * abs(cl_alf)
         critmach_w = -clmfactor * abs(cl_w)
-        if(mach < critmach) then
+        if (mach<critmach) then
             cdc = 0.0
             cdc_alf = 0.0
             cdc_w = 0.0
         else
             cdc = cdmfactor * (mach - critmach)**mexp
             cdc_w = mexp * mach_w * cdc / mach - mexp * critmach_w * cdc / critmach
-            cdc_alf = - mexp * critmach_alf * cdc / critmach
+            cdc_alf = -mexp * critmach_alf * cdc / critmach
         endif
         !      write(*,*) 'critmach,mach ',critmach,mach
         !      write(*,*) 'cdc,cdc_w,cdc_alf ',cdc,cdc_w,cdc_alf
@@ -470,8 +504,7 @@ contains
         cd_w = fac * cd_w + fac_w * cdrag + dcd_w + cdc_w
         cd_rey = fac * cd_rey
         !
-        return
     end
     ! clcdcm
 
-end module m_xaero
+end

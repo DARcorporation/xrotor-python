@@ -1,9 +1,10 @@
+!*==M_VORTEX.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
 !
 !   This file is part of XRotor.
-! 
+!
 !   XRotor is free software: you can redistribute it and/or modify
 !   it under the terms of the GNU General Public License as published by
 !   the Free Software Foundation, either version 3 of the License, or
@@ -19,10 +20,19 @@
 !***********************************************************************
 
 module m_vortex
+    implicit none
 contains
     subroutine vrtxco(imax, ii, nblds, lduct, rake, &
             xi, xv, gam, adw, vind_gam, vind_adw)
         use i_common, only : show_output, pi
+        !*** Start of declarations inserted by SPAG
+        real A, ADW, B, BLDS, DDTH1, DDTH2, DTBLD, DTH, DTH1, DTH2, DTH3, GAM, &
+                & R0X, R0Y, R0Z, R1X, R1Y, R1Z, R1_ADW, R2X
+        real R2Y, R2Z, R2_ADW, RAD1, RAD2, RAD3, RAKE, RV, TANRAK, THET, THET1, &
+                & THET2, THET3, THETOFF, THETSPC, UVW, UVW_A, UVW_B, VADW, VIND_ADW
+        real VIND_GAM, VSUM, XI, XI0, XITIP, XV, XXV
+        integer I, II, IMAX, J, L, N, N1, N2, NBLDS, NTDIM, NTHET
+        !*** End of declarations inserted by SPAG
         !
         parameter (ntdim = 5000)
         dimension xi(imax), xv(imax), gam(imax)
@@ -91,28 +101,27 @@ contains
         thet = 0.0
         dth = dth1
         do i = 1, ntdim
-            if(thet < thet1) then
+            if (thet<thet1) then
                 thetspc(i) = thet
                 thet = thet + dth
                 dth = dth + ddth1
-            elseif(thet < thet2) then
+            elseif (thet<thet2) then
                 thetspc(i) = thet
                 thet = thet + dth
                 dth = dth + ddth2
-            elseif(thet < thet3) then
+            elseif (thet<thet3) then
                 thetspc(i) = thet
                 dth = dth3
                 thet = thet + dth
             else
                 nthet = i - 1
-                go to 100
+                goto 100
             endif
-        end do
+        enddo
         if (show_output) write(*, *) 'Too many vortex segments for spacing array'
         nthet = ntdim
-        100  continue
         !
-        if(lduct) then
+        100   if (lduct) then
             !----- use simple mean swirl to get swirl at blade
             do i = 1, ii
                 do j = 1, ii
@@ -131,8 +140,8 @@ contains
             !
             !----- Do a discrete vortex integration of slipstream vortices
             dtbld = 2.0 * pi / float(nblds)
-            if (show_output) write(*, 20) nblds * nthet
-            20    format(/'Vortex points/radial station = ', i6)
+            if (show_output) write (*, 99001) nblds * nthet
+            99001      format (/'Vortex points/radial station = ', i6)
             !
             !--- velocity influences for point - r0
             do i = 1, ii
@@ -206,14 +215,14 @@ contains
                             !                write(88,10) r1x,r1y,r1z
                             !                write(*,10) 'r1 ',i,j,n,l,r2x,r2y,r2z
                             !               endif
-                            10            format(3f10.3)
-                            12            format(a, 2i6, 2f10.3)
+                            99002                      format (3F10.3)
+                            99003                      format (a, 2I6, 2F10.3)
 
-                        end do ! l loop
+                        enddo   ! l loop
                         !
                         thetoff = thetoff + dtbld
                         !
-                    end do ! n loop
+                    enddo   ! n loop
                     !
                     vsum(3) = -vsum(3)
                     vadw(3) = -vadw(3)
@@ -221,7 +230,7 @@ contains
                     !     influence matrix
                     !
                     !---Open wake, interdigitate all vortex lines
-                    if(j <= ii) then
+                    if (j<=ii) then
                         vind_gam(1, i, j) = -vsum(1)
                         vind_gam(2, i, j) = -vsum(2)
                         vind_gam(3, i, j) = -vsum(3)
@@ -229,7 +238,7 @@ contains
                         vind_adw(2, i) = vind_adw(2, i) - vadw(2) * gam(j)
                         vind_adw(3, i) = vind_adw(3, i) - vadw(3) * gam(j)
                     endif
-                    if(j > 1) then
+                    if (j>1) then
                         vind_gam(1, i, j - 1) = vind_gam(1, i, j - 1) + vsum(1)
                         vind_gam(2, i, j - 1) = vind_gam(2, i, j - 1) + vsum(2)
                         vind_gam(3, i, j - 1) = vind_gam(3, i, j - 1) + vsum(3)
@@ -238,18 +247,23 @@ contains
                         vind_adw(3, i) = vind_adw(3, i) + vadw(3) * gam(j - 1)
                     endif
                     !
-                end do ! j loop
+                enddo   ! j loop
                 !
-            end do ! i loop
+            enddo   ! i loop
             !
         endif
         !
-        return
     end
     ! vrtxco
 
 
     subroutine vorsegvel(a, b, uvw, uvw_a, uvw_b)
+        !*** Start of declarations inserted by SPAG
+        real A, ADB, AMAG, ASQ, AXB, AXB_A, AXB_B, B, BMAG, BSQ, DEN, DEN_ASQ, &
+                & DEN_BSQ, PI4, T, T_ADB, T_ASQ, T_BSQ, UVW, UVW_A
+        real UVW_B
+        integer K, L
+        !*** End of declarations inserted by SPAG
         !-------------------------------------------------------------------
         !     Calculates the velocity induced by a vortex segment
         !     of unit strength, with no core radius.
@@ -273,7 +287,7 @@ contains
         !
         dimension axb(3), axb_a(3, 3), axb_b(3, 3)
         !
-        data pi4  / 12.56637062 /
+        data pi4/12.56637062/
         !
         asq = a(1)**2 + a(2)**2 + a(3)**2
         bsq = b(1)**2 + b(2)**2 + b(3)**2
@@ -290,7 +304,7 @@ contains
         enddo
         !
         !---- contribution from the vortex leg
-        if (amag * bmag /= 0.0) then
+        if (amag * bmag/=0.0) then
             axb(1) = a(2) * b(3) - a(3) * b(2)
             axb(2) = a(3) * b(1) - a(1) * b(3)
             axb(3) = a(1) * b(2) - a(2) * b(1)
@@ -349,8 +363,7 @@ contains
             enddo
         enddo
         !
-        return
     end
     ! vorvel
 
-end module m_vortex
+end

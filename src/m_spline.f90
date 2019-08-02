@@ -1,3 +1,4 @@
+!*==M_SPLINE.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -43,10 +44,10 @@ contains
         n = min(size(s), size(x))
         allocate (xs(n))
 
-        if(n == 1) then
+        if (n==1) then
             xs(1) = 0.
             return
-        end if
+        endif
 
         allocate (a(n), b(n), c(n))
 
@@ -60,7 +61,7 @@ contains
             a(i) = 2.0 * (dsm + dsp)
             c(i) = dsm
             xs(i) = 3.0 * ((x(i + 1) - x(i)) * dsm / dsp + (x(i) - x(i - 1)) * dsp / dsm)
-        end do
+        enddo
 
         !---- set zero second derivative end conditions
         a(1) = 2.0
@@ -100,10 +101,10 @@ contains
         n = min(size(s), size(x))
         allocate (xs(n))
 
-        if (n == 1) then
+        if (n==1) then
             xs(1) = 0.
             return
-        end if
+        endif
 
         allocate (a(n), b(n), c(n))
 
@@ -114,15 +115,15 @@ contains
             a(i) = 2.0 * (dsm + dsp)
             c(i) = dsm
             xs(i) = 3.0 * ((x(i + 1) - x(i)) * dsm / dsp + (x(i) - x(i - 1)) * dsp / dsm)
-        end do
+        enddo
 
         !---- set left end condition
-        if(xs1 == 999.0) then
+        if (xs1==999.0) then
             !----- zero 2nd derivative
             a(1) = 2.0
             c(1) = 1.0
             xs(1) = 3.0 * (x(2) - x(1)) / (s(2) - s(1))
-        else if(xs1 == -999.0) then
+        elseif (xs1==-999.0) then
             !----- set zero 3rd derivative
             a(1) = 1.0
             c(1) = 1.0
@@ -135,12 +136,12 @@ contains
         endif
 
         !---- set right end condition
-        if(xs2 == 999.0) then
+        if (xs2==999.0) then
             !----- zero 2nd derivative
             b(n) = 1.0
             a(n) = 2.0
             xs(n) = 3.0 * (x(n) - x(n - 1)) / (s(n) - s(n - 1))
-        else if(xs2 == -999.0) then
+        elseif (xs2==-999.0) then
             !----- zero 3rd derivative
             b(n) = 1.0
             a(n) = 1.0
@@ -153,7 +154,7 @@ contains
         endif
 
         !---- if only two points, cannot have zero third derivatives at both ends
-        if(n == 2 .and. xs1 == -999.0 .and. xs2 == -999.0) then
+        if (n==2.and.xs1==-999.0.and.xs2==-999.0) then
             !----- set zero 2nd derivative at right end (left end will also be zero)
             b(n) = 1.0
             a(n) = 2.0
@@ -189,15 +190,15 @@ contains
         n = min(size(s), size(x))
         allocate (xs(n))
 
-        if (n == 1) then
+        if (n==1) then
             xs(1) = 0.
             return
-        end if
+        endif
 
         lend = .true.
         do i = 1, n - 1
             ds = s(i + 1) - s(i)
-            if (ds == 0.) then
+            if (ds==0.) then
                 xs(i) = xs1
                 lend = .true.
             else
@@ -211,7 +212,7 @@ contains
                 endif
             endif
             xs1 = xs2
-        end do
+        enddo
         xs(n) = xs1
     end
     ! splina
@@ -239,17 +240,17 @@ contains
             d(km) = d(km) / a(km)
             a(k) = a(k) - b(k) * c(km)
             d(k) = d(k) - b(k) * d(km)
-        end do
+        enddo
 
         d(kk) = d(kk) / a(kk)
 
         do k = kk - 1, 1, -1
             d(k) = d(k) - c(k) * d(k + 1)
-        end do
+        enddo
     end
     ! trisol
 
-    real function seval(ss, x, xs, s) result(val)
+    real function seval(ss, x, xs, s)result(val)
         real, intent(in) :: ss, x(:), xs(:), s(:)
         integer :: i, ilow, imid, n
         real :: ds, t, cx1, cx2
@@ -258,7 +259,7 @@ contains
         !     xs array must have been calculated by spline |
         !--------------------------------------------------
         n = min(size(x), size(xs), size(s))
-        if(n == 1) then
+        if (n==1) then
             val = x(1)
             return
         endif
@@ -266,14 +267,14 @@ contains
         ilow = 1
         i = n
 
-        do while (i - ilow > 1)
+        do while (i - ilow>1)
             imid = (i + ilow) / 2
-            if(ss < s(imid)) then
+            if (ss<s(imid)) then
                 i = imid
             else
                 ilow = imid
             endif
-        end do
+        enddo
 
         ds = s(i) - s(i - 1)
         t = (ss - s(i - 1)) / ds
@@ -292,7 +293,7 @@ contains
         !     xs array must have been calculated by spline |
         !--------------------------------------------------
         n = min(size(x), size(xs), size(s))
-        if(n == 1) then
+        if (n==1) then
             val = x(1)
             return
         endif
@@ -300,14 +301,14 @@ contains
         ilow = 1
         i = n
 
-        do while (i - ilow > 1)
+        do while (i - ilow>1)
             imid = (i + ilow) / 2
-            if(ss < s(imid)) then
+            if (ss<s(imid)) then
                 i = imid
             else
                 ilow = imid
             endif
-        end do
+        enddo
 
         ds = s(i) - s(i - 1)
         t = (ss - s(i - 1)) / ds
@@ -329,25 +330,25 @@ contains
         !     defined by identical successive s values. |
         !-----------------------------------------------
         n = min(size(s), size(x))
-        if(n == 1) then
+        if (n==1) then
             xs(1) = 0.
             return
         endif
 
-        if(s(1) == s(2)) stop 'segspl:  First input point duplicated'
-        if(s(n) == s(n - 1)) stop 'segspl:  Last  input point duplicated'
+        if (s(1)==s(2)) stop 'segspl:  First input point duplicated'
+        if (s(n)==s(n - 1)) stop 'segspl:  Last  input point duplicated'
 
         iseg0 = 1
         do iseg = 2, n - 2
-            if(s(iseg) == s(iseg + 1)) then
+            if (s(iseg)==s(iseg + 1)) then
                 nseg = iseg - iseg0 + 1
                 xs(iseg0:iseg0 + nseg) = splind(s(iseg0:iseg0 + nseg), x(iseg0:iseg0 + nseg), -999.0, -999.0)
                 iseg0 = iseg + 1
             endif
-        end do
+        enddo
 
         nseg = n - iseg0 + 1
         xs(iseg0:iseg0 + nseg) = splind(s(iseg0:iseg0 + nseg), x(iseg0:iseg0 + nseg), -999.0, -999.0)
     end
     ! segspl
-end module m_spline
+end

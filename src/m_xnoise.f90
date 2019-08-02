@@ -1,3 +1,4 @@
+!*==M_XNOISE.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -19,6 +20,7 @@
 !***********************************************************************
 
 module m_xnoise
+    implicit none
 contains
 
 
@@ -56,20 +58,32 @@ contains
         !                  (over one blade-passing period, non-uniformly spaced)
         !
         !------------------------------------------------------------------------
+
         use i_common, only : show_output, pi
         use m_spline, only : seval
-
-        implicit real(a-h, m, o-z)
+        implicit real(A-H, M, O-Z)
+        !*** Start of declarations inserted by SPAG
+        real ADV, AOC, BPTIME, CH, COST, DXI, FDOTM, FX, FXT, FY, FYT, FZ, FZT, &
+                & GAM, MACH, MAX, MAXT, MAXTT, MAY, MAYT
+        real MAYTT, MAZ, MAZT, MAZTT, MDOTM, MOR, MORT, MORTT, MR, MRI, MRIT, &
+                & MRITT, MRT, MRTT, MTIP, OMEGA, PAVG, PEL, PEL_T, PINT
+        real PLFF, PLNF, PRES, PSUM, PTU, R, RAD, RDOTF, RDOTFT, RDOTMT, RHO, &
+                & RHOVR, ROBS, ROTIME, RT, RTT, SINT, TAU
+        real TDELAY, TEL, TEL0, TELB, TELN, TH, THOBS, TIME, TIME0, TMID, TOB, &
+                & TOFF, VEL, VR, VSO, X, XI, XN, XOBS, XT
+        real XTT, XX, Y, YN, YOBS, YT, YTT, Z, ZN, ZOBS, ZT, ZTT
+        integer I, IB, II, IT, L, NBLDS, NT, NTMAX
+        !*** End of declarations inserted by SPAG
         !
         dimension aoc(ii), xi(ii), dxi(ii), ch(ii), gam(ii)
         dimension pres(0:ntmax, 3), time(0:ntmax)
         !
-        parameter (ntx = 160, ix = 40)
+        integer, parameter :: ntx = 160, ix = 40
         dimension pel(0:ntx, ix, 3), tel(0:ntx, ix), pel_t(0:ntx, ix)
         !
         !
-        if(ii > ix) stop 'ptrace: Array overflow. ix too small.'
-        if(nt > ntx) stop 'ptrace: Array overflow. ntx too small.'
+        if (ii>ix) stop 'ptrace: Array overflow. ix too small.'
+        if (nt>ntx) stop 'ptrace: Array overflow. ntx too small.'
         !
         !---- prop rotational speed
         omega = vel / (adv * rad)
@@ -125,9 +139,7 @@ contains
                 xtt = 0.
                 ytt = -vel * xx * sint * omega
                 ztt = vel * xx * cost * omega
-                rtt = (x * xtt + y * ytt + z * ztt) / r&
-                        + (xt * xt + yt * yt + zt * zt) / r&
-                        - rt * rt / r
+                rtt = (x * xtt + y * ytt + z * ztt) / r + (xt * xt + yt * yt + zt * zt) / r - rt * rt / r
                 !
                 !-------- Mach number components of blade element relative to still air
                 max = mach
@@ -157,10 +169,10 @@ contains
                 !-------- Mach number component along blade element --> observer direction
                 mr = (x * max + y * may + z * maz) / r
                 !
-                if(mr >= 1.0) then
-                    if (show_output) write(*, 5500) mr, xi(i), (th * 180.0 / pi)
-                    5500      format(/' warning.  Relative approach Mach number =', f6.3, &
-                            '  at r/r =', f6.3, '    theta =', f6.1, ' deg.')
+                if (mr>=1.0) then
+                    if (show_output) write (*, 99001) mr, xi(i), (th * 180.0 / pi)
+                    99001              format (/' warning.  Relative approach Mach number =', f6.3, &
+                            &'  at r/r =', f6.3, '    theta =', f6.1, ' deg.')
                     mr = 0.995
                 endif
                 !
@@ -209,8 +221,8 @@ contains
                 tob = tau + r / vso
                 tel(it, i) = tob - tdelay
                 !
-            end do
-        end do
+            enddo
+        enddo
         !
         !
         !---- make sure pressure is exactly periodic
@@ -262,27 +274,29 @@ contains
                         !
                         !------------ remove whole multiples of blade period to get into spline range
                         toff = tel0 + amod((telb - tel0), (teln - tel0))
-                        if(toff < tel0) toff = toff + (teln - tel0)
+                        if (toff<tel0) toff = toff + (teln - tel0)
                         !
-                        if(toff < tel0 .or. toff > teln) then
-                            if (show_output) write(*, *) '? ptrace: Time out of spline range.'
-                            if (show_output) write(*, *) 't   t0   tn', toff, tel0, teln
+                        if (toff<tel0.or.toff>teln) then
+                            if (show_output) write (*, *)                       &
+                                    &'? ptrace: Time out of spline range.'
+                            if (show_output) write (*, *) 't   t0   tn', toff, &
+                                    & tel0, teln
                         endif
                         !
                         ! todo: test this
                         ! psum = psum + seval_old(toff, pel(0, i, l), pel_t(0, i), tel(0, i), nt + 1)
                         psum = psum + seval(toff, pel(0:nt, i, l), pel_t(0:nt, i), tel(0:nt, i))
                     enddo
-                end do
+                enddo
                 !
                 !-------- set total pressure signal at current observer time
                 pres(it, l) = psum
                 !
-            end do
+            enddo
             !
             !------ make sure pressure is exactly periodic
             pres(0, l) = pres(nt, l)
-        end do
+        enddo
         !
         time0 = time(0)
         do it = 0, nt
@@ -302,13 +316,16 @@ contains
             enddo
         enddo
         !
-        return
     end
 
 
     subroutine sft(y, t, n, fampl, phase, nf)
-        use i_common, only: pi
-        use i_common, only: pi
+        use i_common, only : pi
+        use i_common, only : pi
+        !*** Start of declarations inserted by SPAG
+        real COST, CSUM, DT, FAMPL, OMEGA, PHASE, RK, SINT, SSUM, T, TK, Y
+        integer I, IO, IP, K, N, NF
+        !*** End of declarations inserted by SPAG
         dimension y(n), t(n)
         dimension fampl(nf), phase(nf)
         !---------------------------------------------------
@@ -321,7 +338,7 @@ contains
         !---------------------------------------------------
         dimension sint(361), cost(361)
         !
-        if(n + 1 > 361) stop 'sft: Array overflow'
+        if (n + 1>361) stop 'sft: Array overflow'
         !
         ! pi = 4.0 * atan(1.0)
         !
@@ -334,7 +351,7 @@ contains
                 tk = omega * rk * t(i)
                 sint(i) = sin(tk)
                 cost(i) = cos(tk)
-            end do
+            enddo
             sint(n + 1) = sint(1)
             cost(n + 1) = cost(1)
             !
@@ -345,29 +362,32 @@ contains
                 dt = t(ip) - t(io)
                 ssum = ssum + 0.5 * (sint(io) * y(io) + sint(ip) * y(ip)) * dt
                 csum = csum + 0.5 * (cost(io) * y(io) + cost(ip) * y(ip)) * dt
-            end do
+            enddo
             !
             fampl(k) = sqrt(ssum**2 + csum**2) * omega / pi
             phase(k) = atan2(ssum, csum)
-        end do
+        enddo
         !
-        return
     end
     ! sft
 
 
     subroutine psplin(x, xp, s, ii)
+        !*** Start of declarations inserted by SPAG
+        real A, B, C, DSMI, DSPI, DXM, DXP, S, X, XP
+        integer I, II
+        !*** End of declarations inserted by SPAG
         !
         dimension x(ii), xp(ii), s(ii)
         dimension a(480), b(480), c(480)
         !
-        if(ii > 480)     stop 'psplin: Array overflow'
-        if(x(ii) /= x(1)) stop 'psplin: Data not periodic'
+        if (ii>480) stop 'psplin: Array overflow'
+        if (x(ii)/=x(1)) stop 'psplin: Data not periodic'
         !
         do i = 1, ii - 1
             !
             !------ Periodic point
-            if(i == 1) then
+            if (i==1) then
                 dsmi = 1.0 / (s(ii) - s(ii - 1))
                 dxm = x(ii) - x(ii - 1)
                 dspi = 1.0 / (s(i + 1) - s(i))
@@ -386,17 +406,20 @@ contains
             c(i) = dspi
             xp(i) = 3.0 * (dxp * dspi**2 + dxm * dsmi**2)
             !
-        end do
+        enddo
         !
         call ptriso(a, b, c, xp, ii - 1)
         !
         xp(ii) = xp(1)
         !
-        return
     end
 
 
     subroutine ptriso(a, b, c, d, kk)
+        !*** Start of declarations inserted by SPAG
+        real A, AINV, B, C, D
+        integer K, KK, KM
+        !*** End of declarations inserted by SPAG
         !
         dimension a(kk), b(kk), c(kk), d(kk)
         !
@@ -408,12 +431,12 @@ contains
             b(km) = b(km) * ainv
             a(k) = a(k) - b(k) * c(km)
             d(k) = d(k) - b(k) * d(km)
-            if(k < kk) then
-                b(k) = - b(k) * b(km)
+            if (k<kk) then
+                b(k) = -b(k) * b(km)
             else
                 a(k) = a(k) - b(k) * b(km)
             endif
-        end do
+        enddo
         !
         c(kk) = c(kk) / a(kk)
         d(kk) = d(kk) / a(kk)
@@ -421,16 +444,15 @@ contains
         do k = kk, 2, -1
             km = k - 1
             d(km) = d(km) - c(km) * d(k) - b(km) * d(kk)
-            c(km) = - c(km) * c(k) - b(km) * c(kk)
-        end do
+            c(km) = -c(km) * c(k) - b(km) * c(kk)
+        enddo
         !
         d(1) = d(1) / (1.0 + c(1))
         !
         do k = 2, kk
             d(k) = d(k) - c(k) * d(1)
-        end do
+        enddo
         !
-        return
     end
 
 
@@ -439,6 +461,12 @@ contains
             galt, dclimb, unitl, nt, &
             nxdim, nydim, nx, ny, x, y, d)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        real ADV, AOC, CH, COSC, D, DCLIMB, DELT, DELY, DTR, DXI, GALT, GAM, &
+                & PAVG, PCOMP, PRES, PRMS, RAD, RHO, SINC, TIME
+        real UNITL, VEL, VSO, X, XG, XI, XOBS, Y, YG, YOBS, ZG, ZOBS
+        integer I, II, IT, J, J0, JPOS, NBLDS, NT, NTX, NX, NXDIM, NY, NYDIM
+        !*** End of declarations inserted by SPAG
         !--------------------------------------------------------
         !     Calculates db noise levels on a ground plane grid.
         !
@@ -487,14 +515,13 @@ contains
         !---- find j index of y=0 line
         dely = abs(y(1, ny) - y(1, 1))
         do j0 = 1, ny
-            if(y(1, j0) > -0.0001 * dely) go to 5
+            if (y(1, j0)>-0.0001 * dely) goto 100
         enddo
         j0 = 1
-        5    continue
         !
-        do i = 1, nx
-            if (show_output) write(*, 1300) i, nx
-            1300   format(5x, i3, ' /', i3)
+        100   do i = 1, nx
+            if (show_output) write (*, 99001) i, nx
+            99001      format (5x, i3, ' /', i3)
             !
             do j = j0, ny
                 !-------- set observer position assuming airplane is level
@@ -508,10 +535,8 @@ contains
                 zobs = -sinc * xg + cosc * zg
                 !
                 !-------- calculate p(t) pressure signature
-                call ptrace(xobs, yobs, zobs, &
-                        nblds, ii, xi, dxi, aoc, ch, gam, &
-                        adv, rad, vel, vso, rho, &
-                        ntx, nt, pcomp, time)
+                call ptrace(xobs, yobs, zobs, nblds, ii, xi, dxi, aoc, ch, gam, adv, rad, &
+                        & vel, vso, rho, ntx, nt, pcomp, time)
                 do it = 0, nt
                     pres(it) = pcomp(it, 1) + pcomp(it, 2) + pcomp(it, 3)
                 enddo
@@ -525,8 +550,8 @@ contains
                 enddo
                 prms = sqrt(prms / (time(nt) - time(0)))
                 !
-                d(i, j) = 20.0 * alog10(prms / 20.0e-6)
-            end do
+                d(i, j) = 20.0 * alog10(prms / 20.0E-6)
+            enddo
             !
             !------ set values for negative y by symmetry
             do j = 1, j0 - 1
@@ -534,8 +559,7 @@ contains
                 d(i, j) = d(i, jpos)
             enddo
             !
-        end do
+        enddo
         !
-        return
     end
-end module m_xnoise
+end

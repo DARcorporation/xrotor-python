@@ -1,3 +1,4 @@
+!*==P_XROTOR.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -18,8 +19,13 @@
 !   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 !***********************************************************************
 module p_xrotor
+    implicit none
 contains
-    subroutine rotor()    !
+    subroutine rotor() !
+
+        !--- module statement for Windoze dvFortran
+        !cc   use dflib
+        !
         use m_xio, only : save, load
         use p_xnoise, only : noise
         use m_xoper, only : shocas, getcas
@@ -27,13 +33,13 @@ contains
         use p_xoper, only : oper
         use p_xbend, only : bend
         use m_userio, only : getflt, askc, getint
-
-        !--- module statement for Windoze dvFortran
-        !cc   use dflib
-        !
-        use i_common, only : Common, show_output
-        implicit real (m)
-        type(Common) :: ctxt
+        use i_common, only : Common, show_output, nparx
+        implicit real(M)
+        !*** Start of declarations inserted by SPAG
+        integer I, IARGC, IINPUT, KF, NARG, NINPUT
+        real RINPUT
+        !*** End of declarations inserted by SPAG
+        type (Common) :: ctxt
         character*7 comand
         character*128 comarg
         !
@@ -58,13 +64,18 @@ contains
         ctxt%version = 7.55
         !
         !---- logical unit numbers
-        ctxt%luread = 5    ! terminal read
-        ctxt%luwrit = 6    ! terminal write
-        ctxt%lutemp = 3    ! general-use disk i/o unit  (usually available)
-        ctxt%lusave = 4    ! save file                  (usually open)
+        ctxt%luread = 5     ! terminal read
+        ctxt%luwrit = 6     ! terminal write
+        ctxt%lutemp = 3     ! general-use disk i/o unit  (usually available)
+        ctxt%lusave = 4     ! save file                  (usually open)
         !
         !
-        if (show_output) write(*, 1000) ctxt%version
+        if (show_output) write (*, 99001) ctxt%version
+        !
+        !.....................................................................
+        !
+        99001  format (/' ========================='/'    xrotor Version', &
+                &f5.2/' =========================')
         !
         call init_(ctxt)
         !
@@ -72,77 +83,73 @@ contains
         !--- Get command line args (if present)
         narg = iargc()
         !
-        if(narg > 0) call getarg(1, ctxt%fname)
-        if(ctxt%fname(1:1) /= ' ') call load(ctxt, ctxt%fname)
+        if (narg>0) call getarg(1, ctxt%fname)
+        if (ctxt%fname(1:1)/=' ') call load(ctxt, ctxt%fname)
         !
         ctxt%fname = ' '
-        if(narg > 1) call getarg(2, ctxt%fname)
-        if(ctxt%fname(1:1) /= ' ') then
+        if (narg>1) call getarg(2, ctxt%fname)
+        if (ctxt%fname(1:1)/=' ') then
             ctxt%ncase = 0
-            open(ctxt%lutemp, file = ctxt%fname, status = 'old', err = 2)
+            open (ctxt%lutemp, file = ctxt%fname, status = 'old', err = 100)
             call getcas(ctxt%lutemp, nparx, ctxt%ncase, ctxt%caspar)
-            close(ctxt%lutemp)
-            if(ctxt%ncase > 0) then
+            close (ctxt%lutemp)
+            if (ctxt%ncase>0) then
                 kf = index(ctxt%fname, ' ') - 1
-                if (show_output) write(*, *) 'Operating cases read from file  ', &
-                        ctxt%fname(1:kf), ' ...'
-                call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, ctxt%name)
+                if (show_output) write (*, *) 'Operating cases read from file  '&
+                        &, ctxt%fname(1:kf), ' ...'
+                call shocas(ctxt%luwrit, nparx, ctxt%ncase, ctxt%caspar, ctxt%rad, &
+                        & ctxt%name)
             endif
-            2      continue
         endif
         !
-        if (show_output) write(*, 1100)
-        !
-        900  continue
-        call askc(' xrotor^', comand, comarg)
-        !
-        do i = 1, 20
-            iinput(i) = 0
-            rinput(i) = 0.0
+        100   if (show_output) write (*, 99003)
+        do
+            !
+            call askc(' xrotor^', comand, comarg)
+            !
+            do i = 1, 20
+                iinput(i) = 0
+                rinput(i) = 0.0
+            enddo
+            ninput = 0
+            call getint(comarg, iinput, ninput, error)
+            ninput = 0
+            call getflt(comarg, rinput, ninput, error)
+            !
+            ctxt%greek = .true.
+            if (comand/='    ') then
+                if (comand=='?   '.and.show_output) write (*, 99003)
+                if (comand/='?   ') then
+                    if (comand=='quit') stop
+                    !
+                    if (comand=='oper') call oper(ctxt)
+                    if (comand=='bend') call bend(ctxt)
+                    if (comand=='save') call save(ctxt, comarg)
+                    if (comand=='load') call load(ctxt, comarg)
+                    if (comand=='nois') call noise(ctxt)
+                    if (comand=='disp') then
+                        !
+                        !---------------------------------------------------------------------
+                        call output(ctxt, ctxt%luwrit)
+                    else
+                        if (ctxt%greek.and.show_output) write (*, 99002) comand
+                        99002                  format (1x, a4, &
+                                &' command not recognized.  Type a "?" for list')
+                    endif
+                endif
+            endif
         enddo
-        ninput = 0
-        call getint(comarg, iinput, ninput, error)
-        ninput = 0
-        call getflt(comarg, rinput, ninput, error)
-        !
-        ctxt%greek = .true.
-        if(comand == '    ') go to 900
-        if (comand == '?   ' .and. show_output) write(*, 1100)
-        if(comand == '?   ') go to 900
-        if(comand == 'quit') then
-            stop
-        endif
-        !
-        if(comand == 'oper') call oper(ctxt)
-        if(comand == 'bend') call bend(ctxt)
-        if(comand == 'save') call save(ctxt, comarg)
-        if(comand == 'load') call load(ctxt, comarg)
-        if(comand == 'nois') call noise(ctxt)
-        if(comand == 'disp') go to 100
-        if (ctxt%greek .and. show_output) write(*, 1050) comand
-        go to 900
-        !
-        !---------------------------------------------------------------------
-        100 call output(ctxt, ctxt%luwrit)
-        go to 900
-        !
-        !.....................................................................
-        !
-        1000 format(/' ========================='&
-                /'    xrotor Version', f5.2&
-                /' =========================')
-        1050 format(1x, a4, ' command not recognized.  Type a "?" for list')
-        1100 format(&
-                /'   quit   Exit program'&
-                /'  .oper   Calculate off-design operating points'&
-                /'  .bend   Calculate structural loads and deflections'&
-                /'  .nois   Calculate and plot acoustic signature'&
-                /'   save f Save rotor to restart file'&
-                /'   load f Read rotor from restart file'&
-                /'   disp   Display current design point')
+        99003  format (/'   quit   Exit program'/                                       &
+                &'  .oper   Calculate off-design operating points'/               &
+                &'  .bend   Calculate structural loads and deflections'/          &
+                &'  .nois   Calculate and plot acoustic signature'/               &
+                &'   save f Save rotor to restart file'/                          &
+                &'   load f Read rotor from restart file'/                        &
+                &'   disp   Display current design point')
     end
     ! rotor
-end module p_xrotor
+end
+!*==XROTOR.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 
 program xrotor
     use p_xrotor, only : rotor

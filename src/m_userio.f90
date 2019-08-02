@@ -1,3 +1,4 @@
+!*==M_USERIO.f90  processed by SPAG 7.25DB at 09:24 on  2 Aug 2019
 !***********************************************************************
 !   Copyright (c) 2018 D. de Vries
 !   Original Copyright (c) 2011 Mark Drela
@@ -24,9 +25,13 @@
 !
 
 module m_userio
+    implicit none
 contains
     subroutine aski(prompt, iinput)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        integer NP
+        !*** End of declarations inserted by SPAG
         !
         !---- integer input
         !
@@ -34,23 +39,26 @@ contains
         integer iinput
         !
         np = index(prompt, '^') - 1
-        if(np == 0) np = len(prompt)
+        if (np==0) np = len(prompt)
         !
-        if (iinput /= 999 .and. show_output) write(*, 1001) iinput
-        10    if (show_output) write(*, 1000) prompt(1:np)
-        read (*, 1002, err = 10) line
-        if(line /= ' ') read (line, *, err = 10) iinput
+        if (iinput/=999.and.show_output) write (*, 99001) iinput
+        99001  format (/'Current value <ret takes default>: ', i5)
+        100   if (show_output) write (*, 99002) prompt(1:np)
+        !
+        99002  format (a, '   i>  ', $)
+        read (*, 99003, err = 100) line
+        99003  format (a)
+        if (line/=' ') read (line, *, err = 100) iinput
         return
-        !
-        1000 format(a, '   i>  ', $)
-        1001 format(/'Current value <ret takes default>: ', i5)
-        1002 format(a)
     end
     ! aski
 
 
     subroutine askr(prompt, rinput)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        integer NP
+        !*** End of declarations inserted by SPAG
         !
         !---- real input
         !
@@ -58,23 +66,26 @@ contains
         real rinput
         !
         np = index(prompt, '^') - 1
-        if(np == 0) np = len(prompt)
+        if (np==0) np = len(prompt)
         !
-        if (rinput /= 999. .and. show_output) write(*, 1001) rinput
-        10    if (show_output) write(*, 1000) prompt(1:np)
-        read (*, 1002, err = 10) line
-        if(line /= ' ') read (line, *, err = 10) rinput
+        if (rinput/=999..and.show_output) write (*, 99001) rinput
+        99001  format (/'Current value <ret takes default>: ', g12.6)
+        100   if (show_output) write (*, 99002) prompt(1:np)
+        !
+        99002  format (a, '   r>  ', $)
+        read (*, 99003, err = 100) line
+        99003  format (a)
+        if (line/=' ') read (line, *, err = 100) rinput
         return
-        !
-        1000 format(a, '   r>  ', $)
-        1001 format(/'Current value <ret takes default>: ', g12.6)
-        1002 format(a)
     end
     ! askr
 
 
     subroutine askl(prompt, linput)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        integer NP
+        !*** End of declarations inserted by SPAG
         !
         !---- logical input
         !
@@ -83,25 +94,31 @@ contains
         character*1 char
         !
         np = index(prompt, '^') - 1
-        if(np == 0) np = len(prompt)
-        !
-        10    if (show_output) write(*, 1000) prompt(1:np)
-        read (*, 1010) char
-        if(char == 'y') char = 'y'
-        if(char == 'n') char = 'n'
-        if(char /= 'y' .and. char /= 'n') go to 10
-        !
-        linput = char == 'y'
-        return
-        !
-        1000 format(/a, ' y/n>  ', $)
-        1010 format(a)
+        if (np==0) np = len(prompt)
+        do
+            !
+            if (show_output) write (*, 99001) prompt(1:np)
+            !
+            99001      format (/a, ' y/n>  ', $)
+            read (*, 99002) char
+            99002      format (a)
+            if (char=='y') char = 'y'
+            if (char=='n') char = 'n'
+            if (char=='y'.or.char=='n') then
+                !
+                linput = char=='y'
+                return
+            endif
+        enddo
     end
     ! askl
 
 
     subroutine asks(prompt, input)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        integer NP
+        !*** End of declarations inserted by SPAG
         !
         !---- string of arbitrary length input
         !
@@ -109,15 +126,15 @@ contains
         character*(*) input
         !
         np = index(prompt, '^') - 1
-        if(np == 0) np = len(prompt)
+        if (np==0) np = len(prompt)
         !
-        if (show_output) write(*, 1000) prompt(1:np)
-        read (*, 1010) input
+        if (show_output) write (*, 99001) prompt(1:np)
+        !
+        99001  format (/a, '   s>  ', $)
+        read (*, 99002) input
+        99002  format (a)
         !
         return
-        !
-        1000 format(/a, '   s>  ', $)
-        1010 format(a)
     end
     ! asks
 
@@ -125,6 +142,9 @@ contains
 
     subroutine askc(prompt, comand, cargs)
         use i_common, only : show_output
+        !*** Start of declarations inserted by SPAG
+        integer I, IZERO, K, KI, NCARGS, NP
+        !*** End of declarations inserted by SPAG
         !
         !---- returns 4-byte character string input converted to uppercase
         !---- also returns rest of input characters in cargs string
@@ -133,39 +153,37 @@ contains
         character*(*) comand, cargs
         !
         character*128 line
-        logical error
         !
         izero = ichar('0')
         !
         np = index(prompt, '^') - 1
-        if(np == 0) np = len(prompt)
+        if (np==0) np = len(prompt)
         !
-        if (show_output) write(*, 1000) prompt(1:np)
-        read (*, 1020) line
+        if (show_output) write (*, 99001) prompt(1:np)
+        !
+        99001  format (/a, '   c>  ', $)
+        read (*, 99002) line
+        99002  format (a)
         !
         !---- strip off leading blanks
         do k = 1, 128
-            if(line(1:1) == ' ') then
-                line = line(2:128)
-            else
-                go to 5
-            endif
+            if (line(1:1)/=' ') exit
+            line = line(2:128)
         enddo
-        5    continue
         !
         !---- find position of first blank, "+", "-", ".", ",", or numeral
         k = index(line, ' ')
         ki = index(line, '-')
-        if(ki /= 0) k = min(k, ki)
+        if (ki/=0) k = min(k, ki)
         ki = index(line, '+')
-        if(ki /= 0) k = min(k, ki)
+        if (ki/=0) k = min(k, ki)
         ki = index(line, '.')
-        if(ki /= 0) k = min(k, ki)
+        if (ki/=0) k = min(k, ki)
         ki = index(line, ',')
-        if(ki /= 0) k = min(k, ki)
+        if (ki/=0) k = min(k, ki)
         do i = 0, 9
             ki = index(line, char(izero + i))
-            if(ki /= 0) k = min(k, ki)
+            if (ki/=0) k = min(k, ki)
         enddo
         !
         !      if(k == 1) then
@@ -176,7 +194,7 @@ contains
         !        comand = line(1:k-1)
         !      endif
         !
-        if(k <= 1) k = 5
+        if (k<=1) k = 5
         !---- set 4-byte alphabetic command string and convert it to uppercase
         comand = line(1:k - 1)
         call lc2uc(comand)
@@ -184,28 +202,27 @@ contains
         cargs = line(k:128)
         call strip(cargs, ncargs)
         return
-        !
-        1000 format(/a, '   c>  ', $)
-        1020 format(a)
     end
     ! askc
 
 
     subroutine lc2uc(input)
+        !*** Start of declarations inserted by SPAG
+        integer I, K, N
+        !*** End of declarations inserted by SPAG
         character*(*) input
         !
         character*26 lcase, ucase
-        data lcase / 'abcdefghijklmnopqrstuvwxyz' /
-        data ucase / 'abcdefghijklmnopqrstuvwxyz' /
+        data lcase/'abcdefghijklmnopqrstuvwxyz'/
+        data ucase/'abcdefghijklmnopqrstuvwxyz'/
         !
         n = len(input)
         !
         do i = 1, n
             k = index(lcase, input(i:i))
-            if(k > 0) input(i:i) = ucase(k:k)
-        end do
+            if (k>0) input(i:i) = ucase(k:k)
+        enddo
         !
-        return
     end
     ! lc2uc
 
@@ -213,6 +230,9 @@ contains
 
 
     subroutine readi(n, ivar, error)
+        !*** Start of declarations inserted by SPAG
+        integer I, IVAR, IVTMP, N, NTMP
+        !*** End of declarations inserted by SPAG
         dimension ivar(n)
         logical error
         !--------------------------------------------------
@@ -222,28 +242,31 @@ contains
         dimension ivtmp(40)
         character*80 line
         !
-        read(*, 1000) line
-        1000 format(a80)
+        read (*, 99001) line
+        99001  format (a80)
         !
         do i = 1, n
             ivtmp(i) = ivar(i)
-        end do
+        enddo
         !
         ntmp = 40
         call getint(line, ivtmp, ntmp, error)
         !
-        if(error) return
+        if (error) return
         !
         do i = 1, n
             ivar(i) = ivtmp(i)
-        end do
+        enddo
         !
-        return
     end
     ! readi
 
 
     subroutine readr(n, var, error)
+        !*** Start of declarations inserted by SPAG
+        integer I, N, NTMP
+        real VAR, VTMP
+        !*** End of declarations inserted by SPAG
         dimension var(n)
         logical error
         !-------------------------------------------------
@@ -253,28 +276,30 @@ contains
         dimension vtmp(40)
         character*80 line
         !
-        read(*, 1000) line
-        1000 format(a80)
+        read (*, 99001) line
+        99001  format (a80)
         !
         do i = 1, n
             vtmp(i) = var(i)
-        end do
+        enddo
         !
         ntmp = 40
         call getflt(line, vtmp, ntmp, error)
         !
-        if(error) return
+        if (error) return
         !
         do i = 1, n
             var(i) = vtmp(i)
-        end do
+        enddo
         !
-        return
     end
     ! readr
 
 
     subroutine getint(input, a, n, error)
+        !*** Start of declarations inserted by SPAG
+        integer I, ILEN, ILENP, IPASS, K, KCOMMA, KSPACE, N, NINP
+        !*** End of declarations inserted by SPAG
         character*(*) input
         integer a(*)
         logical error
@@ -299,7 +324,7 @@ contains
         !
         !---- ignore everything after a "!" character
         k = index(rec, '!')
-        if(k > 0) rec(1:ilen) = rec(1:k - 1)
+        if (k>0) rec(1:ilen) = rec(1:k - 1)
         !
         ninp = n
         !
@@ -311,17 +336,17 @@ contains
             kspace = index(rec(k:ilenp), ' ') + k - 1
             kcomma = index(rec(k:ilenp), ',') + k - 1
             !
-            if(k == kspace) then
+            if (k==kspace) then
                 !------- just skip this space
                 k = k + 1
-                go to 9
+                goto 50
             endif
             !
-            if(k == kcomma) then
+            if (k==kcomma) then
                 !------- comma found.. increment number count and keep looking
                 n = n + 1
                 k = k + 1
-                go to 9
+                goto 50
             endif
             !
             !------ neither space nor comma found, so we ran into a number...
@@ -329,25 +354,26 @@ contains
             n = n + 1
             k = min(kspace, kcomma) + 1
             !
-            9     if(k >= ilen) go to 11
-        end do
+            50        if (k>=ilen) exit
+        enddo
         !
         !---- decide on how many numbers to read, and go ahead and read them
-        11   if(ninp > 0) n = min(n, ninp)
-        read(rec(1:ilen), *, err = 20) (a(i), i = 1, n)
+        if (ninp>0) n = min(n, ninp)
+        read (rec(1:ilen), *, err = 100) (a(i), i = 1, n)
         error = .false.
         return
         !
         !---- bzzzt !!!
-        20   continue
         !cc   write(*,*) 'getint: String-to-integer conversion error.'
-        n = 0
+        100   n = 0
         error = .true.
-        return
     end
 
 
     subroutine getflt(input, a, n, error)
+        !*** Start of declarations inserted by SPAG
+        integer I, ILEN, ILENP, IPASS, K, KCOMMA, KSPACE, N, NINP
+        !*** End of declarations inserted by SPAG
         character*(*) input
         real a(*)
         logical error
@@ -372,7 +398,7 @@ contains
         !
         !---- ignore everything after a "!" character
         k = index(rec, '!')
-        if(k > 0) rec(1:ilen) = rec(1:k - 1)
+        if (k>0) rec(1:ilen) = rec(1:k - 1)
         !
         ninp = n
         !
@@ -384,17 +410,17 @@ contains
             kspace = index(rec(k:ilenp), ' ') + k - 1
             kcomma = index(rec(k:ilenp), ',') + k - 1
             !
-            if(k == kspace) then
+            if (k==kspace) then
                 !------- just skip this space
                 k = k + 1
-                go to 9
+                goto 50
             endif
             !
-            if(k == kcomma) then
+            if (k==kcomma) then
                 !------- comma found.. increment number count and keep looking
                 n = n + 1
                 k = k + 1
-                go to 9
+                goto 50
             endif
             !
             !------ neither space nor comma found, so we ran into a number...
@@ -402,25 +428,26 @@ contains
             n = n + 1
             k = min(kspace, kcomma) + 1
             !
-            9     if(k >= ilen) go to 11
-        end do
+            50        if (k>=ilen) exit
+        enddo
         !
         !---- decide on how many numbers to read, and go ahead and read them
-        11   if(ninp > 0) n = min(n, ninp)
-        read(rec(1:ilen), *, err = 20) (a(i), i = 1, n)
+        if (ninp>0) n = min(n, ninp)
+        read (rec(1:ilen), *, err = 100) (a(i), i = 1, n)
         error = .false.
         return
         !
         !---- bzzzt !!!
-        20   continue
         !cc   write(*,*) 'getflt: String-to-integer conversion error.'
-        n = 0
+        100   n = 0
         error = .true.
-        return
     end
 
 
     subroutine strip(string, ns)
+        !*** Start of declarations inserted by SPAG
+        integer K, K1, K2, N, NS
+        !*** End of declarations inserted by SPAG
         character*(*) string
         !-------------------------------------------
         !     Strips leading blanks off string
@@ -430,20 +457,18 @@ contains
         !
         !---- find last non-blank character
         do k2 = n, 1, -1
-            if(string(k2:k2) /= ' ') go to 11
-        end do
+            if (string(k2:k2)/=' ') goto 100
+        enddo
         k2 = 0
-        11 continue
         !
         !---- find first non-blank character
-        do k1 = 1, k2
-            if(string(k1:k1) /= ' ') go to 21
-        end do
-        21 continue
+        100   do k1 = 1, k2
+            if (string(k1:k1)/=' ') exit
+        enddo
         !
         !---- number of non-blank characters
         ns = k2 - k1 + 1
-        if(ns == 0) return
+        if (ns==0) return
         !
         !---- shift string so first character is non-blank
         string(1:ns) = string(k1:k2)
@@ -451,8 +476,7 @@ contains
         !---- pad tail of string with blanks
         do k = ns + 1, n
             string(k:k) = ' '
-        end do
+        enddo
         !
-        return
     end
-end module m_userio
+end
