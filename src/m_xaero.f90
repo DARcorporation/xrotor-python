@@ -166,7 +166,7 @@ contains
                 clift, cl_alf, cl_w, stallf, &
                 cdrag, cd_alf, cd_w, cd_rey, &
                 cmom, cm_al, cm_w, &
-                polar)
+                polar, ctxt%use_compr_corr)
         !
         !--- Check for another bounding section, if not we are done,
         !    if we have another section linearly interpolate data to station is
@@ -185,7 +185,7 @@ contains
                     clift2, cl_alf2, cl_w2, stallf2, &
                     cdrag2, cd_alf2, cd_w2, cd_rey2, &
                     cmom2, cm_al2, cm_w2, &
-                    polar)
+                    polar, ctxt%use_compr_corr)
             !--- Interpolate aero data to blade station
             stallf = stallf .or. stallf2
             clift = (1.0 - frac) * clift + frac * clift2
@@ -267,7 +267,7 @@ contains
             clift, cl_alf, cl_w, stallf, &
             cdrag, cd_alf, cd_w, cd_rey, &
             cmom, cm_al, cm_w, &
-            polar, use_corrections, mcrit)
+            polar, use_corrections, m_crit)
         ! NOTE: All Reynolds Nr and compressibility effects have been REMOVED from this function!
         ! The user is responsible for ensuring that the aerodynamic sections are analyzed at the
         ! correct local Reynolds and Mach numbers.
@@ -279,13 +279,13 @@ contains
                 deltas(4), new_data(3), deriv(3)
         real :: polar(:, :)
         logical, optional :: use_corrections
-        real, optional :: mcrit
+        real, optional :: m_crit
         real :: cdmfactor, clmfactor, mexp, cdmdd, cdmstall, msq, msq_w, pg, pg_w, mach, mach_w, &
                 cla, cla_alf, cla_w, clmax, clmin, dmstall, clmaxm, clminm, dmdd, critmach, critmach_alf, &
-                critmach_w, cdc, cdc_alf, cdc_w, fac, fac_w, cldmin
+                critmach_w, cdc, cdc_alf, cdc_w, fac, fac_w, cdmin, cldmin
 
         integer :: i_below, i_above
-        real :: f
+        real :: f, mcrit
 
         ! Ensure angle of attack is always between -180 and +180 degrees (-pi and +pi radians)
         if (alf < -pi) then
@@ -327,12 +327,16 @@ contains
             cm_w = 0.
 
         else
-            if (.not. present(mcrit)) then
-                if (show_output) write(*, *) 'clfunc: Compressibility corrections used but no mcrit given. Assuming 0.6'
+            if (.not. present(m_crit)) then
                 mcrit = 0.6
+            else
+                mcrit = m_crit
             end if
-            ! TODO: Actually calculate cldmin
-            cldmin = 0.
+
+            ! Compute cl at cdmin
+            cdmin = minval(polar(:, 3))
+            i_above = maxloc(polar(:, 2), 1, polar(:, 3) == cdmin)
+            cldmin = polar(i_below, 2)
 
             cdmfactor = 10.0
             clmfactor = 0.25

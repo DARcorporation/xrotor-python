@@ -23,7 +23,9 @@ module api
     use :: i_common, only : Common
     implicit none
     private
-    public set_print, get_print, set_max_iter, get_max_iter, &
+    public set_print, get_print, &
+            set_max_iter, get_max_iter, &
+            set_use_compr_corr, get_use_compr_corr, &
             init, set_case, operate, dp, show,  save_prop, &
             get_rms, get_performance, get_blade_angle_change, &
             get_number_of_stations, get_station_conditions
@@ -54,6 +56,16 @@ contains
     function get_max_iter() bind(c, name = 'get_max_iter')
         integer(c_int) :: get_max_iter
         get_max_iter = ctxt%nitera
+    end
+
+    subroutine set_use_compr_corr(use_compr_corr) bind(c, name = 'set_compr_corr')
+        logical(c_bool) :: use_compr_corr
+        ctxt%use_compr_corr = use_compr_corr
+    end
+
+    function get_use_compr_corr() bind(c, name = 'get_use_compr_corr')
+        logical(c_bool) :: get_use_compr_corr
+        get_use_compr_corr = ctxt%use_compr_corr
     end
 
     subroutine init() bind(c, name = 'init')

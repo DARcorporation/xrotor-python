@@ -53,6 +53,7 @@ module i_common
         logical :: conv = f, greek = f, terse = f, vrtx = f, fast = f, free = f, duct = f, lstruc = f, &
                 ldesini = f, loprini = f, lrotor = f, lvnorm = f, lpwrvar = f, &
                 wind = f, dest = f, desp = f, stall(ix) = f, legend = f
+        logical :: use_compr_corr = .false.
 
         real :: rho = 0., rmu = 0., vso = 0., vel = 0., rad = 0., gee = 0., alt = 0.
 
