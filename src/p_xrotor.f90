@@ -59,7 +59,7 @@ contains
         !
         !====================================================
         !
-        ctxt = Common()
+        !ctxt = Common()
 
         ctxt%version = 7.55
         !

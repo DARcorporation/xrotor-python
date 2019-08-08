@@ -24,7 +24,7 @@ module m_xio
 contains
     subroutine save(ctxt, fname1)
         use m_userio, only : asks
-        use m_xaero, only : getaero
+        ! use m_xaero, only : getaero
         use i_common, only : Common, show_output, pi
         implicit real(M)
         !*** Start of declarations inserted by SPAG
@@ -92,8 +92,9 @@ contains
         99006  format ('!  Naero'/1(1x, i5))
         mcrit = 0.8
         do n = 1, ctxt%naero
-            call getaero(ctxt, n, xisect, a0, clmax, clmin, dclda, dclda_stall, &
-                    & dcl_stall, cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+            ! TODO
+!            call getaero(ctxt, n, xisect, a0, clmax, clmin, dclda, dclda_stall, &
+!                    & dcl_stall, cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
             write (lu, 99007)
             99007      format ('!   Xisection')
             write (lu, 99017) xisect
@@ -161,7 +162,7 @@ contains
         !     This format saves more information and can have optional comment
         !     lines beginning with a ! character.
         !------------------------------------------------------------------------
-        use m_xaero, only : putaero
+        ! use m_xaero, only : putaero
         use m_userio, only : asks
         use i_common, only : Common, show_output, ix, pi
         implicit real(M)
@@ -216,8 +217,9 @@ contains
             read (line, *, err = 500) reref, rexp
             !
             a0 = a0deg * pi / 180.0
-            call putaero(ctxt, n, xisect, a0, clmax, clmin, dclda, dclda_stall, &
-                    & dcl_stall, cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+            ! TODO
+!            call putaero(ctxt, n, xisect, a0, clmax, clmin, dclda, dclda_stall, &
+!                    & dcl_stall, cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
         enddo
         !
         !--- Read flags for wake, duct and windmill modes

@@ -1102,6 +1102,7 @@ contains
             do i = 1, ctxt%ii
                 ctxt%dgam(i) = -ctxt%dq(i)
                 !
+                ! TODO: remove dclstall dependence
                 !---- limit cl changes near +- stall
                 dcl = 2.0 * ctxt%dgam(i) / (ctxt%ch(i) * w)
                 dclmin = max(1.5 * dclstall(i), abs(ctxt%cl(i) - clmin(i)))
@@ -1291,6 +1292,48 @@ contains
         p_va = (ci * si_va) / wsq
         !
         !c      write(*,*) 'i,vt,va ',i,vt,va
+    end
+    ! cscalc
+
+    subroutine calcw(ctxt, i, w)
+        use s_xrotor, only : uvadd
+        !
+        !---- Calculate velocity components at radial station i on real prop
+        !
+        use s_xrotor, only : uvadd
+        use i_common, only : Common
+        implicit real(M)
+        real vt, va, uduct, vaduct_va, vd, utot, wa, wt, ci, si, wsq, w
+        integer i
+        type (Common), intent(inout) :: ctxt
+        !
+        vt = ctxt%vind(3, i)
+        !
+        va = ctxt%vind(1, i)
+        !
+        !---- Include duct effect on freestream and induced axial velocity
+        uduct = 0.0
+        vaduct_va = 1.0
+        if (ctxt%duct) then
+            uduct = ctxt%urduct - 1.0
+            vaduct_va = 2.0 * ctxt%urduct
+        endif
+        !------ duct induced axial velocity
+        vd = va * (vaduct_va - 1.0)
+        !
+        !---- Freestream, body induced and added inflow velocities
+        utot = 1.0 + uduct + ctxt%ubody(i)
+        call uvadd(ctxt, ctxt%xi(i), wa, wt)
+        !
+        ci = ctxt%xi(i) / ctxt%adv - wt - vt
+        !
+        si = utot + wa + va + vd
+        !
+        !---- Redefine va to include duct induced velocity
+        !cc      va     =  va + vd
+        !
+        wsq = ci * ci + si * si
+        w = sqrt(wsq)
     end
     ! cscalc
 

@@ -23,7 +23,10 @@ module api
     use :: i_common, only : Common
     implicit none
     private
-    public init, set_case, operate, dp
+    public set_print, get_print, set_max_iter, get_max_iter, &
+            init, set_case, operate, dp, show,  save_prop, &
+            get_rms, get_performance, get_blade_angle_change, &
+            get_number_of_stations, get_station_conditions
 
     integer, parameter :: dp = kind(0.D0)
 
@@ -55,23 +58,27 @@ contains
 
     subroutine init() bind(c, name = 'init')
         use m_xrotor, only : init_
-        ctxt = Common()
+        !ctxt = Common()
         call init_(ctxt)
     end
 
     subroutine set_case(&
             rho, vso, rmu, alt, vel, adv, &
             r_hub, r_tip, r_wake, rake, &
-            n_blds, n_aero, n_geom, &
-            aerodata, geomdata, &
+            n_blds, &
+            n_geom, geomdata, &
+            n_polars, n_polar_points, xi_polars, polardata, &
             free, duct, wind) bind(c, name = 'set_case')
-        use m_xaero, only : putaero
         use i_common, only : pi
         use m_xio, only : initcase
+        use m_xaero, only : putpolars
+
         real(c_float), intent(in) :: rho, vso, rmu, alt, vel, adv
         real(c_float), intent(in) :: r_hub, r_tip, r_wake, rake
-        integer(c_int), intent(in) :: n_blds, n_aero, n_geom
-        real(c_float), intent(in) :: aerodata(14, n_aero), geomdata(4, n_geom)
+        integer(c_int), intent(in) :: n_blds, n_geom
+        real(c_float), intent(in) :: geomdata(4, n_geom)
+        integer(c_int), intent(in) :: n_polars, n_polar_points(n_polars)
+        real(c_float), intent(in) :: xi_polars(n_polars), polardata(sum(n_polar_points), 4)
         logical(c_bool), intent(in) :: free, duct, wind
 
         integer :: i
@@ -90,15 +97,6 @@ contains
 
         ctxt%nblds = n_blds
 
-        ctxt%naero = n_aero
-        do i = 1, n_aero
-            call putaero(ctxt, i, aerodata(1, i), aerodata(2, i) * pi / 180., aerodata(3, i)&
-                    &, aerodata(4, i), aerodata(5, i), aerodata(6, i), aerodata(7, i)&
-                    &, aerodata(8, i), aerodata(9, i), aerodata(10, i), &
-                    & aerodata(11, i), aerodata(12, i), aerodata(13, i), &
-                    & aerodata(14, i))
-        enddo
-
         do i = 1, n_geom
             ctxt%xi(i) = geomdata(1, i)
             ctxt%ch(i) = geomdata(2, i)
@@ -106,6 +104,8 @@ contains
             ctxt%beta0(i) = ctxt%beta(i)
             ctxt%ubody(i) = geomdata(4, i)
         enddo
+
+        call putpolars(ctxt, n_polars, n_polar_points, xi_polars, polardata)
 
         call initcase(ctxt, n_geom, .false.)
     end
@@ -211,14 +211,20 @@ contains
         get_number_of_stations = ctxt%ii
     end
 
-    subroutine get_station_conditions(n, xi, Re) bind(c, name = 'get_station_conditions')
+    subroutine get_station_conditions(n, xi, Re, M) bind(c, name = 'get_station_conditions')
+        use m_xoper, only : calcw
+        use s_xrotor, only : uvadd
         integer(c_int), intent(in) :: n
-        real(c_float), intent(out) :: xi(n), Re(n)
+        real(c_float), intent(out) :: xi(n), Re(n), M(n)
+        real :: w
         integer :: i
 
+        xi = ctxt%xi(1:n)
+        Re = ctxt%re(1:n)
+
         do i = 1, n
-            xi(i) = ctxt%xi(i)
-            Re(i) = ctxt%re(i)
+            call calcw(ctxt, i, w)
+            M(i) = w * ctxt%vel / ctxt%vso
         enddo
     end
 

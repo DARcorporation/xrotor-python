@@ -20,6 +20,7 @@
 !***********************************************************************
 
 module i_common
+    use, intrinsic :: iso_c_binding, only : c_f_pointer, c_float, c_int, c_ptr
     implicit none
 
     public
@@ -79,6 +80,10 @@ module i_common
 
         integer :: naero = 0
         real :: xiaero(nax) = 0., aerodata(ndx, nax) = 0.
+
+        integer :: n_polars = 0
+        integer, allocatable :: n_polar_points(:), i_polars(:)
+        real, allocatable :: xi_polars(:), polardata(:, :)
 
         real :: px(ix) = 0., py(ix) = 0., pz(ix) = 0., &
                 mx(ix) = 0., my(ix) = 0., mz(ix) = 0., &
