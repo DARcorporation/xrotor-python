@@ -213,7 +213,6 @@ contains
 
     subroutine get_station_conditions(n, xi, Re, M) bind(c, name = 'get_station_conditions')
         use m_xoper, only : calcw
-        use s_xrotor, only : uvadd
         integer(c_int), intent(in) :: n
         real(c_float), intent(out) :: xi(n), Re(n), M(n)
         real :: w
