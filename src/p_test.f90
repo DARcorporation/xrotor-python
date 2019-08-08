@@ -1,9 +1,9 @@
 program test_xrotor
     use, intrinsic :: iso_c_binding, only : c_int, c_bool, c_float
-    use api, only : init, set_case, operate, show, get_number_of_stations, get_station_conditions
+    use api, only : init, set_case, operate, show, get_number_of_stations, get_station_conditions, set_use_compr_corr
     real :: rho, vso, rmu, alt, vel, adv, r_hub, r_tip, r_wake, rake
     real :: geomdata(4, 6), polardata(20, 4)
-    logical(c_bool) :: free, duct, wind
+    logical(c_bool) :: free, duct, wind, use_compr_corr
     real, allocatable :: xi(:), Re(:), M(:)
     real :: res
     integer :: n_stations
@@ -46,6 +46,8 @@ program test_xrotor
     duct = .false.
     wind = .false.
 
+    use_compr_corr = .false.
+
     call init()
     call set_case(&
         rho, vso, rmu, alt, vel, adv, &
@@ -54,6 +56,7 @@ program test_xrotor
         6, geomdata, &
         1, (/20/), (/0./), polardata, &
         free, duct, wind)
+    call set_use_compr_corr(use_compr_corr)
     res = operate(4, 2000.)
     call show()
 
