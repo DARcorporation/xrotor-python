@@ -283,6 +283,7 @@ contains
         real :: cdmfactor, clmfactor, mexp, cdmdd, cdmstall, msq, msq_w, pg, pg_w, mach, mach_w, &
                 cla, cla_alf, cla_w, clmax, clmin, dmstall, clmaxm, clminm, dmdd, critmach, critmach_alf, &
                 critmach_w, cdc, cdc_alf, cdc_w, fac, fac_w, cdmin, cldmin
+        real :: a_max, a_min
 
         integer :: i_below, i_above
         real :: f, mcrit
@@ -294,15 +295,33 @@ contains
             alf = alf - 2.*pi
         end if
 
-        ! Find the indices of the angles of attack in the polar just below and just above the specified one
-        i_below = maxloc(polar(:, 1), 1, polar(:, 1) <= alf)
-        i_above = minloc(polar(:, 1), 1, polar(:, 1) >= alf)
+        a_max = maxval(polar(:, 1))
+        a_min = minval(polar(:, 1))
+        if (a_min < alf .and. alf < a_max) then
+            ! Find the indices of the angles of attack in the polar just below and just above the specified one
+            i_below = maxloc(polar(:, 1), 1, polar(:, 1) <= alf)
+            i_above = minloc(polar(:, 1), 1, polar(:, 1) >= alf)
 
-        ! Compute delta values from alpha(i_below) to alpha(i_above)
-        deltas = pack(polar(i_above, :), .true.) - pack(polar(i_below, :), .true.)
+            ! Compute delta values from alpha(i_below) to alpha(i_above)
+            deltas = pack(polar(i_above, :), .true.) - pack(polar(i_below, :), .true.)
 
-        ! Interpolation factor
-        f = (alf - polar(i_below, 1)) / deltas(1)
+            ! Interpolation factor
+            f = (alf - polar(i_below, 1)) / deltas(1)
+        else
+            ! Treat cases where request alf falls outside the known range
+            ! This is done by assuming cl, cd, and cm are periodic in alpha with period 2*pi
+            ! When this assumption is made, alphas outside of the known range can simply be interpolated using the
+            ! edge values.
+            i_below = size(polar, 1)
+            deltas = pack(polar(1, :), .true.) - pack(polar(i_below, :), .true.)
+            if (alf <= a_min) then
+                deltas(1) = deltas(1) + 2.*pi
+                f = (alf - polar(i_below) + 2.*pi) / deltas(1)
+            else
+                deltas(1) = deltas(1) - 2.*pi
+                f = (alf - polar(i_below) - 2.*pi) / deltas(1)
+            end if
+        end if
 
         ! Compute interpolate data and local slopes
         new_data = pack(polar(i_below, 2:), .true.) + f * deltas(2:)
