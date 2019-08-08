@@ -271,7 +271,7 @@ contains
         ! NOTE: All Reynolds Nr and compressibility effects have been REMOVED from this function!
         ! The user is responsible for ensuring that the aerodynamic sections are analyzed at the
         ! correct local Reynolds and Mach numbers.
-        use i_common, only : Common, show_output
+        use i_common, only : Common, show_output, pi
         type(Common) :: ctxt
         logical :: stallf
         integer :: n_points
@@ -287,11 +287,11 @@ contains
         integer :: i_below, i_above
         real :: f
 
-        ! Ensure angle of attack is always between -180 and +180 degrees
-        if (alf < -180.) then
-            alf = alf + 360.
-        elseif (alf > 180.) then
-            alf = alf - 360.
+        ! Ensure angle of attack is always between -180 and +180 degrees (-pi and +pi radians)
+        if (alf < -pi) then
+            alf = alf + 2.*pi
+        elseif (alf > pi) then
+            alf = alf - 2.*pi
         end if
 
         ! Find the indices of the angles of attack in the polar just below and just above the specified one
