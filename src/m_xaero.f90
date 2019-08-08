@@ -314,12 +314,10 @@ contains
             ! edge values.
             i_below = size(polar, 1)
             deltas = pack(polar(1, :), .true.) - pack(polar(i_below, :), .true.)
+            deltas(1) = deltas(1) + 2.*pi
+            f = (alf - polar(i_below, 1)) / deltas(1)
             if (alf <= a_min) then
-                deltas(1) = deltas(1) + 2.*pi
-                f = (alf - polar(i_below) + 2.*pi) / deltas(1)
-            else
-                deltas(1) = deltas(1) - 2.*pi
-                f = (alf - polar(i_below) - 2.*pi) / deltas(1)
+                f = f + 2.*pi/deltas(1)
             end if
         end if
 
