@@ -93,6 +93,8 @@ contains
         real(c_float), intent(in) :: xi_polars(n_polars), polardata(sum(n_polar_points), 4)
         logical(c_bool), intent(in) :: free, duct, wind
 
+        real :: my_polardata(sum(n_polar_points), 4)
+
         integer :: i
 
         ctxt%rho = rho
@@ -117,7 +119,9 @@ contains
             ctxt%ubody(i) = geomdata(4, i)
         enddo
 
-        call putpolars(ctxt, n_polars, n_polar_points, xi_polars, polardata)
+        my_polardata = polardata
+        my_polardata(:, 1) = polardata(:, 1) * pi / 180.
+        call putpolars(ctxt, n_polars, n_polar_points, xi_polars, my_polardata)
 
         call initcase(ctxt, n_geom, .false.)
     end

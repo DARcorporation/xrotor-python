@@ -30,6 +30,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 lib_path = glob.glob(os.path.join(here, 'libxrotor.*'))[0]
 lib_ext = lib_path[lib_path.rfind('.'):]
 fptr = POINTER(c_float)
+iptr = POINTER(c_int)
 
 
 class XRotor(object):
@@ -54,6 +55,7 @@ class XRotor(object):
         self._lib = cdll.LoadLibrary(self._lib_path)
 
         self._lib.get_print.restype = c_bool
+        self._lib.get_use_compr_corr.restype = c_bool
         self._lib.operate.restype = c_float
         self._lib.get_rms.restype = c_float
         self._lib.get_blade_angle_change.restype = c_float
@@ -90,6 +92,15 @@ class XRotor(object):
         self._lib.set_max_iter(byref(c_int(value)))
 
     @property
+    def use_compr_corr(self):
+        """bool: True if compressibility correction should be used."""
+        return self._lib.get_use_compr_corr()
+
+    @use_compr_corr.setter
+    def use_compr_corr(self, value):
+        self._lib.set_use_compr_corr(byref(c_bool(value)))
+
+    @property
     def case(self) -> Case:
         """Case: XRotor run case specification"""
         return self._case
@@ -109,10 +120,12 @@ class XRotor(object):
             byref(c_float(case.disk.blade.geometry.r_wake)),
             byref(c_float(case.disk.blade.geometry.rake)),
             byref(c_int(case.disk.n_blds)),
-            byref(c_int(case.disk.blade.n_aero)),
             byref(c_int(case.disk.blade.geometry.n_geom)),
-            np.asfortranarray(case.disk.blade.aerodata).ctypes.data_as(fptr),
             np.asfortranarray(case.disk.blade.geomdata).ctypes.data_as(fptr),
+            byref(c_int(case.disk.blade.n_polar_points.size)),
+            np.asfortranarray(case.disk.blade.n_polar_points).ctypes.data_as(iptr),
+            np.asfortranarray(case.disk.blade.xi_polars).ctypes.data_as(fptr),
+            np.asfortranarray(case.disk.blade.polardata).ctypes.data_as(fptr),
             byref(c_bool(case.settings.free)),
             byref(c_bool(case.settings.duct)),
             byref(c_bool(case.settings.wind))
@@ -129,12 +142,14 @@ class XRotor(object):
 
     @property
     def station_conditions(self):
-        """(np.ndarray, np.ndarray): Normalized radial coordinates and corresponding local Reynolds numbers."""
+        """(np.ndarray, np.ndarray): Normalized radial coordinates and corresponding local Reynolds and Mach numbers."""
         n = self._lib.get_number_of_stations()
         xi = np.zeros(n, dtype=c_float, order='F')
         re = np.zeros(n, dtype=c_float, order='F')
-        self._lib.get_station_conditions(byref(c_int(n)), xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr))
-        return xi, re
+        ma = np.zeros(n, dtype=c_float, order='F')
+        self._lib.get_station_conditions(byref(c_int(n)),
+                                         xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr), ma.ctypes.data_as(fptr))
+        return xi, re, ma
 
     @property
     def rms(self):

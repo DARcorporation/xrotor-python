@@ -302,6 +302,10 @@ contains
             i_below = maxloc(polar(:, 1), 1, polar(:, 1) <= alf)
             i_above = minloc(polar(:, 1), 1, polar(:, 1) >= alf)
 
+            if (i_below == i_above) then
+                i_above = i_below + 1
+            end if
+
             ! Compute delta values from alpha(i_below) to alpha(i_above)
             deltas = pack(polar(i_above, :), .true.) - pack(polar(i_below, :), .true.)
 
