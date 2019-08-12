@@ -17,9 +17,9 @@
 #   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
 
-from ctypes import c_float
+from ctypes import c_float, c_int
 from scipy.optimize import minimize, newton, minimize_scalar
-from typing import Dict, Union, Iterable, Optional
+from typing import Dict, Union, Iterable, Optional, List
 
 array_like = Union[float, Iterable[float], np.ndarray]
 
@@ -92,7 +92,7 @@ class Geometry(object):
 
     @n_geom.setter
     def n_geom(self, n_geom: int):
-        self.geomdata.resize((4, n_geom))
+        self.geomdata = np.resize(self.geomdata, (4, n_geom))
 
     @property
     def radii(self) -> np.ndarray:
@@ -102,7 +102,7 @@ class Geometry(object):
     @radii.setter
     def radii(self, radii: np.ndarray):
         if radii.size != self.geomdata.shape[1]:
-            self.geomdata.resize((4, radii.size))
+            self.geomdata = np.resize(self.geomdata, (4, radii.size))
         self.geomdata[0, :] = radii[:]
 
     @property
@@ -113,7 +113,7 @@ class Geometry(object):
     @chord.setter
     def chord(self, chord: np.ndarray):
         if chord.size != self.geomdata.shape[1]:
-            self.geomdata.resize((4, chord.size))
+            self.geomdata = np.resize(self.geomdata, (4, chord.size))
         self.geomdata[1, :] = chord[:]
 
     @property
@@ -124,7 +124,7 @@ class Geometry(object):
     @twist.setter
     def twist(self, twist: np.ndarray):
         if twist.size != self.geomdata.shape[1]:
-            self.geomdata.resize((4, twist.size))
+            self.geomdata = np.resize(self.geomdata, (4, twist.size))
         self.geomdata[2, :] = twist[:]
 
     @property
@@ -135,7 +135,7 @@ class Geometry(object):
     @ubody.setter
     def ubody(self, ubody: np.ndarray):
         if ubody.size != self.geomdata.shape[1]:
-            self.geomdata.resize((4, ubody.size))
+            self.geomdata = np.resize(self.geomdata, (4, ubody.size))
         self.geomdata[3, :] = ubody[:]
 
 
@@ -406,49 +406,36 @@ class Blade(object):
     ----------
     geometry : Geometry
         Instance of the Geometry class representing the geometry of the blade
-    sections : dict of Section instances by float
-        Dictionary of aerodynamic Sections, indexed by their normalized radial positions along the blade
-    n_aero
-    aerodata
+    polars : dict of np.ndarray instances by float
+        Dictionary of aerodynamic polars, indexed by their normalized radial positions along the blade
     geomdata
+    polardata
     """
 
-    def __init__(self, geometry: Geometry = Geometry(), sections: Dict[float, Section] = None):
+    def __init__(self, geometry: Geometry = Geometry(), polars: Dict[float, np.ndarray] = None):
         super().__init__()
         self.geometry: Geometry = geometry
-        self.sections: Dict[float, sections] = dict() if sections is None else sections
-
-    @property
-    def n_aero(self) -> int:
-        """int: Number of aerodynamic Sections"""
-        return len(self.sections)
-
-    @property
-    def aerodata(self) -> np.ndarray:
-        """np.ndarray: Array with all Sections' data, row-wise, indexed by radial position in the first column"""
-        data = np.zeros((14, self.n_aero), dtype=c_float, order='F')
-        for i, key in enumerate(sorted(self.sections.keys())):
-            sec = self.sections[key]
-            data[0][i] = key
-            data[1][i] = sec.a_0
-            data[2][i] = sec.Cl_max
-            data[3][i] = sec.Cl_min
-            data[4][i] = sec.dClda
-            data[5][i] = sec.dClda_stall
-            data[6][i] = sec.dCl_stall
-            data[7][i] = sec.Cd_min
-            data[8][i] = sec.Cl_Cd_min
-            data[9][i] = sec.dCddCl2
-            data[10][i] = sec.Cm_const
-            data[11][i] = sec.M_crit
-            data[12][i] = sec.Re
-            data[13][i] = sec.Re_exp
-        return data
+        self.polars: Dict[float, polars] = dict() if polars is None else polars
 
     @property
     def geomdata(self) -> np.ndarray:
         """np.ndarray: Array of the blade's geometric data"""
         return self.geometry.geomdata
+
+    @property
+    def n_polar_points(self) -> np.ndarray:
+        """np.ndarray: Number of points for each specified polar"""
+        return np.array([polar.shape[0] for polar in self.polars.values()], dtype=c_int, order='F')
+
+    @property
+    def polardata(self) -> np.ndarray:
+        """np.ndarray: Array with all Sections' polar data"""
+        return np.asarray(np.vstack(list(self.polars.values())), dtype=c_float, order='F')
+
+    @property
+    def xi_polars(self) -> np.ndarray:
+        """np.ndarray: List of normalized radial positions of the polars"""
+        return np.asarray(list(self.polars.keys()), dtype=c_float, order='F')
 
 
 class Disk(object):
@@ -528,7 +515,7 @@ class Case(object):
         def recurse(obj, sub_d):
             if isinstance(obj, dict):
                 for key, value in sub_d.items():
-                    obj.update({key: Section.from_dict(value)})
+                    obj.update({key: np.asarray(value)})
             else:
                 for key, value in sub_d.items():
                     if hasattr(obj, key):

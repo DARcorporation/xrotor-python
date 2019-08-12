@@ -60,87 +60,47 @@ contains
         !--- Find lower index of aero data sections xiaero(n) bounding xi(is)
         do i = 1, ctxt%ii
             ctxt%iaero(i) = 1
-            do n = 1, ctxt%naero
-                if (ctxt%xiaero(n)<=ctxt%xi(i)) ctxt%iaero(i) = n
+            do n = 1, ctxt%n_polars
+                if (ctxt%xi_polars(n)<=ctxt%xi(i)) ctxt%iaero(i) = n
             enddo
         enddo
     end
 
-    subroutine getaero(ctxt, n, xisect, a0, clmax, clmin, &
-            dclda, dclda_stall, dcl_stall, &
-            cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
-        !---------------------------------------------
-        !     Gets aero data from stored section array
-        !---------------------------------------------
-        use i_common, only : Common, show_output
-        implicit real(M)
-        !*** Start of declarations inserted by SPAG
-        real A0, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, DCLDA, DCLDA_STALL, &
-                & DCL_STALL, MCRIT, REREF, REXP, XISECT
-        integer N
-        !*** End of declarations inserted by SPAG
-        type (Common), intent(inout) :: ctxt
-        !
-        if (n<1.or.n>ctxt%naero) then
-            if (show_output) write (*, *)                                       &
-                    &'Error: index of aero section out of bounds'
-            return
-        endif
-        !
-        a0 = ctxt%aerodata(1, n)
-        clmax = ctxt%aerodata(2, n)
-        clmin = ctxt%aerodata(3, n)
-        dclda = ctxt%aerodata(4, n)
-        dclda_stall = ctxt%aerodata(5, n)
-        dcl_stall = ctxt%aerodata(6, n)
-        cdmin = ctxt%aerodata(7, n)
-        cldmin = ctxt%aerodata(8, n)
-        dcdcl2 = ctxt%aerodata(9, n)
-        cmcon = ctxt%aerodata(10, n)
-        reref = ctxt%aerodata(11, n)
-        rexp = ctxt%aerodata(12, n)
-        mcrit = ctxt%aerodata(13, n)
-        xisect = ctxt%xiaero(n)
-        !
+
+    subroutine getpolar(ctxt, n, polar)
+        use i_common, only : Common
+        type(Common), intent(inout) :: ctxt
+        integer, intent(in) :: n
+        real, allocatable, intent(out) :: polar(:, :) ! ctxt%n_polar_points(n), 4)
+
+        polar = ctxt%polardata(ctxt%i_polars(n):ctxt%i_polars(n+1)-1, :)
     end
 
-    subroutine putaero(ctxt, n, xisect, a0, clmax, clmin, &
-            dclda, dclda_stall, dcl_stall, &
-            cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
-        !--------------------------------------------------------
-        !     Puts aero data into stored section array at index n
-        !--------------------------------------------------------
-        use i_common, only : Common, show_output, nax
-        implicit real(M)
-        !*** Start of declarations inserted by SPAG
-        real A0, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, DCLDA, DCLDA_STALL, &
-                & DCL_STALL, MCRIT, REREF, REXP, XISECT
-        integer N
-        !*** End of declarations inserted by SPAG
-        type (Common), intent(inout) :: ctxt
-        !
-        if (n>nax) then
-            if (show_output) write (*, *) 'Too many aero sections defined...'
-            return
-        endif
-        !
-        ctxt%aerodata(1, n) = a0
-        ctxt%aerodata(2, n) = clmax
-        ctxt%aerodata(3, n) = clmin
-        ctxt%aerodata(4, n) = dclda
-        ctxt%aerodata(5, n) = dclda_stall
-        ctxt%aerodata(6, n) = dcl_stall
-        ctxt%aerodata(7, n) = cdmin
-        ctxt%aerodata(8, n) = cldmin
-        ctxt%aerodata(9, n) = dcdcl2
-        ctxt%aerodata(10, n) = cmcon
-        ctxt%aerodata(11, n) = reref
-        ctxt%aerodata(12, n) = rexp
-        ctxt%aerodata(13, n) = mcrit
-        ctxt%xiaero(n) = xisect
-        !
-    end
 
+    subroutine putpolars(ctxt, n_polars, n_polar_points, xi_polars, polardata)
+        use i_common, only : Common
+        type(Common), intent(inout) :: ctxt
+        integer, intent(in) :: n_polars, n_polar_points(n_polars)
+        real, intent(in) :: xi_polars(n_polars), polardata(sum(n_polar_points), 4)
+
+        integer :: i, i_start, i_end
+        integer, allocatable :: temp_indices(:), temp_n_polar_points(:)
+        real, allocatable :: temp_xi_polars(:), temp_polardata(:, :)
+
+        ctxt%n_polars = n_polars
+
+        temp_indices = (/1, (1 + sum(n_polar_points(:i)), i=1, n_polars)/)
+        call move_alloc(temp_indices, ctxt%i_polars)
+
+        temp_n_polar_points = n_polar_points
+        call move_alloc(temp_n_polar_points, ctxt%n_polar_points)
+
+        temp_xi_polars = xi_polars
+        call move_alloc(temp_xi_polars, ctxt%xi_polars)
+
+        temp_polardata = polardata
+        call move_alloc(temp_polardata, ctxt%polardata)
+    end
 
     !*************************************************************************
     !  Interpolated aero section properties functions
@@ -168,20 +128,22 @@ contains
         real CL_W, CL_W2, CMCON, CMOM, CMOM2, CM_AL, CM_AL2, CM_W, CM_W2, DCDCL2, &
                 & DCLDA, DCLDA_STALL, DCL_STALL, DCL_STALL2, FRAC, MCRIT, REREF, REXP, &
                 & REY, W
-        real XISECT1, XISECT2
         integer IS, N
         !*** End of declarations inserted by SPAG
         type (Common), intent(inout) :: ctxt
         logical stallf, stallf2
+        real :: xi_polar1, xi_polar2
+
+        real, allocatable :: polar(:, :)
         !
         !--- Check for installed aero data section index
         n = ctxt%iaero(is)
-        if (n<1.or.n>ctxt%naero) then
+        if (n<1.or.n>ctxt%n_polars) then
             !
-            if (ctxt%naero>1) then
+            if (ctxt%n_polars>1) then
                 !--- Find lower index of aero data sections xiaero(n) bounding xi(is)
-                do n = 1, ctxt%naero
-                    if (ctxt%xiaero(n)>ctxt%xi(is)) goto 100
+                do n = 1, ctxt%n_polars
+                    if (ctxt%xi_polars(n)>ctxt%xi(is)) goto 100
                     !c          write(*,*) 'getcl iaero= ',n,' is= ',is,xiaero(n),xi(is)
                     ctxt%iaero(is) = n
                 enddo
@@ -195,57 +157,35 @@ contains
         endif
         !
         !--- Get section aero data from stored section array
-        100   a0 = ctxt%aerodata(1, n)
-        clmax = ctxt%aerodata(2, n)
-        clmin = ctxt%aerodata(3, n)
-        dclda = ctxt%aerodata(4, n)
-        dclda_stall = ctxt%aerodata(5, n)
-        dcl_stall = ctxt%aerodata(6, n)
-        cdmin = ctxt%aerodata(7, n)
-        cldmin = ctxt%aerodata(8, n)
-        dcdcl2 = ctxt%aerodata(9, n)
-        cmcon = ctxt%aerodata(10, n)
-        reref = ctxt%aerodata(11, n)
-        rexp = ctxt%aerodata(12, n)
-        mcrit = ctxt%aerodata(13, n)
-        xisect1 = ctxt%xiaero(n)
+        100   call getpolar(ctxt, n, polar)
+        clmax = maxval(polar(:, 2))
+        clmin = minval(polar(:, 2))
+        xi_polar1 = ctxt%xi_polars(n)
         !--- Get data for inner bounding aero section
         call clcdcm(ctxt, alf, w, rey, &
                 clift, cl_alf, cl_w, stallf, &
                 cdrag, cd_alf, cd_w, cd_rey, &
                 cmom, cm_al, cm_w, &
-                a0, clmax, clmin, dclda, dclda_stall, dcl_stall, &
-                cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+                polar, ctxt%use_compr_corr)
         !
         !--- Check for another bounding section, if not we are done,
         !    if we have another section linearly interpolate data to station is
-        if (n<ctxt%naero) then
-            xisect2 = ctxt%xiaero(n + 1)
-            frac = (ctxt%xi(is) - xisect1) / (xisect2 - xisect1)
+        if (n<ctxt%n_polars) then
+            xi_polar2 = ctxt%xi_polars(n + 1)
+            frac = (ctxt%xi(is) - xi_polar1) / (xi_polar2 - xi_polar1)
             if (frac<=0.0.or.frac>1.0) then
                 !c         write(*,*) 'cl n,is,xi,frac = ',n,is,xi(is),frac
             endif
             !
-            a0 = ctxt%aerodata(1, n + 1)
-            clmax2 = ctxt%aerodata(2, n + 1)
-            clmin2 = ctxt%aerodata(3, n + 1)
-            dclda = ctxt%aerodata(4, n + 1)
-            dclda_stall = ctxt%aerodata(5, n + 1)
-            dcl_stall2 = ctxt%aerodata(6, n + 1)
-            cdmin = ctxt%aerodata(7, n + 1)
-            cldmin = ctxt%aerodata(8, n + 1)
-            dcdcl2 = ctxt%aerodata(9, n + 1)
-            cmcon = ctxt%aerodata(10, n + 1)
-            reref = ctxt%aerodata(11, n + 1)
-            rexp = ctxt%aerodata(12, n + 1)
-            mcrit = ctxt%aerodata(13, n + 1)
+            call getpolar(ctxt, n + 1, polar)
+            clmax2 = maxval(polar(:, 2))
+            clmin2 = minval(polar(:, 2))
             !--- Get data for outer bounding aero section
             call clcdcm(ctxt, alf, w, rey, &
                     clift2, cl_alf2, cl_w2, stallf2, &
                     cdrag2, cd_alf2, cd_w2, cd_rey2, &
                     cmom2, cm_al2, cm_w2, &
-                    a0, clmax2, clmin2, dclda, dclda_stall, dcl_stall2, &
-                    cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
+                    polar, ctxt%use_compr_corr)
             !--- Interpolate aero data to blade station
             stallf = stallf .or. stallf2
             clift = (1.0 - frac) * clift + frac * clift2
@@ -327,183 +267,174 @@ contains
             clift, cl_alf, cl_w, stallf, &
             cdrag, cd_alf, cd_w, cd_rey, &
             cmom, cm_al, cm_w, &
-            a0, clmax, clmin, dclda, dclda_stall, dcl_stall, &
-            cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
-        !------------------------------------------------------------
-        !     cl(alpha) function
-        !     Note that in addition to setting clift and its derivatives
-        !     clmax and clmin (+ and - stall cl's) are set in this routine
-        !     In the compressible range the stall cl is reduced by a factor
-        !     proportional to Mcrit-Mach.  Stall limiting for compressible
-        !     cases begins when the compressible drag added cdc > cdMstall
-        !------------------------------------------------------------
-        !     cd(alpha) function - presently cd is assumed to be a sum
-        !     of profile drag + stall drag + compressibility drag
-        !     In the linear lift range drag is cd0 + quadratic function of cl-cldmin
-        !     In + or - stall an additional drag is added that is proportional
-        !     to the extent of lift reduction from the linear lift value.
-        !     Compressible drag is based on adding drag proportional to
-        !     (Mach-Mcrit_eff)^mexp
-        !------------------------------------------------------------
-        !     cm(alpha) function - presently cm is assumed constant,
-        !     varying only with Mach by Prandtl-Glauert scaling
-        !------------------------------------------------------------
-        !
-        use i_common, only : Common, show_output
-        implicit real(M)
-        !*** Start of declarations inserted by SPAG
-        real A0, ALF, CDC, CDC_ALF, CDC_W, CDMDD, CDMFACTOR, CDMIN, CDMSTALL, &
-                & CDRAG, CD_ALF, CD_REY, CD_W, CLA, CLA_ALF, CLA_W, CLDMIN, CLIFT, &
-                & CLLIM, CLLIM_CLA
-        real CLMAX, CLMAXM, CLMFACTOR, CLMIN, CLMINM, CLMN, CLMX, CL_ALF, CL_W, &
-                & CMCON, CMOM, CM_AL, CM_W, CRITMACH, CRITMACH_ALF, CRITMACH_W, DCD, &
-                & DCDCL2, DCDX, DCD_ALF
-        real DCD_W, DCLDA, DCLDA_STALL, DCL_STALL, DMDD, DMSTALL, FAC, FAC_W, &
-                & FSTALL, MACH, MACH_W, MCRIT, MEXP, MSQ, MSQ_W, PG, PG_W, RCORR, &
-                & RCORR_REY, REREF
-        real REXP, REY, W
-        !*** End of declarations inserted by SPAG
-        type (Common), intent(inout) :: ctxt
-        logical stallf
-        double precision ecmin, ecmax
-        !
-        !---- Factors for compressibility drag model, hhy 10/23/00
-        !     Mcrit is set by user
-        !     Effective Mcrit is Mcrit_eff = Mcrit - clmfactor*(cl-clDmin) - dmdd
-        !     dmdd is the delta Mach to get cd=cdmdd (usually 0.0020)
-        !     Compressible drag is cdc = cdmfactor*(Mach-Mcrit_eff)^mexp
-        !     cdMstall is the drag at which compressible stall begins
-        !
-        cdmfactor = 10.0
-        clmfactor = 0.25
-        mexp = 3.0
-        cdmdd = 0.0020
-        cdmstall = 0.1000
-        !
-        !---- Prandtl-Glauert compressibility factor
-        msq = w * w * ctxt%vel**2 / ctxt%vso**2
-        msq_w = 2.0 * w * ctxt%vel**2 / ctxt%vso**2
-        if(msq >= 1.0) then
-            if (show_output) write(*, *) 'clfunc: Local Mach number limited to 0.99, was ', msq
-            msq = 0.99
-            msq_w = 0.
-        endif
-        pg = 1.0 / sqrt(1.0 - msq)
-        pg_w = 0.5 * msq_w * pg**3
-        !
-        !---- Mach number and dependence on velocity
-        mach = sqrt(msq)
-        mach_w = 0.0
-        if (mach/=0.0) mach_w = 0.5 * msq_w / mach
-        !
-        !
-        !------------------------------------------------------------
-        !--- Generate cl from dcl/dAlpha and Prandtl-Glauert scaling
-        cla = dclda * pg * (alf - a0)
-        cla_alf = dclda * pg
-        cla_w = dclda * pg_w * (alf - a0)
-        !
-        !--- Effective cLmax is limited by Mach effects
-        !    reduces cLmax to match the cl of onset of serious compressible drag
-        clmx = clmax
-        clmn = clmin
-        dmstall = (cdmstall / cdmfactor)**(1.0 / mexp)
-        clmaxm = max(0.0, (mcrit + dmstall - mach) / clmfactor) + cldmin
-        clmax = min(clmax, clmaxm)
-        clminm = min(0.0, -(mcrit + dmstall - mach) / clmfactor) + cldmin
-        clmin = max(clmin, clminm)
-        !
-        !--- cl limiter function (turns on after +-stall
-        ecmax = dexp(min(200.0D0, dble((cla - clmax) / dcl_stall)))
-        ecmin = dexp(min(200.0D0, dble((clmin - cla) / dcl_stall)))
-        cllim = dcl_stall * dlog((1.0D0 + ecmax) / (1.0D0 + ecmin))
-        cllim_cla = ecmax / (1.0 + ecmax) + ecmin / (1.0 + ecmin)
-        !
-        !      if(cllim > 0.001) then
-        !      write(*,999) 'cla,cllim,ecmax,ecmin ',cla,cllim,ecmax,ecmin
-        !      endif
-        ! 999  format(a,2(1x,f10.6),3(1x,d12.6))
-        !
-        !--- Subtract off a (nearly unity) fraction of the limited cl function
-        !    This sets the dcl/dAlpha in the stalled regions to 1-fstall of that
-        !    in the linear lift range
-        fstall = dclda_stall / dclda
-        clift = cla - (1.0 - fstall) * cllim
-        cl_alf = cla_alf - (1.0 - fstall) * cllim_cla * cla_alf
-        cl_w = cla_w - (1.0 - fstall) * cllim_cla * cla_w
-        !
-        stallf = .false.
-        if (clift>clmax) stallf = .true.
-        if (clift<clmin) stallf = .true.
-        !
-        !
-        !------------------------------------------------------------
-        !--- cm from cmcon and Prandtl-Glauert scaling
-        cmom = pg * cmcon
-        cm_al = 0.0
-        cm_w = pg_w * cmcon
-        !
-        !
-        !------------------------------------------------------------
-        !--- cd from profile drag, stall drag and compressibility drag
-        !
-        !---- Reynolds number scaling factor
-        if (rey<=0) then
-            rcorr = 1.0
-            rcorr_rey = 0.0
+            polar, use_corrections, m_crit)
+        ! NOTE: All Reynolds Nr and compressibility effects have been REMOVED from this function!
+        ! The user is responsible for ensuring that the aerodynamic sections are analyzed at the
+        ! correct local Reynolds and Mach numbers.
+        use i_common, only : Common, show_output, pi
+        type(Common) :: ctxt
+        logical :: stallf
+        integer :: n_points
+        real :: alf, w, rey, clift, cl_alf, cl_w, cdrag, cd_alf, cd_w, cd_rey, cmom, cm_al, cm_w, &
+                deltas(4), new_data(3), deriv(3)
+        real :: polar(:, :)
+        logical, optional :: use_corrections
+        real, optional :: m_crit
+        real :: cdmfactor, clmfactor, mexp, cdmdd, cdmstall, msq, msq_w, pg, pg_w, mach, mach_w, &
+                cla, cla_alf, cla_w, clmax, clmin, dmstall, clmaxm, clminm, dmdd, critmach, critmach_alf, &
+                critmach_w, cdc, cdc_alf, cdc_w, fac, fac_w, cdmin, cldmin
+        real :: a_max, a_min
+
+        integer :: i_below, i_above
+        real :: f, mcrit
+
+        ! Ensure angle of attack is always between -180 and +180 degrees (-pi and +pi radians)
+        if (alf < -pi) then
+            alf = alf + 2.*pi
+        elseif (alf > pi) then
+            alf = alf - 2.*pi
+        end if
+
+        a_max = maxval(polar(:, 1))
+        a_min = minval(polar(:, 1))
+        if (a_min < alf .and. alf < a_max) then
+            ! Find the indices of the angles of attack in the polar just below and just above the specified one
+            i_below = maxloc(polar(:, 1), 1, polar(:, 1) <= alf)
+            i_above = minloc(polar(:, 1), 1, polar(:, 1) >= alf)
+
+            if (i_below == i_above) then
+                i_above = i_below + 1
+            end if
+
+            ! Compute delta values from alpha(i_below) to alpha(i_above)
+            deltas = pack(polar(i_above, :), .true.) - pack(polar(i_below, :), .true.)
+
+            ! Interpolation factor
+            f = (alf - polar(i_below, 1)) / deltas(1)
         else
-            rcorr = (rey / reref)**rexp
-            rcorr_rey = rexp / rey
-        endif
-        !
-        !--- In the basic linear lift range drag is a function of lift
-        !    cd = cd0 (constant) + quadratic with cl)
-        cdrag = (cdmin + dcdcl2 * (clift - cldmin)**2) * rcorr
-        cd_alf = (2.0 * dcdcl2 * (clift - cldmin) * cl_alf) * rcorr
-        cd_w = (2.0 * dcdcl2 * (clift - cldmin) * cl_w) * rcorr
-        cd_rey = cdrag * rcorr_rey
-        !
-        !--- Post-stall drag added
-        fstall = dclda_stall / dclda
-        dcdx = (1.0 - fstall) * cllim / (pg * dclda)
-        !      write(*,*) 'cla,cllim,fstall,pg,dclda ',cla,cllim,fstall,pg,dclda
-        dcd = 2.0 * dcdx**2
-        dcd_alf = 4.0 * dcdx * (1.0 - fstall) * cllim_cla * cla_alf / (pg * dclda)
-        dcd_w = 4.0 * dcdx * ((1.0 - fstall) * cllim_cla * cla_w / (pg * dclda) - dcd / pg * pg_w)
-        !      write(*,*) 'alf,cl,dcd,dcd_alf,dcd_w ',alf,clift,dcd,dcd_alf,dcd_w
-        !
-        !--- Compressibility drag (accounts for drag rise above Mcrit with cl effects
-        !    cdc is a function of a scaling factor*(m-Mcrit(cl))**mexp
-        !    dmdd is the Mach difference corresponding to cd rise of cdmdd at mcrit
-        dmdd = (cdmdd / cdmfactor)**(1.0 / mexp)
-        critmach = mcrit - clmfactor * abs(clift - cldmin) - dmdd
-        critmach_alf = -clmfactor * abs(cl_alf)
-        critmach_w = -clmfactor * abs(cl_w)
-        if (mach<critmach) then
-            cdc = 0.0
-            cdc_alf = 0.0
-            cdc_w = 0.0
+            ! Treat cases where request alf falls outside the known range
+            ! This is done by assuming cl, cd, and cm are periodic in alpha with period 2*pi
+            ! When this assumption is made, alphas outside of the known range can simply be interpolated using the
+            ! edge values.
+            i_below = size(polar, 1)
+            deltas = pack(polar(1, :), .true.) - pack(polar(i_below, :), .true.)
+            deltas(1) = deltas(1) + 2.*pi
+            f = (alf - polar(i_below, 1)) / deltas(1)
+            if (alf <= a_min) then
+                f = f + 2.*pi/deltas(1)
+            end if
+        end if
+
+        ! Compute interpolate data and local slopes
+        new_data = pack(polar(i_below, 2:), .true.) + f * deltas(2:)
+        deriv = deltas(2:) / deltas(1)
+
+        ! Store results in proper places
+        clift = new_data(1)
+        cdrag = new_data(2)
+        cmom  = new_data(3)
+
+        cl_alf = deriv(1)
+        cd_alf = deriv(2)
+        cm_al  = deriv(3)
+
+        cd_rey = 0.
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Optional Compressibility Corrections !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (.not. present(use_corrections) .or. .not. use_corrections) then
+            cl_w = 0.
+            cd_w = 0.
+            cm_w = 0.
+
         else
-            cdc = cdmfactor * (mach - critmach)**mexp
-            cdc_w = mexp * mach_w * cdc / mach - mexp * critmach_w * cdc / critmach
-            cdc_alf = -mexp * critmach_alf * cdc / critmach
-        endif
-        !      write(*,*) 'critmach,mach ',critmach,mach
-        !      write(*,*) 'cdc,cdc_w,cdc_alf ',cdc,cdc_w,cdc_alf
-        !
-        fac = 1.0
-        fac_w = 0.0
-        !--- Although test data does not show profile drag increases due to Mach #
-        !    you could use something like this to add increase drag by Prandtl-Glauert
-        !    (or any function you choose)
-        !c      fac   = pg
-        !c      fac_w = pg_w
-        !--- Total drag terms
-        cdrag = fac * cdrag + dcd + cdc
-        cd_alf = fac * cd_alf + dcd_alf + cdc_alf
-        cd_w = fac * cd_w + fac_w * cdrag + dcd_w + cdc_w
-        cd_rey = fac * cd_rey
-        !
+            if (.not. present(m_crit)) then
+                mcrit = 0.6
+            else
+                mcrit = m_crit
+            end if
+
+            ! Compute cl at cdmin
+            cdmin = minval(polar(:, 3))
+            i_above = maxloc(polar(:, 2), 1, polar(:, 3) == cdmin)
+            cldmin = polar(i_below, 2)
+
+            cdmfactor = 10.0
+            clmfactor = 0.25
+            mexp = 3.0
+            cdmdd = 0.0020
+            cdmstall = 0.1000
+            !
+            !---- Prandtl-Glauert compressibility factor
+            msq = w * w * ctxt%vel**2 / ctxt%vso**2
+            msq_w = 2.0 * w * ctxt%vel**2 / ctxt%vso**2
+            if(msq >= 1.0) then
+                if (show_output) write(*, *) 'clfunc: Local Mach number limited to 0.99, was ', msq
+                msq = 0.99
+                msq_w = 0.
+            endif
+            pg = 1.0 / sqrt(1.0 - msq)
+            pg_w = 0.5 * msq_w * pg**3
+            !
+            !---- Mach number and dependence on velocity
+            mach = sqrt(msq)
+            mach_w = 0.0
+            if (mach/=0.0) mach_w = 0.5 * msq_w / mach
+            !
+            !
+            !------------------------------------------------------------
+            !--- Generate cl from dcl/dAlpha and Prandtl-Glauert scaling
+            cla = clift * pg
+            cla_alf = cl_alf * pg
+            cla_w = clift * pg_w
+            !
+            !--- Effective cLmax is limited by Mach effects
+            !    reduces cLmax to match the cl of onset of serious compressible drag
+            clmax = maxval(polar(:, 2))
+            clmin = minval(polar(:, 2))
+            dmstall = (cdmstall / cdmfactor)**(1.0 / mexp)
+            clmaxm = max(0.0, (mcrit + dmstall - mach) / clmfactor) + cldmin
+            clmax = min(clmax, clmaxm)
+            clminm = min(0.0, -(mcrit + dmstall - mach) / clmfactor) + cldmin
+            clmin = max(clmin, clminm)
+
+            !------------------------------------------------------------
+            !--- cm from cmcon and Prandtl-Glauert scaling
+            cmom = pg * cmom
+            cm_al = 0.0
+            cm_w = pg_w * cmom
+
+            !--- Compressibility drag (accounts for drag rise above Mcrit with cl effects
+            !    cdc is a function of a scaling factor*(m-Mcrit(cl))**mexp
+            !    dmdd is the Mach difference corresponding to cd rise of cdmdd at mcrit
+            dmdd = (cdmdd / cdmfactor)**(1.0 / mexp)
+            critmach = mcrit - clmfactor * abs(clift - cldmin) - dmdd
+            critmach_alf = -clmfactor * abs(cl_alf)
+            critmach_w = -clmfactor * abs(cl_w)
+            if (mach<critmach) then
+                cdc = 0.0
+                cdc_alf = 0.0
+                cdc_w = 0.0
+            else
+                cdc = cdmfactor * (mach - critmach)**mexp
+                cdc_w = mexp * mach_w * cdc / mach - mexp * critmach_w * cdc / critmach
+                cdc_alf = -mexp * critmach_alf * cdc / critmach
+            endif
+            !      write(*,*) 'critmach,mach ',critmach,mach
+            !      write(*,*) 'cdc,cdc_w,cdc_alf ',cdc,cdc_w,cdc_alf
+            !
+            fac = 1.0
+            fac_w = 0.0
+            !--- Although test data does not show profile drag increases due to Mach #
+            !    you could use something like this to add increase drag by Prandtl-Glauert
+            !    (or any function you choose)
+            !c      fac   = pg
+            !c      fac_w = pg_w
+            !--- Total drag terms
+            cdrag = fac * cdrag  + cdc
+            cd_alf = fac * cd_alf  + cdc_alf
+            cd_w = fac * cd_w + fac_w * cdrag + cdc_w
+        end if
     end
     ! clcdcm
 

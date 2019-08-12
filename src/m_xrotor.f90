@@ -107,8 +107,8 @@ contains
 
 
     subroutine setdef(ctxt)
-        use m_xaero, only : putaero
-        use i_common, only : Common, ix
+        use m_xaero, only : putpolars, setiaero
+        use i_common, only : Common, ix, pi
         implicit real(M)
         !*** Start of declarations inserted by SPAG
         real A0, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, DCLDA, DCLDA_STALL, &
@@ -116,6 +116,23 @@ contains
         integer I
         !*** End of declarations inserted by SPAG
         type (Common), intent(inout) :: ctxt
+        ! Default polar is of a NACA 0012 at Re = 1e6 and M = 0.0
+        real :: polardata(20, 4) = reshape((/&
+                ! alpha (deg)
+                -20.0000, -18.0000, -16.0000, -14.0000, -12.0000, -10.0000,  -8.0000,  -6.0000,  -4.0000,  -2.0000, &
+                  2.0000,   4.0000,   6.0000,   8.0000,  10.0000,  12.0000,  14.0000,  16.0000,  18.0000,  20.0000, &
+                ! cl
+                 -1.0550,  -1.2246,  -1.2551,  -1.3550,  -1.2452,  -1.0796,  -0.9098,  -0.6940,  -0.4275,  -0.2144, &
+                  0.2144,   0.4275,   0.6940,   0.9097,   1.0796,   1.2453,   1.3555,   1.3913,   1.3048,   1.1910, &
+                ! cd
+                  0.1450,   0.0891,   0.0622,   0.0256,   0.0193,   0.0151,   0.0122,   0.0098,   0.0073,   0.0058, &
+                  0.0058,   0.0073,   0.0098,   0.0122,   0.0151,   0.0193,   0.0256,   0.0412,   0.0819,   0.1332, &
+                ! cm
+                  0.0102,  -0.0132,  -0.0370,  -0.0263,  -0.0133,  -0.0054,   0.0040,   0.0041,  -0.0061,  -0.0030, &
+                  0.0030,   0.0061,  -0.0041,  -0.0040,   0.0054,   0.0133,   0.0262,   0.0303,   0.0111,  -0.0173/), &
+        (/20, 4/))
+        ! convert angles of attack from degrees to radians
+        polardata(:, 1) = polardata(:, 1) * pi / 180.
         !
         !---- hard-wired start-up defaults
         !ccihi
@@ -128,29 +145,8 @@ contains
         !cc      rmu =  1.78e-05   ! dynamic viscosity     kg/m-s
         !cc      vso =  340.0      ! speed of sound        m/s
         !
-        !--- Default aero properties for section #1
-        a0 = 0.            ! zero lift angle of attack   radians
-        dclda = 6.28      ! lift curve slope            /radian
-        clmax = 1.5      ! ctxt%stall ctxt%cl
-        clmin = -0.5      ! negative ctxt%stall ctxt%cl
-        dcl_stall = 0.1  ! ctxt%cl increment from incipient to total ctxt%stall
-        dclda_stall = 0.1  ! stalled lift curve slope    /radian
-        cmcon = -0.1       ! section ctxt%cm  (for pitch-axis moments)
-        cdmin = 0.013     ! minimum ctxt%cd
-        cldmin = 0.5      ! ctxt%cl at minimum ctxt%cd
-        dcdcl2 = 0.004    ! d(ctxt%cd)/d(ctxt%cl**2)
-        reref = 200000.   ! reynolds number at which ctxt%cd values apply
-        rexp = -0.4       ! exponent for ctxt%re scaling of ctxt%cd:  ctxt%cd ~ ctxt%re**exponent
-        mcrit = 0.8       ! Critical Mach number
         !--- Install data into aero section #1
-        ctxt%naero = 1
-        xisect = 0.0
-        call putaero(ctxt, ctxt%naero, xisect, a0, clmax, clmin, &
-                dclda, dclda_stall, dcl_stall, &
-                cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
-        do i = 1, ix
-            ctxt%iaero(i) = 1
-        enddo
+        call putpolars(ctxt, 1, (/20/), (/0./), polardata)
         !
         ctxt%xpitch = 0.3      ! x/c location of pitch axis
         !

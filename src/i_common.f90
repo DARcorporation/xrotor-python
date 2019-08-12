@@ -20,6 +20,7 @@
 !***********************************************************************
 
 module i_common
+    use, intrinsic :: iso_c_binding, only : c_f_pointer, c_float, c_int, c_ptr
     implicit none
 
     public
@@ -52,6 +53,7 @@ module i_common
         logical :: conv = f, greek = f, terse = f, vrtx = f, fast = f, free = f, duct = f, lstruc = f, &
                 ldesini = f, loprini = f, lrotor = f, lvnorm = f, lpwrvar = f, &
                 wind = f, dest = f, desp = f, stall(ix) = f, legend = f
+        logical :: use_compr_corr = .false.
 
         real :: rho = 0., rmu = 0., vso = 0., vel = 0., rad = 0., gee = 0., alt = 0.
 
@@ -79,6 +81,10 @@ module i_common
 
         integer :: naero = 0
         real :: xiaero(nax) = 0., aerodata(ndx, nax) = 0.
+
+        integer :: n_polars = 0
+        integer, allocatable :: n_polar_points(:), i_polars(:)
+        real, allocatable :: xi_polars(:), polardata(:, :)
 
         real :: px(ix) = 0., py(ix) = 0., pz(ix) = 0., &
                 mx(ix) = 0., my(ix) = 0., mz(ix) = 0., &
@@ -131,6 +137,8 @@ module i_common
                 dxw(ix) = 0., dxw_gam(ix, ix) = 0., dxw_adw(ix) = 0., dxw_adv(ix) = 0.
 
         real :: dgam(ix) = 0., res(iq) = 0., dadv = 0., dadw = 0., dbet = 0., deff = 0., dq(iq) = 0., dgamold(ix) = 0.
+
+        logical :: always_overwrite = .true.
     end type Common
     !
     !cc   EQUIVALENCE (A_GAMJ(0,1),Q(1,1))
