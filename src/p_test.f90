@@ -1,6 +1,7 @@
 program test_xrotor
     use, intrinsic :: iso_c_binding, only : c_int, c_bool, c_float
-    use api, only : init, set_case, operate, show, get_number_of_stations, get_station_conditions, set_use_compr_corr
+    use api, only : init, set_case, operate, show, get_number_of_stations, get_station_conditions, set_use_compr_corr, &
+            save_prop, load_prop
     real :: rho, vso, rmu, alt, vel, adv, r_hub, r_tip, r_wake, rake
     integer, parameter :: n_geom = 6, n_polars = 1, n_polar_points(n_polars) = (/105/)
     real :: geomdata(4, n_geom), xi_polars(n_polars), polardata(sum(n_polar_points), 4)
@@ -107,13 +108,21 @@ program test_xrotor
     use_compr_corr = .false.
 
     call init()
-    call set_case(&
-        rho, vso, rmu, alt, vel, adv, &
-        r_hub, r_tip, r_wake, rake, &
-        n_blds, &
-        n_geom, geomdata, &
-        n_polars, n_polar_points, xi_polars, polardata, &
-        free, duct, wind)
+!    call set_case(&
+!        rho, vso, rmu, alt, vel, adv, &
+!        r_hub, r_tip, r_wake, rake, &
+!        n_blds, &
+!        n_geom, geomdata, &
+!        n_polars, n_polar_points, xi_polars, polardata, &
+!        free, duct, wind)
+!    call set_use_compr_corr(use_compr_corr)
+!    res = operate(4, 2000.)
+!    call show()
+!
+!    call save_prop()
+
+    call init()
+    call load_prop('output.json')
     call set_use_compr_corr(use_compr_corr)
     res = operate(4, 2000.)
     call show()

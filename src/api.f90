@@ -28,7 +28,7 @@ module api
             set_use_compr_corr, get_use_compr_corr, &
             init, set_case, operate, dp, show,  save_prop, &
             get_rms, get_performance, get_blade_angle_change, &
-            get_number_of_stations, get_station_conditions
+            get_number_of_stations, get_station_conditions, load_prop
 
     integer, parameter :: dp = kind(0.D0)
 
@@ -196,7 +196,13 @@ contains
 
     subroutine save_prop() bind(c, name = 'save_prop')
         use m_xio, only : save
-        call save(ctxt, 'output.prop')
+        call save(ctxt, 'output.json')
+    end
+
+    subroutine load_prop(fname)
+        use m_xio, only : load
+        character*(*) fname
+        call load(ctxt, fname)
     end
 
     function get_rms() bind(c, name = 'get_rms')

@@ -137,6 +137,8 @@ module i_common
                 dxw(ix) = 0., dxw_gam(ix, ix) = 0., dxw_adw(ix) = 0., dxw_adv(ix) = 0.
 
         real :: dgam(ix) = 0., res(iq) = 0., dadv = 0., dadw = 0., dbet = 0., deff = 0., dq(iq) = 0., dgamold(ix) = 0.
+
+        logical :: always_overwrite = .true.
     end type Common
     !
     !cc   EQUIVALENCE (A_GAMJ(0,1),Q(1,1))

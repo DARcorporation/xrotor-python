@@ -24,13 +24,13 @@ module m_xio
 contains
     subroutine save(ctxt, fname1)
         use m_userio, only : asks
-        ! use m_xaero, only : getaero
+        use m_xaero, only : getpolar
         use i_common, only : Common, show_output, pi
         implicit real(M)
         !*** Start of declarations inserted by SPAG
         real A0, A0DEG, BETA0DEG, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, &
                 & DCLDA, DCLDA_STALL, DCL_STALL, MCRIT, REREF, REXP, XISECT
-        integer I, LU, N
+        integer I, LU, N, j
         !*** End of declarations inserted by SPAG
         type (Common), intent(inout) :: ctxt
         character*(*) fname1
@@ -42,6 +42,8 @@ contains
         logical lvduct
         !
         character*1 ans
+        real, allocatable :: polar(:, :)
+        character (47) :: settings
         !
         ctxt%greek = .false.
         !c      if(.not.conv) then
@@ -57,7 +59,9 @@ contains
         open (lu, file = ctxt%fname, status = 'old', err = 100)
         if (show_output) write (*, *)
         if (show_output) write (*, *) 'Output file exists.  Overwrite?  y'
-        read (*, 99001) ans
+        if (.not. ctxt%always_overwrite) then
+            read (*, 99001) ans
+        end if
         !
         !...................................................................
         99001  format (a)
@@ -69,77 +73,95 @@ contains
         !
         100   open (lu, file = ctxt%fname, status = 'new', err = 300)
         200   rewind (lu)
-        !
-        !
-        !--- Version header and case name
-        if (ctxt%name==' ') ctxt%name = 'saved blade'
-        write (lu, 99002) ctxt%version, ctxt%name
-        99002  format ('xrotor version: ', f5.2/a)
-        !--- Altitude and atmospheric data
-        write (lu, 99003)
-        99003  format ('!         Rho          Vso          Rmu           Alt')
-        write (lu, 99017) ctxt%rho, ctxt%vso, ctxt%rmu, ctxt%alt
-        !--- Radius, velocity, advance ratio and blade rake angle
-        write (lu, 99004)
-        99004  format ('!         Rad          Vel          Adv          Rake')
-        write (lu, 99017) ctxt%rad, ctxt%vel, ctxt%adv, ctxt%rake
-        !
-        write (lu, 99005)
-        99005  format ('!         xi0          xiw')
-        write (lu, 99017) ctxt%xi0, ctxt%xw0
-        !--- Save aero data for defined aero sections
-        write (lu, 99006) ctxt%naero
-        99006  format ('!  Naero'/1(1x, i5))
-        mcrit = 0.8
-        do n = 1, ctxt%naero
-            ! TODO
-!            call getaero(ctxt, n, xisect, a0, clmax, clmin, dclda, dclda_stall, &
-!                    & dcl_stall, cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
-            write (lu, 99007)
-            99007      format ('!   Xisection')
-            write (lu, 99017) xisect
-            a0deg = a0 * 180.0 / pi
-            write (lu, 99008)
-            99008      format ('!       a0deg        dcLda        cLmax         cLmin')
-            write (lu, 99017) a0deg, dclda, clmax, clmin
-            write (lu, 99009)
-            99009      format ('!  dcLdAstall     dcLstall      Cmconst         Mcrit')
-            write (lu, 99017) dclda_stall, dcl_stall, cmcon, mcrit
-            write (lu, 99010)
-            99010      format ('!       cDmin      clcDmin     dcDdcl^2')
-            write (lu, 99017) cdmin, cldmin, dcdcl2
-            write (lu, 99011)
-            99011      format ('!       rEref        rEexp')
-            write (lu, 99017) reref, rexp
-        enddo
-        !
-        !--- Save logical flags for duct and windmill
-        write (lu, 99012) lvduct, ctxt%duct, ctxt%wind
-        99012  format ('!lvDuct  lDuct   lWind'/3(1x, l2, 5x))
-        !
-        !--- #radial stations and #blades
-        write (lu, 99013) ctxt%ii, ctxt%nblds
-        99013  format ('!   ii Nblds'/2(1x, i5), &
-                &/'!         r/r          c/r     Beta0deg         Ubody')
-        !--- Save blade definition with chord,twist and body velocity
-        do i = 1, ctxt%ii
-            beta0deg = ctxt%beta0(i) * 180.0 / pi
-            write (lu, 99017) ctxt%xi(i), ctxt%ch(i), beta0deg, ctxt%ubody(i)
-        enddo
-        !--- Duct velocity
-        write (lu, 99014)
-        99014  format ('!      urDuct')
-        write (lu, 99017) ctxt%urduct
-        !--- Save added velocity components
-        if (ctxt%nadd>1) then
-            write (lu, 99015) ctxt%nadd
-            99015      format ('!Nadd'/1(1x, i5), /'!        Radd         Uadd         Vadd')
-            do i = 1, ctxt%nadd
-                write (lu, 99017) ctxt%radd(i), ctxt%uadd(i), ctxt%vadd(i)
-            enddo
-            if (show_output) write (*, *)                                       &
-                    &'External slipstream included in save file'
-        endif
+
+        settings = '    "free": '
+        if (ctxt%free) then
+            settings = trim(settings) // ' true '
+        else
+            settings = trim(settings)  // ' false'
+        end if
+        settings = trim(settings)  // ', "duct": '
+        if (ctxt%duct) then
+            settings = trim(settings)  // ' true '
+        else
+            settings = trim(settings)  // ' false'
+        end if
+        settings = trim(settings)  // ', "wind": '
+        if (ctxt%wind) then
+            settings = trim(settings)  // ' true '
+        else
+            settings = trim(settings)  // ' false'
+        end if
+
+        99100 format (A)
+        99101 format (A, g12.4, A)
+        99102 format (A, i3, A)
+        99103 format ('      ['3(f8.4, ', '), f8.4']', A)
+        99104 format ('      "'f5.3'": [')
+        99105 format ('        ['3(f8.4, ', '), f8.4']', A)
+        write (lu, 99100) '{'
+        write (lu, 99100) '  "conditions": {'
+        write (lu, 99101) '    "rho": ', ctxt%rho, ','
+        write (lu, 99101) '    "vso": ', ctxt%vso, ','
+        write (lu, 99101) '    "rmu": ', ctxt%rmu, ','
+        write (lu, 99101) '    "alt": ', ctxt%alt, ','
+        write (lu, 99101) '    "vel": ', ctxt%vel, ','
+        write (lu, 99101) '    "adv": ', ctxt%adv
+        write (lu, 99100) '  },'
+        write (lu, 99100) '  "disk": {'
+        write (lu, 99102) '    "n_blds": ', ctxt%nblds, ','
+        write (lu, 99100) '    "dimensions": {'
+        write (lu, 99101) '      "r_hub" : ', ctxt%xi0 * ctxt%rad, ','
+        write (lu, 99101) '      "r_tip" : ', ctxt%rad, ','
+        write (lu, 99101) '      "r_wake": ', ctxt%xw0 * ctxt%rad, ','
+        write (lu, 99101) '      "rake"  : ', ctxt%rake
+        write (lu, 99100) '    },'
+        write (lu, 99100) '    "geometry": ['
+        do i = 1, ctxt%ii-1
+            if (i < ctxt%ii-1) then
+                write (lu, 99103) ctxt%xi(i), ctxt%ch(i), ctxt%beta(i) * 180. / pi, ctxt%ubody(i), ','
+            else
+                write (lu, 99103) ctxt%xi(i), ctxt%ch(i), ctxt%beta(i) * 180. / pi, ctxt%ubody(i)
+            end if
+        end do
+        write (lu, 99100) '    ],'
+        write (lu, 99100) '    "polars": {'
+        do i = 1, ctxt%n_polars
+            write (lu, 99104) ctxt%xi_polars(i)
+            call getpolar(ctxt, i, polar)
+            do n = 1, ctxt%n_polar_points(i)
+                if (n < ctxt%n_polar_points(i)) then
+                    write (lu, 99105) polar(n, 1) * 180. / pi, polar(n, 2:), ','
+                else
+                    write (lu, 99105) polar(n, 1) * 180. / pi, polar(n, 2:)
+                end if
+            end do
+
+            if (i < ctxt%n_polars - 1) then
+                write (lu, 99100) '      ],'
+            else
+                write (lu, 99100) '      ]'
+            end if
+        end do
+        write (lu, 99100) '    }'
+        write (lu, 99100) '  },'
+        write (lu, 99100) '  "settings": {'
+        write (lu, 99100) settings
+        write (lu, 99100) '  },'
+        write (lu, 99101) '  "u_r_duct": ', ctxt%urduct
+        write (lu, 99100) '}'
+
+!        !--- Save added velocity components
+!        if (ctxt%nadd>1) then
+!            write (lu, 99015) ctxt%nadd
+!            99015      format ('!Nadd'/1(1x, i5), /'!        Radd         Uadd         Vadd')
+!            do i = 1, ctxt%nadd
+!                write (lu, 99017) ctxt%radd(i), ctxt%uadd(i), ctxt%vadd(i)
+!            enddo
+!            if (show_output) write (*, *)                                       &
+!                    &'External slipstream included in save file'
+!        endif
+
         !
         close (lu)
         return
@@ -148,7 +170,7 @@ contains
         if (show_output) write (*, *) 'Current rotor not saved.'
         return
         99016  format (/' *** Converged operating solution does not exist ***')
-        99017  format (5(1x, g12.5))
+        99017  format (5(f16.4, 1x))
         !
         !x123456789012x123456789012x123456789012x123456789012x123456789012
         !!         Rho          Vso          Rmu           Alt')
@@ -165,6 +187,8 @@ contains
         ! use m_xaero, only : putaero
         use m_userio, only : asks
         use i_common, only : Common, show_output, ix, pi
+        use m_xutils, only : strip
+        use m_xaero, only: putpolars
         implicit real(M)
         !*** Start of declarations inserted by SPAG
         real A0, A0DEG, BETADEG, CDMIN, CLDMIN, CLMAX, CLMIN, CMCON, DCDCL2, &
@@ -174,150 +198,198 @@ contains
         type (Common), intent(inout) :: ctxt
         character*(*) fname1
         character*128 line
+        character*4 dump
+        real :: xi_tmp, point(4)
+        integer :: n_geom, n_polars
+        real, allocatable :: xi_polars(:), polardata(:, :), tmp_polardata(:, :)
+        integer, allocatable :: n_polar_points(:), indices(:), tmp_indices(:)
         ctxt%greek = .false.
         !
         lu = ctxt%lutemp
         !
         ctxt%fname = fname1
         if (ctxt%fname(1:1)==' ') call asks('enter filename^', ctxt%fname)
-        open (lu, file = ctxt%fname, status = 'old', err = 400)
-        !
-        !--- Check for new format/old format xrotor file
+        open (lu, file = 'output.json', status = 'old', err = 400)
+
+        call rdline(lu, line) !{
+        call rdline(lu, line) !  "conditions": {
         call rdline(lu, line)
-        if (line=='end'.or.line=='err') goto 500
-        read (line(17:22), *) filevers
-        if (show_output) write (*, 99001) filevers
-        99001  format (' Reading file from xrotor Version ', f5.2)
-        !
-        !
-        !--- Case title
+        read (line(11:23), *, err = 500) ctxt%rho
         call rdline(lu, line)
-        ctxt%name = line
-        !
+        read (line(11:23), *, err = 500) ctxt%vso
         call rdline(lu, line)
-        read (line, *, err = 500) ctxt%rho, ctxt%vso, ctxt%rmu, ctxt%alt
+        read (line(11:23), *, err = 500) ctxt%rmu
         call rdline(lu, line)
-        read (line, *, err = 500) ctxt%rad, ctxt%vel, ctxt%adv, ctxt%rake
+        read (line(11:23), *, err = 500) ctxt%alt
         call rdline(lu, line)
-        read (line, *, err = 500) ctxt%xi0, ctxt%xw0
+        read (line(11:23), *, err = 500) ctxt%vel
         call rdline(lu, line)
-        !
-        !--- Read aero section definitions
-        read (line, *, err = 500) ctxt%naero
-        do n = 1, ctxt%naero
+        read (line(11:23), *, err = 500) ctxt%adv
+        call rdline(lu, line) !  },
+        call rdline(lu, line) !  "disk": {
+        call rdline(lu, line)
+        read (line(14:17), *, err = 500) ctxt%nblds
+        call rdline(lu, line) !    "dimensions": {
+        call rdline(lu, line)
+        read (line(16:28), *, err = 500) ctxt%xi0
+        call rdline(lu, line)
+        read (line(16:28), *, err = 500) ctxt%rad
+        call rdline(lu, line)
+        read (line(16:28), *, err = 500) ctxt%xw0
+        call rdline(lu, line)
+        read (line(16:28), *, err = 500) ctxt%rake
+        ctxt%xi0 = ctxt%xi0 / ctxt%rad
+        ctxt%xw0 = ctxt%xw0 / ctxt%rad
+        call rdline(lu, line) !    },
+        call rdline(lu, line) !    "geometry": [
+        do i=1, ctxt%ii
             call rdline(lu, line)
-            read (line, *, err = 500) xisect
+            line = trim(adjustl(line))
+
+            if (line(1:1) == '[') then
+                call strip(line, '[],')
+                read (line, *, err = 100) ctxt%xi(i), ctxt%ch(i), ctxt%beta(i), ctxt%ubody(i)
+            elseif (line(1:1) == ']') then
+                goto 100
+            else
+                goto 500
+            end if
+        end do
+        if (show_output) write (*, 99001) ctxt%fname(1:32)
+        99001  format (' File  ', a, ' contains too many radial stations.'/' Loading not completed'/)
+        return
+
+        100 ctxt%beta = ctxt%beta * pi / 180.
+        ctxt%beta0 = ctxt%beta
+        n_geom = i
+
+        ctxt%n_polars = 0
+        allocate(xi_polars(0))
+        allocate(polardata(0, 4))
+        allocate(n_polar_points(0))
+
+        call rdline(lu, line) !    "polars": {
+        do i=1, 1000
             call rdline(lu, line)
-            read (line, *, err = 500) a0deg, dclda, clmax, clmin
-            call rdline(lu, line)
-            read (line, *, err = 500) dclda_stall, dcl_stall, cmcon, mcrit
-            call rdline(lu, line)
-            read (line, *, err = 500) cdmin, cldmin, dcdcl2
-            call rdline(lu, line)
-            read (line, *, err = 500) reref, rexp
-            !
-            a0 = a0deg * pi / 180.0
-            ! TODO
-!            call putaero(ctxt, n, xisect, a0, clmax, clmin, dclda, dclda_stall, &
-!                    & dcl_stall, cdmin, cldmin, dcdcl2, cmcon, mcrit, reref, rexp)
-        enddo
-        !
-        !--- Read flags for wake, duct and windmill modes
+            line = adjustl(line)
+            if (line(1:1) == '"') then
+                call strip(line, '"":[')
+                read (line(1:5), *, err = 200) xi_tmp
+                xi_polars = [xi_polars, xi_tmp]
+                n_polar_points = [n_polar_points, 0]
+                n_polars = n_polars + 1
+            elseif (line(1:1) == '[') then
+                call strip(line, '[],')
+                read (line, *, err = 500) point
+                n_polar_points(n_polars) = n_polar_points(n_polars) + 1
+                allocate(tmp_polardata(sum(n_polar_points), 4))
+                tmp_polardata(1:sum(n_polar_points)-1, :) = polardata
+                tmp_polardata(sum(n_polar_points), :) = point
+                call move_alloc(tmp_polardata, polardata)
+            elseif (line(1:1) == ']') then
+                if (line(2:2) /= ',') then
+                    goto 200
+                end if
+            else
+                goto 500
+            end if
+        end do
+        200 polardata(:, 1) = polardata(:, 1) * pi / 180.
+        call putpolars(ctxt, n_polars, n_polar_points, xi_polars, polardata)
+
+        call rdline(lu, line) !    }
+        call rdline(lu, line) !  },
+        call rdline(lu, line) !  "settings": {
         call rdline(lu, line)
-        read (line, *, err = 500) ctxt%free, ctxt%duct, ctxt%wind
-        !
-        if (show_output) write (*, *)
-        if (ctxt%free.and.show_output) write (*, *)                             &
-                &'self-deforming wake option set'
-        if (.not.ctxt%free.and.show_output) write (*, *) 'rigid wake option set'
-        if (ctxt%duct.and.show_output) write (*, *) 'duct option set'
-        if (.not.ctxt%duct.and.show_output) write (*, *) 'free-tip option set'
-        if (ctxt%wind.and.show_output) write (*, *) 'windmill plotting mode set'
-        if (.not.ctxt%wind.and.show_output) write (*, *)                        &
-                &'propeller plotting mode set'
-        !
-        if (show_output) write (*, *) ' '
-        call rdline(lu, line)
-        if (line=='end'.or.line=='err') goto 500
-        read (line, *, err = 500) iix, ctxt%nblds
-        do i = 1, iix
-            call rdline(lu, line)
-            read (line, *, err = 500) ctxt%xi(i), ctxt%ch(i), betadeg, ctxt%ubody(i)
-            ctxt%beta(i) = betadeg * pi / 180.0
-            ctxt%beta0(i) = ctxt%beta(i)
-            !c        write(*,*) 'load i,ch,beta ',i,ch(i),beta(i)
-        enddo
-        !
-        !--- Optional duct velocity
-        ctxt%urduct = 1.0
-        call rdline(lu, line)
-        if (line/='end'.and.line/='err') read (line, *, end = 100) ctxt%urduct
-        !
-        !---- Optional slipstream velocities
-        100   ctxt%nadd = 0
-        call rdline(lu, line)
-        if (line/='end'.and.line/='err') then
-            read (line, *, end = 300) ctxt%nadd
-            if (ctxt%nadd>ix) then
-                ctxt%nadd = ix
-                if (show_output) write (*, *)                                   &
-                        &'Warning, slipstream data terminated at '&
-                        &, ix
-            endif
-            do i = 1, ctxt%nadd
-                call rdline(lu, line)
-                if (line=='end'.or.line=='err') goto 200
-                read (line, *, err = 200, end = 200) ctxt%radd(i), ctxt%uadd(i), &
-                        & ctxt%vadd(i)
-            enddo
-            if (i<ctxt%nadd) then
-                ctxt%nadd = i - 1
-                if (show_output) write (*, *)                                   &
-                        &'warning, slipstream data terminated at '&
-                        &, ctxt%nadd
-            endif
-        endif
-        goto 300
-        !
-        200   if (i>2) ctxt%nadd = i - 1
-        !
+        if (line(13:16) == 'true') then
+            ctxt%free = .true.
+        elseif (line(13:16) == 'false') then
+            ctxt%free = .false.
+        else
+            goto 500
+        end if
+        if (line(28:31) == 'true ') then
+            ctxt%free = .true.
+        elseif (line(28:32) == 'false') then
+            ctxt%free = .false.
+        else
+            goto 500
+        end if
+        if (line(43:46) == 'true') then
+            ctxt%free = .true.
+        elseif (line(43:47) == 'false') then
+            ctxt%free = .false.
+        else
+            goto 500
+        end if
+
+!        !--- Optional duct velocity
+!        ctxt%urduct = 1.0
+!        call rdline(lu, line)
+!        if (line/='end'.and.line/='err') read (line, *, end = 100) ctxt%urduct
+!        !
+!        !---- Optional slipstream velocities
+!        100   ctxt%nadd = 0
+!        call rdline(lu, line)
+!        if (line/='end'.and.line/='err') then
+!            read (line, *, end = 300) ctxt%nadd
+!            if (ctxt%nadd>ix) then
+!                ctxt%nadd = ix
+!                if (show_output) write (*, *)                                   &
+!                        &'Warning, slipstream data terminated at '&
+!                        &, ix
+!            endif
+!            do i = 1, ctxt%nadd
+!                call rdline(lu, line)
+!                if (line=='end'.or.line=='err') goto 200
+!                read (line, *, err = 200, end = 200) ctxt%radd(i), ctxt%uadd(i), &
+!                        & ctxt%vadd(i)
+!            enddo
+!            if (i<ctxt%nadd) then
+!                ctxt%nadd = i - 1
+!                if (show_output) write (*, *)                                   &
+!                        &'warning, slipstream data terminated at '&
+!                        &, ctxt%nadd
+!            endif
+!        endif
+!        goto 300
+!        !
+!        200   if (i>2) ctxt%nadd = i - 1
+!        !
+!        300   close (lu)
+!        if (ctxt%nadd>1) then
+!            if (show_output) write (*, *)
+!            if (show_output) write (*, *)                                       &
+!                    &'slipstream profiles read with #points '&
+!                    &, ctxt%nadd
+!        endif
+!        !
+!        ctxt%conv = .false.
+!        !
+!        !--- Check for number of analysis stations to use
+!        if (iix/=ctxt%ii) then
+!            350       if (show_output) write (*, 99002) iix, ctxt%ii, ctxt%ii
+!            99002      format (/'Read  # input stations = ', i3, /'Using # blade stations = ', &
+!                    & i3, /'Enter # stations or <cr> for ', i3, ' ', $)
+!            read (*, 99003) line
+!            99003      format (a)
+!            if (line/=' ') read (line, *, err = 350) ctxt%ii
+!        endif
+
         300   close (lu)
-        if (ctxt%nadd>1) then
-            if (show_output) write (*, *)
-            if (show_output) write (*, *)                                       &
-                    &'slipstream profiles read with #points '&
-                    &, ctxt%nadd
-        endif
-        !
-        ctxt%conv = .false.
-        !
-        !--- Check for number of analysis stations to use
-        if (iix/=ctxt%ii) then
-            350       if (show_output) write (*, 99002) iix, ctxt%ii, ctxt%ii
-            99002      format (/'Read  # input stations = ', i3, /'Using # blade stations = ', &
-                    & i3, /'Enter # stations or <cr> for ', i3, ' ', $)
-            read (*, 99003) line
-            99003      format (a)
-            if (line/=' ') read (line, *, err = 350) ctxt%ii
-        endif
-        !
-        call initcase(ctxt, iix, .true.)
-        !---- rotor now exists
+        call initcase(ctxt, n_geom, .false.)
         ctxt%lrotor = .true.
         return
-        !
+
         400   if (show_output) write (*, 99004) ctxt%fname(1:32)
         99004  format (' File  ', a, ' not found'/)
         return
-        !
+
         500   if (show_output) write (*, 99005) ctxt%fname(1:32)
         99005  format (' File  ', a, ' has incompatible format'/' Loading not completed'/)
         close (lu)
         ctxt%conv = .false.
         return
-        !..............................
-        99006  format (a)
-        !
     end
 
     subroutine initcase(ctxt, iix, losolve)
