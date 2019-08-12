@@ -42,9 +42,10 @@ for f in sys.argv:
 
 class CMakeExtension(Extension):
 
-    def __init__(self, name, cmake_list_dir='.', **kwargs):
+    def __init__(self, name, cmake_target=None, cmake_list_dir='.', **kwargs):
         super().__init__(name, sources=[], **kwargs)
         self.cmake_lists_dir = os.path.abspath(cmake_list_dir)
+        self.cmake_target = cmake_target
 
 
 class CMakeBuild(build_ext):
@@ -96,6 +97,9 @@ class CMakeBuild(build_ext):
 
             cmake_args += cmake_cmd_args
 
+            if ext.cmake_target is not None:
+                cmake_args += ['--target', ext.cmake_target]
+
             print(cmake_args)
 
             if not os.path.exists(self.build_temp):
@@ -138,7 +142,7 @@ setup(
     license='GNU General Public License v3 or later (GPLv3+)',
     packages=['xrotor'],
     # package_dir={'': 'src'},
-    ext_modules=[CMakeExtension('xrotor.xrotor')],
+    ext_modules=[CMakeExtension('xrotor.xrotor', cmake_target='xrotor')],
     cmdclass={'build_ext': CMakeBuild},
     install_requires=['numpy', 'scipy'],
     zip_save=False
