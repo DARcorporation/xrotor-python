@@ -24,7 +24,7 @@ from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 
-version = '1.0.0'
+version = '1.0.1'
 
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
 for flag in options.keys():
@@ -122,6 +122,7 @@ setup(
     version=version,
     description='Stripped down version of XROTOR as compiled python module ',
     long_description=readme(),
+    long_description_content_type='text/markdown',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
@@ -142,7 +143,7 @@ setup(
     license='GNU General Public License v3 or later (GPLv3+)',
     packages=['xrotor'],
     # package_dir={'': 'src'},
-    ext_modules=[CMakeExtension('xrotor.xrotor', cmake_target='xrotor')],
+    ext_modules=[CMakeExtension('xrotor.xrotor')],
     cmdclass={'build_ext': CMakeBuild},
     install_requires=['numpy', 'scipy'],
     zip_save=False
