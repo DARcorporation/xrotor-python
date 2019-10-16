@@ -26,6 +26,8 @@ module api
     public set_print, get_print, &
             set_max_iter, get_max_iter, &
             set_use_compr_corr, get_use_compr_corr, &
+            set_vrtx, get_vrtx, &
+            set_fast, get_fast, &
             init, set_case, operate, dp, show,  save_prop, &
             get_rms, get_performance, get_blade_angle_change, &
             get_number_of_stations, get_station_conditions, load_prop
@@ -66,6 +68,26 @@ contains
     function get_use_compr_corr() bind(c, name = 'get_use_compr_corr')
         logical(c_bool) :: get_use_compr_corr
         get_use_compr_corr = ctxt%use_compr_corr
+    end
+
+    subroutine set_vrtx(vrtx) bind(c, name = 'set_vrtx' )
+        logical(c_bool) :: vrtx
+        ctxt%vrtx = vrtx
+    end
+
+    function get_vrtx() bind(c, name = 'get_vrtx')
+        logical(c_bool) :: get_vrtx
+        get_vrtx = ctxt%vrtx
+    end
+
+    subroutine set_fast(fast) bind(c, name = 'set_fast' )
+        logical(c_bool) :: fast
+        ctxt%fast = fast
+    end
+
+    function get_fast() bind(c, name = 'get_fast')
+        logical(c_bool) :: get_fast
+        get_fast = ctxt%fast
     end
 
     subroutine init() bind(c, name = 'init')

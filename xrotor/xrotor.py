@@ -56,6 +56,8 @@ class XRotor(object):
 
         self._lib.get_print.restype = c_bool
         self._lib.get_use_compr_corr.restype = c_bool
+        self._lib.get_vrtx.restype = c_bool
+        self._lib.get_fast.restype = c_bool
         self._lib.operate.restype = c_float
         self._lib.get_rms.restype = c_float
         self._lib.get_blade_angle_change.restype = c_float
@@ -99,6 +101,24 @@ class XRotor(object):
     @use_compr_corr.setter
     def use_compr_corr(self, value):
         self._lib.set_use_compr_corr(byref(c_bool(value)))
+
+    @property
+    def vrtx(self):
+        """bool: True if Vortex Wake should be used, False if Graded Momentum should be used."""
+        return self._lib.get_vrtx()
+
+    @vrtx.setter
+    def vrtx(self, value):
+        self._lib.set_vrtx(byref(c_bool(value)))
+
+    @property
+    def fast(self):
+        """bool: True for Graded Momentum, False for Potential Formulation. Does not matter if vrtx == True."""
+        return self._lib.get_fast()
+
+    @fast.setter
+    def fast(self, value):
+        self._lib.set_fast(byref(c_bool(value)))
 
     @property
     def case(self) -> Case:
