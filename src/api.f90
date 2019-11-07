@@ -251,7 +251,10 @@ contains
     end
 
     function set_number_of_stations(setting) bind(c, name = 'set_number_of_stations')
+        use m_spline, only : spline, seval
+        use m_xrotor, only : setx
         integer(c_int), intent(in) :: setting
+        integer :: iisav
 
         if (ctxt%lrotor) then
             iisav = ctxt%ii
