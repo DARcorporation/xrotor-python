@@ -272,7 +272,7 @@ contains
                     & w8(1:ctxt%ii))
         endif
 
-        ctxt$ii = setting
+        ctxt%ii = setting
         ctxt%iinf = ctxt%ii + ctxt%ii / 2
         call setx(ctxt)
         if (ctxt%lrotor) then
