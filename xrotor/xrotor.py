@@ -121,6 +121,15 @@ class XRotor(object):
         self._lib.set_fast(byref(c_bool(value)))
 
     @property
+    def n_stations(self):
+        """int: Number of radial stations."""
+        return self._lib.get_number_of_stations()
+
+    @n_stations.setter
+    def n_stations(self, value):
+        self._lib.set_number_of_stations(byref(c_int(value)))
+
+    @property
     def case(self) -> Case:
         """Case: XRotor run case specification"""
         return self._case
@@ -163,7 +172,7 @@ class XRotor(object):
     @property
     def station_conditions(self):
         """(np.ndarray, np.ndarray): Normalized radial coordinates and corresponding local Reynolds and Mach numbers."""
-        n = self._lib.get_number_of_stations()
+        n = self.n_stations
         xi = np.zeros(n, dtype=c_float, order='F')
         re = np.zeros(n, dtype=c_float, order='F')
         ma = np.zeros(n, dtype=c_float, order='F')

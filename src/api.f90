@@ -250,6 +250,46 @@ contains
         get_blade_angle_change = ctxt%dbeta * 180.0 / pi
     end
 
+    function set_number_of_stations(setting) bind(c, name = 'set_number_of_stations')
+        integer(c_int), intent(in) :: setting
+
+        if (ctxt%lrotor) then
+            iisav = ctxt%ii
+            do i = 1, iisav
+                ctxt%w1(i) = ctxt%xi(i)
+                ctxt%w2(i) = ctxt%ch(i)
+                ctxt%w4(i) = ctxt%beta(i)
+                ctxt%w6(i) = ctxt%ubody(i)
+                ctxt%w8(i) = ctxt%cldes(i)
+            enddo
+            ctxt%w3(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt% &
+                    & w2(1:ctxt%ii))
+            ctxt%w5(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt% &
+                    & w4(1:ctxt%ii))
+            ctxt%w7(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt% &
+                    & w6(1:ctxt%ii))
+            ctxt%w9(1:ctxt%ii) = spline(ctxt%w1(1:ctxt%ii), ctxt% &
+                    & w8(1:ctxt%ii))
+        endif
+
+        ctxt$ii = setting
+        ctxt%iinf = ctxt%ii + ctxt%ii / 2
+        call setx(ctxt)
+        if (ctxt%lrotor) then
+            do i = 1, ctxt%ii
+                ctxt%ch(i) = seval(ctxt%xi(i), ctxt%w2, ctxt%w3&
+                        &, ctxt%w1)
+                ctxt%beta(i) = seval(ctxt%xi(i), ctxt%w4, ctxt%&
+                        & w5, ctxt%w1)
+                ctxt%ubody(i) = seval(ctxt%xi(i), ctxt%w6, ctxt&
+                        & %w7, ctxt%w1)
+                ctxt%cldes(i) = seval(ctxt%xi(i), ctxt%w8, ctxt&
+                        & %w9, ctxt%w1)
+                ctxt%beta0(i) = ctxt%beta(i)
+            enddo
+        endif
+    end
+
     function get_number_of_stations() bind(c, name = 'get_number_of_stations')
         integer(c_int) :: get_number_of_stations
         get_number_of_stations = ctxt%ii
