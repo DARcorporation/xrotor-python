@@ -298,7 +298,7 @@ contains
         get_number_of_stations = ctxt%ii
     end
 
-    subroutine get_station_conditions(n, xi, Re, M) bind(c, name = 'get_station_conditions')
+    subroutine get_station_conditions(n, xi, Re, M, Cl, Cd, Cm) bind(c, name = 'get_station_conditions')
         use m_xoper, only : calcw
         integer(c_int), intent(in) :: n
         real(c_float), intent(out) :: xi(n), Re(n), M(n), Cl(n), Cd(n), Cm(n)
