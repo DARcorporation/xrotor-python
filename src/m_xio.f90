@@ -209,7 +209,7 @@ contains
         !
         ctxt%fname = fname1
         if (ctxt%fname(1:1)==' ') call asks('enter filename^', ctxt%fname)
-        open (lu, file = 'output.json', status = 'old', err = 400)
+        open (lu, file = ctxt%fname, status = 'old', err = 400)
 
         call rdline(lu, line) !{
         call rdline(lu, line) !  "conditions": {
@@ -306,21 +306,21 @@ contains
         elseif (line(13:16) == 'false') then
             ctxt%free = .false.
         else
-            goto 500
+            ctxt%free = .true.
         end if
         if (line(28:31) == 'true ') then
-            ctxt%free = .true.
+            ctxt%duct = .true.
         elseif (line(28:32) == 'false') then
-            ctxt%free = .false.
+            ctxt%duct = .false.
         else
-            goto 500
+            ctxt%duct = .false.
         end if
         if (line(43:46) == 'true') then
-            ctxt%free = .true.
+            ctxt%wind = .true.
         elseif (line(43:47) == 'false') then
-            ctxt%free = .false.
+            ctxt%wind = .false.
         else
-            goto 500
+            ctxt%wind = .false.
         end if
 
 !        !--- Optional duct velocity
