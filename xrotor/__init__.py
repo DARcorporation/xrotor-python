@@ -16,3 +16,4 @@
 #   You should have received a copy of the GNU General Public License
 #   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 from .xrotor import XRotor
+from .model import Case
