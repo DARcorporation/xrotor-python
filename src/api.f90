@@ -60,7 +60,7 @@ contains
         get_max_iter = ctxt%nitera
     end
 
-    subroutine set_use_compr_corr(use_compr_corr) bind(c, name = 'set_compr_corr')
+    subroutine set_use_compr_corr(use_compr_corr) bind(c, name = 'set_use_compr_corr')
         logical(c_bool) :: use_compr_corr
         ctxt%use_compr_corr = use_compr_corr
     end
