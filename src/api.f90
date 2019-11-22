@@ -192,7 +192,7 @@ contains
         endif
 
         ctxt%conv = .false.
-        call aper(ctxt, spec, ifix, ctxt%loprini)
+        call aper(ctxt, spec, ifix, .true.)
 
         if (ifix==1.and.spec/=4) then
             if (ctxt%conv) then
