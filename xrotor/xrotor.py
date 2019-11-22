@@ -176,8 +176,12 @@ class XRotor(object):
         xi = np.zeros(n, dtype=c_float, order='F')
         re = np.zeros(n, dtype=c_float, order='F')
         ma = np.zeros(n, dtype=c_float, order='F')
+        cl = np.zeros(n, dtype=c_float, order='F')
+        cd = np.zeros(n, dtype=c_float, order='F')
+        cm = np.zeros(n, dtype=c_float, order='F')
         self._lib.get_station_conditions(byref(c_int(n)),
-                                         xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr), ma.ctypes.data_as(fptr))
+                                         xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr), ma.ctypes.data_as(fptr),
+                                         cl.ctypes.data_as(fptr), cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr))
         return xi, re, ma
 
     @property
