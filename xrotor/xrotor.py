@@ -182,7 +182,7 @@ class XRotor(object):
         self._lib.get_station_conditions(byref(c_int(n)),
                                          xi.ctypes.data_as(fptr), re.ctypes.data_as(fptr), ma.ctypes.data_as(fptr),
                                          cl.ctypes.data_as(fptr), cd.ctypes.data_as(fptr), cm.ctypes.data_as(fptr))
-        return xi, re, ma
+        return xi, re, ma, cl, cd, cm
 
     @property
     def rms(self):
