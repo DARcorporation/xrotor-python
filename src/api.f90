@@ -301,12 +301,15 @@ contains
     subroutine get_station_conditions(n, xi, Re, M) bind(c, name = 'get_station_conditions')
         use m_xoper, only : calcw
         integer(c_int), intent(in) :: n
-        real(c_float), intent(out) :: xi(n), Re(n), M(n)
+        real(c_float), intent(out) :: xi(n), Re(n), M(n), Cl(n), Cd(n), Cm(n)
         real :: w
         integer :: i
 
         xi = ctxt%xi(1:n)
         Re = ctxt%re(1:n)
+        Cl = ctxt%cl(1:n)
+        Cd = ctxt%cd(1:n)
+        Cm = ctxt%cm(1:n)
 
         do i = 1, n
             call calcw(ctxt, i, w)
