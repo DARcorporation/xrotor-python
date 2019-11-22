@@ -17,6 +17,7 @@
 #   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import platform
+import re
 import subprocess
 import sys
 
@@ -24,7 +25,10 @@ from setuptools import setup
 from setuptools.extension import Extension
 from setuptools.command.build_ext import build_ext
 
-version = '1.2.0'
+__version__ = re.findall(
+    r"""__version__ = ["']+([0-9\.]*)["']+""",
+    open('xrotor/__init__.py').read(),
+)[0]
 
 options = {k: 'OFF' for k in ['--opt', '--debug', '--cuda']}
 for flag in options.keys():
@@ -119,7 +123,7 @@ def readme():
 
 setup(
     name='xrotor',
-    version=version,
+    version=__version__,
     description='Stripped down version of XROTOR as compiled python module ',
     long_description=readme(),
     long_description_content_type='text/markdown',
@@ -137,7 +141,7 @@ setup(
     ],
     keywords='xrotor propeller performance analysis',
     url='https://github.com/daniel-de-vries/xrotor-python',
-    download_url='https://github.com/daniel-de-vries/xrotor-python/tarball/' + version,
+    download_url='https://github.com/daniel-de-vries/xrotor-python/tarball/' + __version__,
     author='Daniël de Vries',
     author_email='contact@daniel-de-vries.com',
     license='GNU General Public License v3 or later (GPLv3+)',

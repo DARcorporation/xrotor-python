@@ -15,5 +15,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with XRotor.  If not, see <https://www.gnu.org/licenses/>.
+__version__ = "1.2.1"
+
 from .xrotor import XRotor
 from .model import Case
