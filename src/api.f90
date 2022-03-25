@@ -52,7 +52,7 @@ contains
 
     subroutine set_max_iter(setting) bind(c, name = 'set_max_iter')
         integer(c_int), intent(in) :: setting
-        ctxt%nitera = ctxt%nitera
+        ctxt%nitera = setting
     end
 
     function get_max_iter() bind(c, name = 'get_max_iter')
