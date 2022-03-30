@@ -30,7 +30,8 @@ module api
             set_fast, get_fast, &
             init, set_case, operate, dp, show,  save_prop, &
             get_rms, get_performance, get_blade_angle_change, &
-            get_number_of_stations, get_station_conditions, load_prop
+            get_number_of_stations, get_station_conditions, load_prop, &
+            get_geometry
 
     integer, parameter :: dp = kind(0.D0)
 
@@ -315,6 +316,19 @@ contains
             call calcw(ctxt, i, w)
             M(i) = w * ctxt%vel / ctxt%vso
         enddo
+    end
+
+    subroutine get_geometry(n, r_R, chord, twist) bind(c, name = 'get_geometry')
+        integer(c_int), intent(in)  :: n
+        real(c_float),  intent(out) :: r_R(n), chord(n), twist(n)
+        
+        r_R   = ctxt%xi(1:n)   ! r/R
+        chord = ctxt%ch(1:n)   ! c/R
+        twist = ctxt%beta(1:n) ! rad
+
+        !   XI(.)       Radial coordinate array (r/R)
+        !   CH(.)       Chord array
+        !   BETA(.)     Twist angle array
     end
 
 end

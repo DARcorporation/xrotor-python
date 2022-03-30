@@ -185,6 +185,19 @@ class XRotor(object):
         return xi, re, ma, cl, cd, cm
 
     @property
+    def xrotor_geometry(self):
+        """(np.ndarray, np.ndarray, np.ndarray): Normalized radial coordinates, normalized chord and twist angles."""
+        n     = self.n_stations
+        r_R   = np.zeros(n, dtype=c_float, order='F')
+        chord = np.zeros(n, dtype=c_float, order='F')
+        twist = np.zeros(n, dtype=c_float, order='F')
+        self._lib.get_geometry(byref(c_int(n)), r_R.ctypes.data_as(fptr), chord.ctypes.data_as(fptr), twist.ctypes.data_as(fptr))
+        
+        twist = twist*(180/np.pi) # rad to deg
+
+        return r_R, chord, twist
+
+    @property
     def rms(self):
         """float: The root-mean-squared error of the last XRotor analysis."""
         return float(self._lib.get_rms())
